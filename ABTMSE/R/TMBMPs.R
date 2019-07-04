@@ -31,7 +31,10 @@ dummy <- function(){
 #' @examples
 #' assessDDmm(1,dset = dset_EW,AS = 1, AMs = 1)
 #' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
-assessDDmm <- function( x, dset, AMs = c(1,3,5) )
+assessDDmm <- function( x, dset, AMs = c(1,3,5),
+                        caps = c(25,4),
+                        TACrule = c("mean"),
+                        check = TRUE )
 {
   # Load the indicesOM list
   data(indicesOM)
@@ -41,22 +44,63 @@ assessDDmm <- function( x, dset, AMs = c(1,3,5) )
                     dset = dset,
                     simNum = x )
 
+
   # Apply the HCR, compute area and stock
   # TAC
   mmTACs <- lapply( X = mmFits,
                     FUN = calcHCR )
   mmTACs <- do.call( rbind, mmTACs ) %>%
             mutate( zeroMeanNLL = nll - mean(nll),
-                    deltaNLL = zeroMeanNLL - min(zeroMeanNLL),
+                    deltaNLL = (zeroMeanNLL - min(zeroMeanNLL))/2,
                     amWts = exp(-deltaNLL)/sum(exp(-deltaNLL)),
                     wtdTAC_E = amWts * TAC_E,
                     wtdTAC_W = amWts * TAC_W )
 
+  outTable <- mmTACs
 
-  TAC_E <- mean( mmTACs$TAC_E ) * 1e6
-  TAC_W <- mean( mmTACs$TAC_W ) * 1e6
+  # Add new columns for biomass, and NLL
+  outTable$Bnext_E    <- numeric(length(AMs))
+  outTable$Bnext_W    <- numeric(length(AMs))
 
-  
+  for( amIdx in 1:length(AMs) )
+  {
+    outTable$Bnext_E[amIdx] <- mmFits[[amIdx]]$B_s[1]
+    outTable$Bnext_W[amIdx] <- mmFits[[amIdx]]$B_s[2]
+  }
+
+  if( TACrule == "mean" )
+  {
+    TAC_E <- mean(mmTACs$TAC_E)
+    TAC_W <- mean(mmTACs$TAC_W)
+  }
+
+  if( TACrule == "AIC" )
+  {
+    TAC_E <- sum(mmTACs$wtdTAC_E)
+    TAC_W <- sum(mmTACs$wtdTAC_W)
+  }
+
+  # Apply the caps
+  TAC_E <- min(TAC_E,caps[1])
+  TAC_W <- min(TAC_W,caps[2])
+
+  # Scale to kg
+  TAC_E <- mean( TAC_E ) * 1e6
+  TAC_W <- mean( TAC_W ) * 1e6
+
+  # Check that HCR calcs are running correctly
+  if(check)
+  {
+    if(!file.exists("outTable.csv"))
+      write.csv(  outTable, file = "outTable.csv")
+    else
+      write.csv(  outTable, 
+                  file = "outTable.csv", 
+                  append = TRUE,
+                  col.names = FALSE )
+  }
+
+  # Return TAC
   return(c( East = TAC_E, West = TAC_W ))
 }
 class(assessDDmm)<-"MMMSMP"
