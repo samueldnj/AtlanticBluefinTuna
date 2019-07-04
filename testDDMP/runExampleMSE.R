@@ -31,17 +31,17 @@ MSE_ex <- new(  'MSE',
                 interval=3,
                 IE="Overage_10")
 
-MSE_1 <- new( 'MSE', 
-              OM=OM_1,
-              Obs=Perfect_Obs,
-              MPs=testMPs,
-              interval=3,
-              IE="Overage_10")
+# MSE_1 <- new( 'MSE', 
+#               OM=OM_1,
+#               Obs=Perfect_Obs,
+#               MPs=testMPs,
+#               interval=3,
+#               IE="Overage_10")
 
 
-MSE_2 <- new( 'MSE', 
-              OM=OM_2,
-              Obs=Good_Obs,
-              MPs=testMPs,
-              interval=3,
-              IE="Overage_10")
+# MSE_2 <- new( 'MSE', 
+#               OM=OM_2,
+#               Obs=Good_Obs,
+#               MPs=testMPs,
+#               interval=3,
+#               IE="Overage_10")
