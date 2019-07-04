@@ -61,7 +61,7 @@ kable(T1,format='markdown')
 #("normalsize", "tiny", "scriptsize", "footnotesize", "small", "large", "Large", "LARGE", "huge", "Huge
 ```
 
-## Factor 2: Current Abundance 
+## Factor 2: Natural Mortality / Maturity
 
 ```{r OMdesign2, results='asis',echo=FALSE}
 T1<-data.frame(Design$all_lnams[[2]])
@@ -70,7 +70,7 @@ kable(T1,format='markdown')
 
 ```
 
-## Factor 3: Natural Mortality / Maturity
+## Factor 3: Stock mixing
 
 ```{r OMdesign3, results='asis',echo=FALSE}
 T1<-data.frame(Design$all_lnams[[3]])
@@ -86,7 +86,7 @@ Table 1. The subset of wider operating models included in this comparison report
 ```{r OMdesigngrid, results='asis',echo=FALSE,fig.width=5}
 
 DM<-cbind(OMnames,Design$Design_Ref[OMnos,])
-names(DM)<-c("Code.","Future Recruitment","Current Abundance","Maturity / M")
+names(DM)<-c("Code.","Future Recruitment","Maturity / M","Stock mixing")
 DM%>%
  kable(format = "html", escape = F) %>%
   kable_styling("striped", full_width = T)
@@ -243,8 +243,9 @@ for(i in 1:nOMs){
   res[,c(2,3,6,7,8,9,10)]<-round(res[,c(2,3,6,7,8,9,10)],3)
   res[,c(1,4,5)]<-round(res[,c(1,4,5)]/1000,0)
   res[res[,2]==5,2]<-"5 (hit max bound)"
-  BMSY<-round(res[,6]*dynB0[i,,nHy+ny]/1000,0)
+  BMSY<-round(res[,7]*dynB0[i,,nHy+ny]/1000,0)
   B_BMSY<-round(apply(out$SSB,1:2,mean)[,out$ny]/(BMSY*1000),3)
+
   Dep_dyn<-round(apply(out$SSB,1:2,mean)[,out$ny]/dynB0[i,,nHy+ny],3)
   res<-cbind(res[,c(1,2)],BMSY,res[,c(7,9)],B_BMSY,Dep_dyn)
   names(res)<-c("MSY","FMSY","BMSY","BMSY_B0","F_FMSY","B_BMSY","Dep")
@@ -342,8 +343,9 @@ mtext("Residual error. log(Obs.)-log(Pred.)",1,outer=T,line=0.5)
 
 ```{r SSBa_overlap, results='asis',echo=FALSE,fig.width=9,fig.height=6}
 
-  cols=rep(c('black','red','green','blue'),each=2)
-  ltys=rep(1:2,20)
+  cols=rep(c('black','red'),4)
+  ltys=rep(rep(1:2,each=2),2)
+  lwds=rep(1:2,each=4)
 
   par(mai=c(0.2,0.2,0.5,0.2),omi=c(0.5,0.5,0.1,0.1))
 
@@ -358,15 +360,15 @@ mtext("Residual error. log(Obs.)-log(Pred.)",1,outer=T,line=0.5)
   
   for(aa in 2:1){
 
-    matplot(yrs,t(SSBstore[,aa,]/1000),col=cols,lty=ltys,type='l',ylab="",ylim=c(0,quantile(SSBstore[,aa,]/1000,0.99)))
+    matplot(yrs,t(SSBstore[,aa,]/1000),col=cols,lty=ltys,lwd=lwds,type='l',ylab="",ylim=c(0,quantile(SSBstore[,aa,]/1000,0.99)))
     mtext(paste(anams[aa],"Stock"),3,line=0.5)
    
-    matplot(yrs,t(SSBastore[,aa,]/1000000),col=cols,lty=ltys,type='l',ylab="",ylim=c(0,quantile(SSBastore[,aa,]/1000000,0.99)))
+    matplot(yrs,t(SSBastore[,aa,]/1000000),col=cols,lty=ltys,lwd=lwds,type='l',ylab="",ylim=c(0,quantile(SSBastore[,aa,]/1000000,0.99)))
     mtext(paste(anams[aa],"Area"),3,line=0.5)
 
     plot(rep(1,nOMs),SSBstore[,aa,ny]/1000,xlim=c(0.6,1.4),ylim=range(SSBstore[,aa,]/1000),col="white",axes=F)
     #text(rep(1,nOMs)+runif(length(OMnos),-0.3,0.3),SSBstore[,aa,ny],OMnos,col=cols,font=2,cex=1.3)
-    if(aa==1) legend('bottom',legend=c("Rec 1","Rec 2","Mat/M I","Mat/M II","Mat/M III","Mat/M IV"),lty=c(1,2,1,1,1,1),col=c("black","black",cols[c(1,3,5,7)]),bty='n')
+    if(aa==1) legend('bottom',legend=c("Rec 1","Rec 2","Mat/M A","Mat/M B","Mix I","Mix II"),lty=c(1,1,1,2,1,1),lwd=c(1,1,1,1,1,2),col=c("black","red",rep('black',4)),bty='n')
 
     plot(rep(1,nOMs),SSBastore[,aa,ny]/1000,xlim=c(0.6,1.4),ylim=range(SSBastore[,aa,]/1000),col="white",axes=F)
     #text(rep(1,nOMs)+runif(nOMs,-0.3,0.3),SSBastore[,aa,ny],OMnos,col=cols,font=2,cex=1.3)
@@ -459,33 +461,17 @@ mtext("SSB (000,t)",4,outer=T,line=0.5)
 Table 3. Contribution of negative log-likelihood components (lower values are better fit) to global objective function. Each likelihood component has a specific weighting that is documented in the trial specifications. 
 
 ```{r Likelihoods, fig.width=7, fig.height=9,echo=FALSE}
-LHs<-LHsU<-data.frame(array(NA,c(nOMs,16)))
-names(LHs)<-names(LHsU)<- c("OM","Code","Catch", "CPUE", "Survey", "L Comp", "SOO", "PSAT", "Rec Dev", "Mov Pr", "Sel Pr", "SRA pen", "SSB Pr", "Dep Pr",  "MI Pr","TOT")
 
-wts<-OMIs[[i]]@LHw[c(1:6,8:14)] # 13 
-LHs[,1]<-LHsU[,1]<-OMnos
-LHs[,2]<-LHsU[,2]<-OMnames
-
-for(i in 1:nOMs){
+tabs<-LHtabs(outs,OMIs,OMnos=OMnos,OMnams=OMnames)  
+LHs<-tabs$LHs
+LHsU<-tabs$LHsU
   
-  LHs[i,3:16]<-outs[[i]]$obj[c(1:13,15)] # ignore R0 penalty for now
-  LHsU[i,3:15]<-outs[[i]]$obj[1:13]/wts
-  
-  
-  LHs[i,is.na(LHs[i,])|LHs[i,]=='Inf']<-0
-  LHs[i,3:16]<-round(LHs[i,3:16],1)
-  LHsU[i,is.na(LHsU[i,])|LHsU[i,]=='Inf']<-0
-  LHsU[i,16]<-sum(LHsU[i,3:15])
-  LHsU[i,3:16]<-round(LHsU[i,3:16],0)
-}  
-
 LHs%>%
  kable(format = "html", escape = F) %>%
   kable_styling("striped", full_width = T)
 
 ```
 
-Catch = catch data by fleet, quarter and area. CPUE = the fishery dependent CPUE indices, Survey = fishery-independent indices, L Comp = length composition data, SOO = stock of origin data, PSAT = Electronic tagging data, Rec Dev = prior on recruitment deviations, Mov Pr = prior on movement parameters, Sel Pr = prior on size selectivity parameters, SRA pen = penalty incurred when catches exceed F=1 catches in the stock reduction analysis phase (1864-1964), SSB Pr = a prior on spawning stock biomass by area for reference operating models B (match VPA assessments), Dep Pr = a prior on stock depletion since 1980 to generate more depleted stocks for refernece operating models C (historically low stock levels), MI Pr = a prior on similarlity to the 'Master Index' that predicts F by year, area, season and fleet, TOT = total global objective function. 
-
+Cat = catch data by fleet, quarter and area. CR = the fishery dependent catch rate (CPUE) indices, Surv = fishery-independent survey indices, Comp = length composition data, SOOm = stock of origin microchemistry data, SOOg = stock of origin genetics, Tag = Electronic tagging data, Rec = prior on recruitment deviations, Mov = prior on movement parameters, Sel = prior on size selectivity parameters, SRA = penalty incurred when catches exceed F=1 catches in the stock reduction analysis phase (1864-1964), MI = a prior on similarity to the 'Master Index' that predicts F by year, area, season and fleet, R0diff = a prior on the difference in R0 estimated in two-phase recruitment models (recruitment level 1 and 3), TOT_nP = total global objective function without priors, TOT = total global objective function. 
 
 

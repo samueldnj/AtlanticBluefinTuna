@@ -72,16 +72,15 @@ vector<Type> addCompNoise(  vector<Type>  inputComp,
 //            & pen = external penalty variable
 // output:    y conditional on value of x-eps:
 //            y = x if x > eps
-//            y = eps / (2 - eps/x)
+//            y = eps / (2 - x/eps)
 // side-effs: pen += 0.01 * (x - eps)^2
 // Usage:     required for state space models when catch may
 //            become larger than biomass under stochastic conditions.
-// Source:    kaskr.github.com/adcomp wiki, modified by SDNJ
-//            to actually make output > eps
+// Source:    kaskr.github.com/adcomp wiki
 template<class Type>
 Type posfun(Type x, Type eps, Type &pen){
   pen += CppAD::CondExpLt(x, eps, Type(0.01) * pow(x-eps,2), Type(0.));
-  return CppAD::CondExpGe(x, eps, x, eps/(Type(2.0)-eps/x));
+  return CppAD::CondExpGe(x, eps, x, eps/(Type(2.0)-x/eps));
 }
 
 

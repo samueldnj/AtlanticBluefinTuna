@@ -69,6 +69,7 @@
 \item{SSB}{a 4D array containing true simulated spawning biomass [MP x nsim x nstocks x nyears]}
 \item{SSB0}{a 2D array containing unfished spawnign biomass by simulation and stock [nsim x nstocks]}
 \item{dynB0}{a 3D array containing dynamic unfished spawning biomass by simulation, stock and projection year [nsim x nstocks x proyears]}
+\item{dynB0h}{a 3D array containing dynamic unfished spawning biomass by simulation, stock and historical year [nsim x nstocks x nyears]}
 \item{MSY}{a 2D array containing MSY estimates (2018 parameters) [sim x nstocks]}
 \item{BMSY}{a 2D array containing BMSY estimates (2018 parameters) [sim x nstocks]}
 \item{VBMSY}{a 2D array containing vulnerable BMSY estimates (2018 parameters) [sim x nstocks]}

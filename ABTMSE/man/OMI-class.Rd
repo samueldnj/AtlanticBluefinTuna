@@ -100,6 +100,7 @@
 \item{CobsCV}{a vector nf long, the catch observation error (lognormal sd)}
 \item{CPUEobsCV}{a vector nCPUEq long, the index observation error (lognormal sd)}
 \item{IobsCV}{a vector nI long, the fishery independent index observation error (lognormal sd)}
+\item{CLCV_num}{the numerator of the normal observation error on lengths}
 \item{RDCV}{the recruitment deviation penalty (sigma R)(lognormal sd)}
 \item{SSBfit}{the type of SSBfit 1:SSB0 2:SSBnow}
 \item{SSBprior}{a vector np long, an optional prior on current spawning biomass}
@@ -131,6 +132,8 @@
 \item{nF}{the number estimated F parameters (usually =nCobs)}
 \item{nMPind}{the number of fishery indices used for informing management procedures in subsequent MSE analysis (currently unused)}
 \item{MPind}{a data frame of fishery indices used for informing management procedures in subsequent MSE analysis (currently unused)}
+\item{MIinv}{a 1 or 0 determining whether the fit should attempt to be MI invariant}
+\item{MICV}{numerical value of the CV in additional to regional FMod deviations}
 \item{debug}{a logical (0 or 1) value determing whether the model should be run for a single iteration to check for errors}
 \item{verbose}{a logical (0 or 1) value determing whether more complete information should be provided in each iteration of the model estimation}
 \item{datacheck}{a unique number for checking that data were read into the model correctly}
@@ -138,5 +141,6 @@
 \item{Inames}{a character string nI long, recording the names of the fishery indepdendent indices}
 \item{nMovExc}{integer the number of rows in the movement exclusion data frame}
 \item{MovExc}{a data frame of movement exceptions}
+\item{Phases}{the phases of the various parameter estimates (1,2,3)}
 }
 }

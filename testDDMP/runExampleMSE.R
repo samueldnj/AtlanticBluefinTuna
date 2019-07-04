@@ -25,7 +25,7 @@ checkTAC <- assessDDmm( x = 1, dset = dsetComb, AMs = c(1,4,7) )
 testMPs <- list(  #SS = c("UMSY","UMSY"),
                   MM = c("assessDDmm","assessDDmm") )
 MSE_ex <- new(  'MSE', 
-                OM=OM_1,
+                OM=OM_example,
                 Obs=Perfect_Obs,
                 MPs=testMPs,
                 interval=3,

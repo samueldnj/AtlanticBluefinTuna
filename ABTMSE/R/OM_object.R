@@ -50,6 +50,8 @@
 #' \item{qCPUE}{a vector nCPUE long of catchabilities by fishery CPUE index}
 #' \item{sel}{an array of selectivities [sim, fleets, length class]}
 #' \item{selpars}{array of selectivity parameters (currently unused)}
+#' \item{Fmod}{array of season x area mean F parameters}
+#' \item{FDY}{array of annual F deviations [sim, year, quarter, area]}
 #' \item{mat}{array of maturity [sim, stock, age, year]}
 #' \item{M}{array of natural mortality rate [sim, stock, age, year]}
 #' \item{Recdevs}{of historical recruitment deviations [sim, stock, year]}
@@ -109,6 +111,7 @@ setClass("OM",representation(
   qI="array",qCPUE="array",            # Catchability of effort, fishery ind indices and fishery CPUE indices
   sel="array",selpars="array",
   Fmod="array",                        # The regional/seasonal Fmodifiers
+  FDY="array",                         # The annual MI deviations
   mat="array",M="array",
   Recdevs="array",
   hR0="array", hRecpar ="array", hRectype="array",
@@ -123,6 +126,7 @@ setClass("OM",representation(
   Ibeta_ignore = "logical",                        # Logical, should hyperstability and hyperdepletion be ignored?
   qinc="numeric",                                  # % annual changes in catchability affecting CPUE indices
   SSBpR="array",
+  checks='list',
   seed="numeric"                                   # Random seed from which this object was made
 ))
 
@@ -143,6 +147,8 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   cat(paste("Reading operating model fit data from directory:",OMd))
   cat("\n")#.Object@targpop=targpop
   out<-M3read(OMDir=OMd)
+
+  .Object@checks<-list(N=out$N, SSB=out$SSB, B=out$B, VB=out$VB, VL=out$VL, FL=out$FL)
 
   set.seed(seed)
   .Object@seed<-seed
@@ -211,9 +217,9 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
 
   # ---- Get covariance matrix and sample correlated parameters -------
 
-  vcv<-read.fit(file=paste(OMd),digits=10)
+  vcv<-read.fit(file=OMd,digits=10,cor_ignore = FALSE)
   pnam<-vcv$names[1:vcv$nopar]
-  #rbind(pnam,vcv$est)
+  #cbind(pnam,vcv$est)
   nparams<-length(pnam)
 
   if(MLEonly){
@@ -230,9 +236,9 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
         samps<-read.table(paste(OMd,"/nodes.cha",sep=""), sep=" ")
         #if(ncol(samps) != nparams+1) stop(paste0("Error: a different number of parameters (", vcv$nopar,") were estimated than mcmc posteriors are available (", ncol(samps)-1,")"))
 
-        allnams<-c("NAmonkey",pnam[1:(match("lnqE",pnam)-1)],rep("visc",nsubyears),rep("lnqE",OMI@nE),rep("lnqI",OMI@nI),rep("lnqCPUE",OMI@nCPUEq),rep("Fmod",nsubyears*nareas),pnam[match("lnRD1",pnam):length(pnam)])
+        allnams<-c("NAmonkey",pnam[1:(match("lnqE",pnam)-1)],rep("visc",nsubyears*npop),rep("lnqE",OMI@nE),rep("lnqI",OMI@nI),rep("lnqCPUE",OMI@nCPUEq),rep("Fmod",nsubyears*nareas),pnam[match("lnRD1",pnam):length(pnam)])
+        #test<-allnams%in%pnam; allnams[!test]
         samps<-samps[,allnams%in%pnam]
-        names
 
         mupar<-apply(samps,2,mean)
         #mupar<-samps[1,]
@@ -255,7 +261,7 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
         }
 
         names(samps)<-pnam<-allnams[allnams%in%pnam]
-
+        FDYind<-(1:nparams)[grepl("FDY",names(samps))]
 
     }else{
 
@@ -269,6 +275,17 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   Fmodind<-(1:nparams)[names(samps)=="Fmod"]
   Fmodvec<-exp(as.numeric(as.matrix(samps)[,Fmodind]))
   .Object@Fmod<-array(Fmodvec,c(nsim,nareas,nsubyears))
+
+  # FDY
+  FDYind<-(1:nparams)[grepl("FDY",names(samps))]
+  FDYtemp<-as.numeric(as.matrix(samps)[,FDYind])
+  if(mean(FDYtemp,na.rm=T)>0.5){ # the mcmc version is already exponentiated
+    FDYvec<-FDYtemp
+  }else{
+    FDYvec<-exp(FDYtemp) # for the mle version
+  }
+  #FDYvec<-exp(as.numeric(as.matrix(samps)[,FDYind]))
+  .Object@FDY<-array(FDYvec,c(nsim,nyears,nsubyears,nareas))
 
   # ---- Stock-recruit relationships -------
 
@@ -329,6 +346,7 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
       }
 
 
+
     } else{ # Hockey stick with fixed hinge point
 
       # get MLE hingepoint
@@ -366,13 +384,20 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
     recind<-(1:nparams)[paste0("lnRD",SRno)==pnam]
     estind<-rep(recind,each=yblock)[1:length(yind)]
 
+    # test of lognormal bias adjustment
+    #recs<-samps[1,recind]
+    #var<-sum(recs^2)/(length(recs)-1)
+    #exp(recs-var/2)
+
+    Ntemp<-apply(as.matrix(samps[,recind]),1,function(x)sum(x^2)/(length(x)-1))
+
     if(MLEonly){
-      .Object@Recdevs[,pp,yind]<-exp(as.matrix(samps[,estind]))
+      .Object@Recdevs[,pp,yind]<-exp(as.matrix(samps[,estind])-Ntemp/2)
       .Object@hR0[,pp,yind]<-exp(samps[,SRno])
       .Object@hRecpar[,pp,yind]<-.Object@Recpars[,SRno,1]
       .Object@hRectype[pp,yind]<-.Object@Rectype[SRno]
     }else{
-      .Object@Recdevs[,pp,yind]<-exp(as.matrix(samps[,estind]))
+      .Object@Recdevs[,pp,yind]<-exp(as.matrix(samps[,estind])-Ntemp/2)
       .Object@hR0[,pp,yind]<-exp(samps[,SRno])
       .Object@hRecpar[,pp,yind]<-.Object@Recpars[,SRno,1]
       .Object@hRectype[pp,yind]<-.Object@Rectype[SRno]
@@ -394,7 +419,7 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   .Object@movIndex<-rep(1, nyears+proyears+4)
   movcalc<-array(-10,c(nsim,npop,nma,nsubyears,nareas,nareas)) # start from very low chance of moving
 
-  visc<-array(unlist(samps[,grep("visc",pnam)]),c(nsim,nsubyears))
+  visc<-array(unlist(samps[,grep("visc",pnam)]),c(nsim,nsubyears,npop))
 
   movest_p1_a1<-array(unlist(samps[,grep("movest_p1_a1",pnam)]),c(nsim,nareas-2,nsubyears))
   movest_p1_a2<-array(unlist(samps[,grep("movest_p1_a2",pnam)]),c(nsim,nareas-2,nsubyears))
@@ -409,7 +434,6 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   # Base - age independent around age class 2
 
   ind_p1a2<-as.matrix(expand.grid(1:nsim,1,2,1:nsubyears,1:nareas,2:6)) # sim pop ageclass subyear area area
-
   ind_p1a2_<-ind_p1a2[,c(1,6,4)]                             # sim area subyear
   ind_p1a2_[,2]<-ind_p1a2_[,2]-1 # should map to 1:5 estimated areas
   movcalc[ind_p1a2]<-movest_p1_a2[ind_p1a2_] # sim area subyear
@@ -441,7 +465,7 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   ind_p2a3_[,2]<-ind_p2a3_[,2]-1 # should map to 1:5 estimated areas
   movcalc[ind_p2a3]<-movest_p2_a2[ind_p2a2_]+ movest_p2_a3[ind_p2a3_] # sim area subyear
 
-  for(i in 1:nsim)for(ss in 1:nsubyears)for(rr in 1:nareas)movcalc[i,,,ss,rr,rr]<-movcalc[i,,,ss,rr,rr]+exp(visc[i,ss])
+  for(i in 1:nsim)for(ss in 1:nsubyears)for(rr in 1:nareas)movcalc[i,,,ss,rr,rr]<-movcalc[i,,,ss,rr,rr]+exp(visc[i,ss,])
 
   for(i in 1:nrow(OMI@MovExc)){
     for(ss in 1:nsim){
@@ -462,10 +486,10 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   movTV[movTVind]<-mov[movTVind[,c(1:3,5:7)]]
 
   ## mov(nsim,npop,nages,nsubyears,nareas,nareas)) # spamrr
-  #  mov[1,     2,   1,        1,      ,    ]
+  #  mov[1,     2,   35,        1,      ,    ]
   #movest_p2_a2[1,,1] #c(nsim,nareas-2,nsubyears)
 
-  #mov[1,2,6,2,,]
+  #mov[1,2,35,1,,]
   #movest_p2_a2[1,,2]
 
   .Object@mov<-movTV
@@ -600,28 +624,7 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   MSYMLE_parallel<-ABTMSE::MSYMLE_parallel
   res<-array(NA,c(nsim,np,8)) # MSY, FMSYa, UMSY, BMSY, SSBMSY, BMSY/B0, SSBMSY/SSB0, RMSY/R0
 
-  #if(nsim<16){
-
-
-    for(i in 1:nsim)res[i,,]<-as.matrix(MSYMLE_parallel(i,FMLs, iALK, N, wt_age, M_age, mat_age, R0_arr, fixpar_arr, SSBpR, SRtypes, maxage)) # recruitment curve assumed to be first of the future assumed types
-
-  #}else{
-
-   # sfInit(parallel=T,cpus=8)
-  #  sfExport("optMSY_eq")
-  #  sfExport("MSYCalcs")
-  #  sfExport("meanFs")
-   # sfExport("MSYMLE_parallel")
-
-    #test<-sfLapply(1:nsim,MSYMLE_parallel,FMLs=FMLs,iALK=iALK, N=N, wt_age=wt_age, M_age=M_age,
-           #                       mat_age=mat_age, R0_arr=R0_arr, fixpar_arr=fixpar_arr,
-          #                        SSBpR=SSBpR, SRtypes=SRtypes, maxage=maxage)
-    #for(i in 1:nsim)   res[i,,]<-as.matrix(test[[i]])
-
-  #}
-
-  #                   1   2     3    4     5      6         7         8
-  # all<-data.frame(MSY,FMSYap,UMSY,BMSY,SSBMSY,BMSY_B0,SSBMSY_SSB0,RMSY_R0)
+  for(i in 1:nsim)res[i,,]<-as.matrix(MSYMLE_parallel(i,FMLs, iALK, N, wt_age, M_age, mat_age, R0_arr, fixpar_arr, SSBpR, SRtypes, maxage)) # recruitment curve assumed to be first of the future assumed types
 
   .Object@MSY<-res[,,1]#cbind(MSYrefs1[,1],MSYrefs2[,1])
   .Object@BMSY<-res[,,4]#cbind(MSYrefs1[,2],MSYrefs2[,2])

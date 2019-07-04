@@ -539,7 +539,6 @@ meanFs<-function(FML,iALK,N,wt_age,rnams=c("East","West")){
   #wFM2<-apply(Ftot,c(1,6),sum)/nr
   #wFM2
 
-
   np<-dim(iALK)[1]
   na<-dim(iALK)[2] # number of ages
   nl<-dim(iALK)[3] # number of length classes
@@ -1036,6 +1035,16 @@ SRopt<-function(out,plot=F,quiet=F,years=NULL,type="BH",R0p=NA){
   }
 
 }
+
+sigR_AC_conv<-function(sig2,AC2){
+
+  AC2[AC2<0]<-0.01
+  AC1<-1.0509*AC2^0.7898
+  sig1<-(2*sig2)/(1+AC1)
+  list(AC1=AC1,sig1=sig1)
+
+}
+
 
 
 

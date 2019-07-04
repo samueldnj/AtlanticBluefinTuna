@@ -51,6 +51,7 @@ AssignFleet<-function(dat,Fleets){
 
 ICCATtoGEO<-function(dato){   # Convert ICCAT format (corner closest to GMT/equator) to South West corner
 
+  names(dato)[names(dato)=="GeoStrata"]<-"SquareTypeCode"   # Standardize nomenclature among datasets
   ICCATdat<-subset(dato,dato$SquareTypeCode!="none"&dato$SquareTypeCode!="ICCAT")
 
   Latadj<-as.numeric(array(unlist(strsplit(as.character(ICCATdat$SquareTypeCode),"x")),dim=c(2,nrow(ICCATdat)))[1,])
@@ -136,7 +137,6 @@ assign_fleet<-function(dat,fleets){
 }
 
 assign_year<-function(dat,years){
-
 
   dat<-dat[dat$YearC>(years[1]-1)&dat$YearC<(years[2]+1),]
   Year<-as.numeric(dat$YearC)-years[1]+1

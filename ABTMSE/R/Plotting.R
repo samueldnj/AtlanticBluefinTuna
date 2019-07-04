@@ -172,4 +172,77 @@ vmovplot<-function(vec,N,mov,anam,custom){
 }
 
 
+plot_mov<-function(out,OMI,pnam=c("Eastern stock","Western stock"),custom=F){
+
+  acs<-c(1,6,12)
+
+  for(pp in 1:out$np){
+    for(ac in 1:out$nma){
+
+      movE<-out$mov[pp,,acs[ac],,]
+
+      nr<-out$nr
+      ns<-out$ns
+
+      movplot(movE,anam=OMI@areanams,custom=custom)
+      legend('topleft',legend=paste0(pnam[pp],", Age class ",ac),bty='n',cex=0.9)
+    }
+  }
+
+}
+
+movplot<-function(mov,anam,custom){
+
+  N<-mov
+  ns<-dim(mov)[1]
+  nrr<-dim(mov)[2]
+
+  sref<-(1:ns)[c(2:ns,1)]
+  v2<-apply(N,c(1,3),sum)
+
+  xlim<-c(0,(4+nrr)*ns)
+
+  ncol<-100
+  vcol<-rainbow(ncol,s=1,v=1,start=0,end=0.45,alpha=1)[ncol:1]
+  for(i in 1:50)vcol[i]<-makeTransparent(vcol[i],i/5*10)
+  #plot(1:100,pch=19,cex=2,col=vcol)
+
+  colsN<-array(vcol[ceiling((N/max(N))*ncol)],dim(N))
+
+  if(!custom)par(mai=rep(0.01,4),omi=rep(0.01,4))
+  plot(c(-4,ns*(nrr+4)),c(0,nrr+3.5),col="white",axes=F)
+
+  for(s in 1:ns){
+
+    sc<-(s-1)*(nrr+4)
+
+    for(r in 1:nrr){
+
+      #polygon(x=c(sc+1+nrr,sc+2+nrr,sc+2+nrr,sc+1+nrr),y=c(r-1,r-1,r,r),col=colsv[sref[s],r],border="white")
+
+      for(r2 in 1:nrr){
+
+        polygon(x=c(sc+(nrr-r2),sc+1+(nrr-r2),sc+1+(nrr-r2),sc+(nrr-r2)),y=c(r-1,r-1,r,r),col=colsN[s,r,r2],border='white')
+
+      }
+
+      #polygon(x=c(sc+2+(nrr-r),sc+3+(nrr-r),sc+3+(nrr-r),sc+2+(nrr-r)),y=c(0,0,1,1),col=colsv2[s,r],border='white')
+
+    }
+
+    for(r in 1:nrr){
+      text(-2.5,r-0.5,anam[r],cex=0.75)
+      polygon(x=c(sc+(nrr-r),sc+1+(nrr-r),sc+1+(nrr-r),sc+(nrr-r)),y=c(r-1,r-1,r,r),col=NA,border='light grey')
+
+    }
+
+    text(sc+nrr/2,nrr+0.75,paste0("Season ",s),font=1,cex=0.8)
+
+    arrows(x0=sc+nrr+2.5,x1=sc+nrr+3.5,y0=nrr/2,y1=nrr/2,length=0.1,lwd=2)
+
+  }
+
+}
+
+
 

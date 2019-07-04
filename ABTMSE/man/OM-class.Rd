@@ -55,6 +55,8 @@
 \item{qCPUE}{a vector nCPUE long of catchabilities by fishery CPUE index}
 \item{sel}{an array of selectivities [sim, fleets, length class]}
 \item{selpars}{array of selectivity parameters (currently unused)}
+\item{Fmod}{array of season x area mean F parameters}
+\item{FDY}{array of annual F deviations [sim, year, quarter, area]}
 \item{mat}{array of maturity [sim, stock, age, year]}
 \item{M}{array of natural mortality rate [sim, stock, age, year]}
 \item{Recdevs}{of historical recruitment deviations [sim, stock, year]}

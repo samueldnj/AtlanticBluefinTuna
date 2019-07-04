@@ -195,7 +195,7 @@ class(POF)<-"PM"
 #' @examples
 #' loadABT()
 #' POS(MSE_example)
-POS<-function(MSE,pp=1) apply(MSE@B_BMSY[,,pp,MSE@nyears+1:30]>1,1:2,mean,na.rm=T)*100
+POS<-function(MSE,pp=1) apply(MSE@B_BMSY[,,pp,MSE@nyears+1:30]<1,1:2,mean,na.rm=T)*100
 class(POS)<-"PM"
 
 

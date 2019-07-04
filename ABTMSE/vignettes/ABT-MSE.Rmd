@@ -1,5 +1,5 @@
 ---
-title: "ABT-MSE: Atlantic Bluefin Tuna Management Strategy Evaluation (v4.2.9)"
+title: "ABT-MSE: Atlantic Bluefin Tuna Management Strategy Evaluation (v5.1.3)"
 subtitle: "ICCAT Atlantic Wide Research Programme for Bluefin Tuna (GBYP)"
 author: "Tom Carruthers (<t.carruthers@fisheries.ubc.ca>)"
 date: "`r Sys.Date()`"
@@ -80,180 +80,28 @@ This guide also provides a reproducible account of how the reference set of oper
 
 <br>
 
-# Version Notes
+# Version Notes (since v4.0)
 
 The package is subject to ongoing testing and development. If you find a bug or a problem please send a report to <t.carruthers@oceans.ubc.ca> so that it can be fixed!  
 
+## Version 5.1.3
 
-## Version 4.2.9
+* Three additional OMs (#13-#15) were added that provide greater contrast in Western stock biomass. These are identical to OMs #4-#6 but were fitted with increased weight (precision) added to the western-only GOM_LAR_SUV index. 
 
-* 12 Robustness operating models now included in the Package that are 5 deviations from the first two reference operating models 1AI and 2AI: ROM_1_1, ROM_1_2, ROM_2_1, ROM_2_2, ROM_3_1, ROM_3_2, ROM_4_1, ROM_4_2, ROM_5_1, ROM_5_2, ROM_6_1 and ROM_6_2. 
+## Version 5.1.2
 
-## Version 4.1.2 
+* The new 12 reference OMs were added that span 3 recruitment scenarios, two M/maturity scenarios and two mixing scenarios
 
-* Fix for erroneous future index calculation for indices that have data after the last year of conditioning (2017)
+## Version 5.1.1 
 
-## Version 4.1.1 
+* Line by line debug of OM translation code (bias correction for log normal recruitment deviations etc)
+* 'Check Mode' was added to runMSE to test fidelity of ABTMSE R package historical numbers reconstruction with that of the M3 model. E.g. new('MSE',OM_1d, check=T)
 
-* Overhauled Operating models
-* Two-phase recruitment estimation in level 1 and 3 recruitment
-* Operating models fitted to data up to 2016
+## Version 5.0.1
 
-## Version 3.4.1 
-
-* Trade-off plot added to shiny App
-
-## Version 3.4.0 
-
-* Includes new Shiny App. Shiny(ABTMSE)
-
-## Version 3.3.3 
-
-* UCT version without kableExtra package.
-
-## Version 3.3.2 
-
-* MP recommendations were erroneously starting in 2018 (model year 54), this has been corrected to 2019 (model year 55)
-
-* OMs for recruitment level 3 were not included in some packages. These are all included now.  
-
-## Version 3.3.1
-
-* UCT version without kableExtra package. 
-
-## Version 3.3.0 
-
-* Bug in stock-recruitment code block was chronically lowering productivity
-* getperf(MSE_example,quantile=T) now works as expected
-
-## Version 3.2.8
-
-* UCT version without kableExtra dependency
-
-## Version 3.2.7
-
-* Debug of plot(MSE) now provides correct SSB/SSBMSY, e.g.  plot(MSE_Example, MSY=T)
-
-## Version 3.2.6
-
-* UCT version without kableExtra dependency
-
-## Version 3.2.5
-
-* Updated plot(MSE) defaults to plotting SSB/SSBMSY, e.g.  plot(MSE_Example, MSY=T)
-* New performance metric Brel30 - Spawning biomass relative to dynamic SSBMSY after 30 years 
-* New slots have been added to the MSE object that record MSY related quantities (matrices nsim rows by stock columns):  MSY, BMSY, VBMSY,SSBMSY, UMSY, FMSYa, SSBMSY_SSB0,
-
-## Version 3.2.4
-
-* UCT version without kableExtra dependency
-
-## Version 3.2.3
-
-* Updated MSE plots to start in 2019
-
-## Version 3.2.2
-
-* Removed all Factor 2 level C (low depletion) scenarios from the operating model objects in the package. 
-* Some text typos fixed
-
-## Version 3.2.1
-
-* UCT version - removed kableExtra temporarily for UCT cluster computation on < OpenSSL v1.0
-
-## Version 3.2
-
-* Updated performance metrics to include 'dynamic B0' a theoretical running biomass with zero fishing (smoothly tracks changes in recruitment strength)
-
-* Added correct lags in data (y-3 for catches, y-2 for indices, y-2 catch data are assumed to be the TAC that was set)
-
-* New indices to future generated data for MP use (Canadian Acoustic Survey and US RR 66-114)
-
-* Various plotting fixes for plot(MSE)
-
-* New generic MSE reporting function (create a standardized html document): MSE_report(MSE_example,dir="C:/temp")
-
-
-## Version 3.1
-
-* All operating models revised and refitted in light of trial specifications - both factors 1 (recruitment) and 2 (abundance) changed.
-
-
-## Version 3.0
-
-* Shift to multi-periodic R0 recruitment model. E.g. Beverton-Holt before 1975, hockey stick with SSB hingpoint in the mid 90's after 1975
-
-* New log normal likelihood function for composition data where precision is the inverse of the composition fraction (of Maunder 2013)
-
-* New logit likelihood function for stock of origin data
-
-* Use of alternative stock of origin data (derived by mixture modelling of microchemistry assignment data - Carruthers and Butterworth 2018)
-
-
-## Version 2.8
-
-* getperf()  now allows users to report quantiles of all the metrics: getperf(myMSE,quantile=T)
-
-* The D10, D20 and D30 metrics have been fixed to reflect spawning stock depletion after 10, 20 and 30 years respectively. 
-
-* An error reported by JJ Maguire has been fixed relating to the variable 'Cunder' which controls over take of catches in areas where there is insufficient yield
-
-* If users wish to use East and West data simultaneously to set TACs in just one area then they can do so accepting dset to their MP (now with two positions: 1 is the East and 2 is the West). They must include an argument AS which is the area that they are providing advice for. Also they must make their class of MP 'MSMP' for Multi-Stock Management Procedure. See the MSMP named CSMP for an example: avail('MSMP') 
-
-## Version 2.7
-
-All operating models now have a deterministic (no process error) version that includes just two identical simulations at the MLE estimate of model parameters. Previous operating models are named OM_1, OM_2, OM_R1, the deterministic version have a 'd' on the end: OM_1d, OM_2d, OM_R1d... To generate almost identical future projections use the Perfect_Obs observation model.  
-
-## Version 2.6
-
-* TACs for 2017 and 2018 are fixed
-2017 TAC is 23155t (East) and 2000t (West)
-2018 TAC is 28200t (East) and 2350t (West)
-
-* A bug was fixed where indices were recalibrated incorrectly among update years (causing artificial oscillation)
-
-* The Perfect_Obs observation model now includes very small observation error (e.g. CVs ~ 1E-10 for most data types)
-
-* A new performance metric (class PM) is available called AvC30 which is the average yield in the first 30 years
-
-* PPlot and getperf have been updated to include AvC30
-
-
-## Version 2.5
-
-* Important error #1 was identified in which future indices were simulated to be identical if no hyperdepletion/hyperstability was detected. Many thanks to Mitsuyo Miyagawa for finding that one!
-
-* Important error #2 was identified in which TACs by management area were being smeared over geographic areas due to a mistake in the allocation equation. Many thanks to Alex Hanke and Mitsuyo Miyagawa who both reported the issue. 
-
-* The default plot(MSE) has been updated to show catches and SSB by area (East/West) rather than stock. You can set an argument 'byarea' = False to plot by stock. 
-
-* Added a function Deterministic() that removes all process errors (recruitment deviations) from the projections. Coupled with the Perfect_Obs observation model this generates idealized projections for theoretical testing of MPs.
-
-* The current (2018) TAC is by default 28200t in the East and 2350t in the West (this is an argument 'curTAC' in newMSE()). This is now provided to the simulate dataset 'dset' and used by the current catch reference MPs (CurC50, CurC100, CurC150).
-
-
-## Version 2.4
-
-* A series of memory optimization changes have been implemented that have reduced RAM resource requirements by around 3Gb for any MSE run. It still may be difficult to run the MSE on a system that does not  have at least 12 Gb of RAM however. 
-
-* The current TACs for the East and West have been updated to 28200t (2018) and 2350t (2018-2020), respectively.
-
-* Documentation has been added to CDD_i7 and XSA MPs, including a clarification that XSA is still not stable and in development. 
-
-
-## Version 2.3
-
-* Operating models are conditioned using stock reduction analysis before 1960 after which the model follows a statistical catch-at-length formulation.
-
-* Operating models are now fitted to CPUE indices that are used in Eastern and Western bluefin tuna stock assessments.
-
-* All 36 operating models of the reference set are available in the package (OM_1, OM_2, etc)
-
-* The four primary robustness operating models are also now available (OM_R1, OM_R2, etc)
-
-* New performance summary table (getperf) and plotting functions (plot, Tplot) that match the Trial Specifications document. 
-
-* Customization future recruitment scenarios, fleet allocation scenarios and spatial stock definitions.
+* Overhaul of OMs and upgrade to the latest version of the M3 operating model (M3 v5.0: selectivity mirroring, size-specific indices, annual deviations from master index, etc)
+* Dynamic B0 calculations now added to MSE object in slots dynB0 (projected) and dynB0h (historical)
+* All existing performance metrics now phrase B relative to BMSY as SSB relative to SSBMSY_dynamic (where SSBMSY_dynamic is dynamic SSB0 * time invariant SSBMSY relative to SSB0)
 
 
 ## Future additions 
@@ -317,12 +165,12 @@ loadABT(quiet=T)
 
 ```
 
-```{r plotareas,echo=F,message=F,warning=F,error=F,fig.width=3, fig.height=2.5}
+```{r plotareas,echo=F,message=F,warning=F,error=F,fig.width=4, fig.height=3.5}
 par(mar=rep(0.01,4))
 areaplot(MSE_example)
 ```
 
-The model is disaggregated into subyear time blocks that follow quarters (ie Jan-Mar, Apr-Jun, Jul-Sept, Oct-Dec). This is primarily a constraint arising from how data have been reported historically.  
+The model is disaggregated into quarterly time blocks (ie Jan-Mar, Apr-Jun, Jul-Sept, Oct-Dec). This is primarily a constraint arising from how data have been reported historically.  
 
 ## MSE design
 
@@ -330,7 +178,7 @@ The Atlantic bluefin tuna MSE follows an overarching design document coordinated
 
 A very brief introduction to the ABT-MSE R package is provided in [SCRS/2017/225](https://drive.google.com/open?id=1IBcZhxNJXwSKkmEoAFoGrj7BhzilNt81)
 
-The MSE design (range of OMs) is described in [SCRS/2017/223](https://drive.google.com/open?id=1oJmXDD6tRKbEI4DwZnsLbFIAcq1EfiPt)
+The MSE design (range of OMs) is described in the [report of the Jan 2019 bluefin MSE meeting](https://drive.google.com/open?id=10sWypo0nFdruIJ-6x1M_gTcB0AC6_5uJ)
 
 Examples of MPs coded and in action can be found in [SCRS/2017/224](https://drive.google.com/open?id=1gauaI74rowuzY3pAE-qFFlWQuY9wElPI)
 
@@ -338,7 +186,7 @@ Examples of MPs coded and in action can be found in [SCRS/2017/224](https://driv
 
 ## Data 
 
-All of the data that are used in the operational modelling are available [here](https://drive.google.com/open?id=1mLVS_fqjNZMqP5sn3bdiFmWqrW9Sd1yX)
+All of the data that are used in the operational modelling are available [here](https://drive.google.com/open?id=18jqJXqwgDmnq48Ww6AskgS5J9J5T4exO)
 
 A meta-data summary of all data available to the ABT-MSE project is available online [here](https://drive.google.com/open?id=13pFaM3BTnzQ1BNQGoYn4O2n1IeD18V3VTbN9Hv7139U)
 
@@ -474,7 +322,7 @@ source("C:/ABT-MSE/Depends.r")
 
 5. Install the ABTMSE R package by opening RStudio and entering the following code at the R console (making sure to change the file path to reflect where you put the ABT-MSE folder on your computer):
 ```{r install_package,eval=F}
-install.packages("C:/ABT-MSE/ABTMSE_4.1.15.tar.gz") 
+install.packages("C:/ABT-MSE/ABTMSE_5.1.3.tar.gz") 
 ```
 6. Check that the installation is successful by finding this help file (the ABTMSE vignette):
 ```{r load_library, eval=F}
@@ -519,11 +367,11 @@ avail('Obs')
 
 ### Reference Trials
 
-An MSE design object *Design* was also loaded with loadABT(). *Design* is a list of the factors and their levels used in defining the reference set of operating models, e.g. the MSE design outlined in the [Trial Specifications document](https://drive.google.com/open?id=1vaGsXJfR4OFEwyx1QUX8KFEY8NUzgaYN) .
+An MSE design object *Design* was also loaded with loadABT(). *Design* is a list of the factors and their levels used in defining the reference set of operating models, e.g. the MSE design outlined in the [Trial Specifications document](https://drive.google.com/open?id=16YIFO0avqFjsJo3iLjnfhfkyIv6k-awR) (note this is currently being updated).
 
-Here is a figure showing how the reference OM numbering relates to the three factors (recruitment, abundance, spawning fraction / natural mortality rate M):
+Here is a figure showing how the reference OM numbering relates to the three factors (recruitment, spawning fraction / natural mortality rate M, stock mixing):
 
-<img src="Ref_OMs.jpg" width="460">
+<img src="Ref_OMs.jpg" width="280">
 
 
 The list item *all_levs* shows all levels that were used in defining the factorial design of the MSE reference operating models:
@@ -555,9 +403,7 @@ You'll notice that some objects in the ABTMSE package have the extension *\_exam
 
 ### Robustness Trials
 
-Additionally a set of robustness OMs are specified that are single-factor deviations from 1AI (OM_1) and 2AI (OM_2):
-
-<img src="Rob_OMs.jpg" width="460">
+Robustness OMs have yet to be specified in this round of OM review. 
 
 
 ## Running an MSE using pre-specified objects
@@ -604,7 +450,7 @@ Specifying management procedures is somewhat more complex in a multistock MSE as
 
 To specify management procedures in this MSE framework you must select a MP for each spatially distinct area to which an MP is to be applied. For example, a VPA stock assessment in the West and a Surplus production stock assessment in the East. Traditionally the spatial division for Atlantic bluefin has been at 45 degrees W. In this quick start section we're going to ignore MP areas and the package will assume the default setup which is 2 data areas - 2 MPs, one per area, divided by 45deg W.  
 
-A related issue is fleet allocation of regional TACs that are calculated by MPs. Again we're going to leave allocation for a later section of this document as it is a bit complicated. 
+A related issue is fleet allocation of regional TACs that are calculated by MPs. Again we're going to leave allocation for a later section of this document as it is a bit complicated, for now all you need to know is that it mirrors recent spatial fleet allocations in the East and West management areas (ie it reflects the status quo by default). 
 
 As with the observation and implementation error models you can search for management procedures and find help documentation on these:
 
@@ -629,7 +475,7 @@ This code will test three management systems. One where UMSY is used in both the
 
 ### Operating models
 
-A search for operating models reveals `r (length(avail('OM'))-1)/2` reference OMs and 1 example:
+A search for operating models reveals `r floor((length(avail('OM'))-1)/2)` reference OMs and 1 example:
 
 ```{r qs_OM_help}
 avail('OM')
@@ -646,7 +492,7 @@ When OM class objects are made, a number of expensive and lengthy calculations a
 
 Later in this document we'll cover exactly how data are formatted for operating models and how these are fitted to data. For now we're going to use one of the prebuilt OMs *OM\_example* that only requires the computation of `r OM_example@nsim` simulations.
 
-### Running an preliminary MSE
+### Running a preliminary MSE
 
 Management strategy evaluation is computationally intensive and typically requires the recursive application of statistical models (MPs) for many independent simulations. 
 
@@ -810,7 +656,7 @@ dim(MSE_example@C)
 
 In the case of the *POF* function three slots of an MSE object are used.
 
-  MSE@F_FMSY is the slot containing fishing rate relative to FMSY 
+  MSE@F_FMSY is the slot containing fishing rate relative to FMSY (these are actually harvest rate U, relative to U at MSY)
 
   MSE@nyears represents the last year of the historical simulation.
 

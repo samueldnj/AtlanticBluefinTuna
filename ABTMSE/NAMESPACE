@@ -52,8 +52,6 @@ export(
     "CSMP",
     "xMPi",
 
-    "assessDDmm",
-
     "runMulti",
     "multiMSE",
 
@@ -136,6 +134,7 @@ export(
     "meanFslen",
     "Fageprof",
     "timeFs",
+    "sigR_AC_conv",
 
     "AssignAge",
     "tbin",
@@ -151,7 +150,12 @@ export(
 
     "plotindex2",
     "plot_mov_dist",
+    "plot_mov",
     "vmovplot",
+
+    "Explot_SS_multi",
+    "Explot_SS",
+    "Explot",
 
     "sourceall",
 
@@ -166,7 +170,6 @@ export(
     "optMSY_eq",
     "MSYCalcs",
 
-
     "read.hessian",
     "pin_from_par",
     "pin_from_cor",
@@ -175,6 +178,8 @@ export(
     "runM3",
     "runM3p",
     "M3read",
+    "CalcCVs",
+    "LHtabs",
 
     "DesignEffect",
 
@@ -204,9 +209,7 @@ import(
     "rmarkdown",
     "knitr",
     "mvtnorm",
-    "ggplot2",
-    "TMB",
-    "RcppEigen"
+    "ggplot2"
 )
 importFrom("grDevices", "col2rgb", "rainbow", "rgb", "xy.coords", "colorRampPalette")
 importFrom("graphics", "abline", "hist", "layout", "legend", "lines",
@@ -220,10 +223,8 @@ importFrom("stats", "coef", "density", "dlnorm", "dnorm", "lm",
 importFrom("utils", "flush.console", "read.csv", "lsf.str", "packageVersion")
 importFrom("abind", "abind")
 importFrom("Rcpp", "evalCpp")
-useDynLib("tunaDelay")
 #importFrom("readxl", "read_excel", "excel_sheets")
 #useDynLib(DLMtool)
-
 
 
 

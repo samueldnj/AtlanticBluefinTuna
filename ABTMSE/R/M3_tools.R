@@ -278,6 +278,9 @@ M3write<-function(OMI,OMdir="C:/M3"){
   write("# IobsCV, lognormal CV of the fishery independent indices",datfile,1,append=T)
   write(OMI@IobsCV,datfile,OMI@np,append=T) # SSB index for each population
 
+  write("# CLCV_num, numerator of the Maunder normal composition LHF",datfile,1,append=T)
+  write(OMI@CLCV_num,datfile,OMI@np,append=T) # SSB index for each population
+
 
   # -- Priors
 
@@ -326,7 +329,7 @@ M3write<-function(OMI,OMdir="C:/M3"){
   write(OMI@nLHw,datfile,1,append=T)
 
   write("# LHw,  likelihood components",datfile,1,append=T)
-  write(OMI@LHw,datfile,OMI@nLHw,append=T) # Likelihood weights (1 catch, 2 cpue, 3 FIindex, 4 Lcomp, 5 SOO, 6 PSAT, 7 PSAT2, 8 RecDev, 9 mov, 10 sel, 11 SRA penalty, 12 SSB prior, 13 SSBinc, 14 Fmod, 15 BSfrac)
+  write(OMI@LHw,datfile,OMI@nLHw,append=T) # Likelihood weights (1 catch, 2 cpue, 3 FIindex, 4 Lcomp, 5 SOO, 6 PSAT, 7 PSAT2, 8 RecDev, 9 mov,  10 sel,  11 SRA, 12 SSB, 13 SSBinc, 14 Fmod, 15 R0diff, 16 BSfrac, 17 MICV)"
 
   # -- Initial values
 
@@ -367,6 +370,21 @@ M3write<-function(OMI,OMdir="C:/M3"){
 
   write("# nF either nCobs or 1 if complexF=0",datfile,1,append=T)
   write(OMI@nF,datfile,1,append=T) # debug switch
+
+  write("# MICV the (extra Fmod) variability in regional F by year",datfile,1,append=T)
+  write(OMI@MICV,datfile,1,append=T)
+
+  write("# Phase1 the phase for estimation of things",datfile,1,append=T)
+  write(OMI@Phases[1],datfile,1,append=T)
+
+  write("# Phase2 the phase for estimation of things",datfile,1,append=T)
+  write(OMI@Phases[2],datfile,1,append=T)
+
+  write("# Phase3 the phase for estimation of things",datfile,1,append=T)
+  write(OMI@Phases[3],datfile,1,append=T)
+
+  write("# Phase4 the phase for estimation of things",datfile,1,append=T)
+  write(OMI@Phases[4],datfile,1,append=T)
 
   write("# debug 1= run with initial values",datfile,1,append=T)
   write(OMI@debug,datfile,1,append=T) # debug switch
@@ -552,8 +570,8 @@ M3read<-function(OMDir="C:/M3",quiet=T){
   st<-st+1+out$nmov1
   out$movtype<-scan(repfile,skip=st,nlines=1,quiet=quiet)
   st<-st+2
-  out$Ilencat<-ADMBrep(repfile,st,c(5,2),quiet=quiet)
-  st<-st+6
+  out$Ilencat<-ADMBrep(repfile,st,c(nf,2),quiet=quiet)
+  st<-st+nf+1
   out$M_age<-ADMBrep(repfile,st,c(np,na),quiet=quiet)
   st<-st+1+np
   fec<-ADMBrep(repfile,st,c(np,na),quiet=quiet)
@@ -601,7 +619,7 @@ M3read<-function(OMDir="C:/M3",quiet=T){
   st<-st+2
   out$SSBnow<-scan(repfile,skip=st,nlines=1,quiet=quiet)
   st<-st+2
-  out$objnam<-c("Catch","CPUE","Ind.","Length","SOO","PSAT","P Rec.","P mov","P sel","SRA pen","P SSB","P Dep","P Fmod","R0 diff","TOT")
+  out$objnam<-c("Catch","CPUE","Ind.","Length","SOO","PSAT","P Rec.","P mov","P sel","SRA pen","P SSB","P Dep","P Fmod","R0 diff","TOT","SOOm","SOOg")
   out$obj<-scan(repfile,skip=st,nlines=1,quiet=quiet)
   st<-st+2
   out$SOOpred<-scan(repfile,skip=st,nlines=1,quiet=quiet)
@@ -614,6 +632,10 @@ M3read<-function(OMDir="C:/M3",quiet=T){
   st<-st+2
   out$PSAT2pred<-scan(repfile,skip=st,nlines=1,quiet=quiet)
   st<-st+2
+  out$Fmod<-scan(repfile,skip=st,nlines=1,quiet=quiet)
+  st<-st+2
+  out$FDYt<-ADMBrep(repfile,st,c(nr,ns,ny),quiet=quiet)
+  st<-st+1+nr*ns
   out$datacheck<-scan(repfile,skip=st,nlines=1,quiet=quiet)
   out
 }
@@ -662,7 +684,7 @@ read.fit<-function(file="C:/M3",digits=12,cor_ignore=T){
     ret$cov<-ret$cor*(ret$std%o%ret$std)
   }
 
-  cat(paste0("No .cor file: ",cfile," is not available, storing MLE parameter estimates only"))
+  if(!file.exists(cfile))cat(paste0("No .cor file: ",cfile," is not available, storing MLE parameter estimates only"))
   cat("\n")
   lin<-readLines(parf)
   sublin<-lapply(strsplit(lin, ' '),function(x)x[x!=''&x!="#"])
@@ -875,4 +897,46 @@ make_comp_report<-function(OMdirs,dir){
   render(input=system.file("OMcomp.Rmd", package="ABTMSE"), output_file=paste(dir,"/Comparison_Report.pdf",sep=""))
 
 }
+
+#' Make negative log-likelihood components table
+#'
+#' @param outs list of output files each created from M3read()
+#' @param OMIs list of OMI file paired to each position in outs()
+#' @param OMnos vector of OM numbers
+#' @param OMnams vector of OM names
+#' @param rnd integer numbers in tables are rounded to rnd decimal places
+#' @return a list 2 elements long of (1) weighted and (2) unweighted negative log-likelihoods
+#' @export
+LHtabs<-function(outs,OMIs,OMnos, OMnams,rnd=0){
+
+  nOMs<-length(outs)
+  LHs<-LHsU<-data.frame(array(NA,c(nOMs,17)))
+  LHw_ind<-c(                               1,    2,     3,      4,    5,       5,       6,    8,     9,     10,   11,      15,      17)
+  Obj_ind<-c(                               1,    2,     3,      4,    16,      17,      6,    7,     8,     9,    10,      14,      13)
+  Tab_ind<-c(                               3,    4,     5,      6,     7,      8,       9,    10,    11,    12,   13,      14,      15)
+  names(LHs)<-names(LHsU)<- c("OM","Code","Cat", "CR", "Surv", "Comp", "SOOm", "SOOg", "Tag", "Rec", "Mov", "Sel", "SRA",  "R0diff", "MI","TOT_nP","TOT")
+
+  LHs[,1]<-LHsU[,1]<-OMnos
+  LHs[,2]<-LHsU[,2]<-OMnames
+
+  for(i in 1:nOMs){
+    wts<-OMIs[[i]]@LHw[LHw_ind]
+    LHs[i,Tab_ind]<-outs[[i]]$obj[Obj_ind]
+    LHsU[i,Tab_ind]<-outs[[i]]$obj[Obj_ind]/wts
+    LHs[i,17]<-sum(LHs[i,Tab_ind])
+    LHsU[i,17]<-sum(LHsU[i,Tab_ind])
+    LHs[i,16]<-LHs[i,17]-sum(LHs[i,10:15])
+    LHsU[i,16]<-LHsU[i,17]-sum(LHsU[i,10:15])
+
+    #LHs[i,is.na(LHs[i,])|LHs[i,]=='Inf']<-0
+    LHs[i,3:17]<-round(LHs[i,3:17],rnd)
+
+    #LHsU[i,is.na(LHsU[i,])|LHsU[i,]=='Inf']<-0
+    LHsU[i,3:17]<-round(LHsU[i,3:17],rnd)
+  }
+
+  list(LHs=LHs,LHsU=LHsU)
+
+}
+
 
