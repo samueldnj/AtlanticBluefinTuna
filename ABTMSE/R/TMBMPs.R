@@ -31,7 +31,8 @@ dummy <- function(){
 #' @examples
 #' assessDDmm(1,dset = dset_EW,AS = 1, AMs = 1)
 #' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
-assessDDmm <- function( x, dset, AMs = c(1,3,5),
+assessDDmm <- function( x, dset, 
+                        AMs = c(1,3,5),
                         caps = c(25,4),
                         TACrule = c("mean"),
                         check = TRUE )
