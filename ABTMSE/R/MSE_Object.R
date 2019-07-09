@@ -1140,9 +1140,9 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
         } else if( class( get( MPs[[MP]][1] ) ) == "MMMSMP" )
         {
           if(sfIsRunning()&!MSEparallel){
-            TACtrial <- t(sfSapply(1:nsim,get(MPs[[MP]][1]),dset, AMs = c(1,4,7) ))
+            TACtrial <- t(sfSapply(1:nsim,get(MPs[[MP]][1]),dset))
           }else{
-            TACtrial <- t(sapply(1:nsim,get(MPs[[MP]][1]),dset, AMs = c(1,4,7) ))
+            TACtrial <- t(sapply(1:nsim,get(MPs[[MP]][1]),dset))
           }
 
           for( AS in 1:nAss)

@@ -34,6 +34,7 @@ dummy <- function(){
 assessDDmm <- function( x, dset, 
                         AMs = c(1,3,5),
                         caps = c(25,4),
+                        F23M = FALSE,
                         TACrule = c("mean"),
                         check = TRUE )
 {
@@ -45,15 +46,15 @@ assessDDmm <- function( x, dset,
                     dset = dset,
                     simNum = x )
 
-
   # Apply the HCR, compute area and stock
   # TAC
   mmTACs <- lapply( X = mmFits,
-                    FUN = calcHCR )
+                    FUN = calcHCR,
+                    F23M = F23M )
   mmTACs <- do.call( rbind, mmTACs ) %>%
             mutate( zeroMeanNLL = nll - mean(nll),
-                    deltaNLL = (zeroMeanNLL - min(zeroMeanNLL))/2,
-                    amWts = exp(-deltaNLL)/sum(exp(-deltaNLL)),
+                    deltaNLL = (zeroMeanNLL - min(zeroMeanNLL)),
+                    amWts = exp(-deltaNLL/2)/sum(exp(-deltaNLL/2)),
                     wtdTAC_E = amWts * TAC_E,
                     wtdTAC_W = amWts * TAC_W )
 
@@ -109,12 +110,23 @@ class(assessDDmm)<-"MMMSMP"
 # calcHCR()
 # Calculates stock and area TAC 
 # from the mpOutput, then
-calcHCR <- function(  mpOutput = mmTACs[1] )
+calcHCR <- function(  mpOutput = mmTACs[1],
+                      F23M     = FALSE )
 {
   # First, calculate TAC by stock
   B_s       <- mpOutput$B_s
   msy_s     <- mpOutput$msy
-  Fmsy_s    <- mpOutput$Fmsy
+  if( F23M )
+    Fmsy_s  <- mpOutput$M_s*2/3
+  else
+    Fmsy_s  <- mpOutput$Fmsy
+
+
+
+
+  # change fmsy_s to ftarget
+
+
 
   # Fmsy is actually HRs, so just
   # apply it as B*F
@@ -415,6 +427,7 @@ fitDD <- function(  omIndices = indicesOM[[AMs[1]]],
                     B_sa    = B_sa,
                     rho_s   = repOpt$rho_s,
                     alpha_s = repOpt$alpha_s,
+                    M_s     = repOpt$M_s,
                     msy     = msyList$msy,
                     Bmsy    = msyList$Bmsy,
                     Fmsy    = msyList$Fmsy,
