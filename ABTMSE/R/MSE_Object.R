@@ -164,9 +164,7 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
     print(paste('Could not run MSE:',deparse(substitute(Obs)),'not of class Obs'))
     stop()
   }
-  if( class(get(MPs[[1]][1]))!='MP' & 
-      class(get(MPs[[1]][1]))!='MSMP' & 
-      class(get(MPs[[1]][1]))!='MMMSMP' ){
+  if(class(get(MPs[[1]][1]))!='MP'& class(get(MPs[[1]][1]))!='MSMP'){
     print(paste('Could not run MSE:',deparse(substitute(MPs[[1]][1])),'not of class MP'))
     stop()
   }
@@ -1100,70 +1098,39 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
                            )
         }
 
-        # Run single stock/area MPs
-        if(all( class( get(MPs[[MP]])) %in% c("MP","MSMP") ))
-        {
-          for(AS in 1:nAss){
-            #SPAYMRF
-            AA<-Assess_data[AS,]
+        for(AS in 1:nAss){
+          #SPAYMRF
+          AA<-Assess_data[AS,]
 
-            assign("dset",dset,envir=globalenv()) # debugging
-            if(sfIsRunning())sfExport("dset")
-            #if(MPs[[MP]][AS]=="XSA"|!sfIsRunning()) TACtrial[,AS]<-sapply(1:nsim,get(MPs[[MP]][AS]),dset[[AS]])
-            if(class(get(MPs[[MP]][AS]))=="MP"){
-              if(sfIsRunning()&!MSEparallel){
-                TACtrial[,AS]<-sfSapply(1:nsim,get(MPs[[MP]][AS]),dset[[AS]])
-              }else{
-                TACtrial[,AS]<-sapply(1:nsim,get(MPs[[MP]][AS]),dset[[AS]])
-              }
-            } else if(class(get(MPs[[MP]][AS]))=="MSMP"){
-              if(sfIsRunning()&!MSEparallel){
-                TACtrial[,AS]<-sfSapply(1:nsim,get(MPs[[MP]][AS]),dset,AS=AS)
-              }else{
-                TACtrial[,AS]<-sapply(1:nsim,get(MPs[[MP]][AS]),dset,AS=AS)
-              }
+          assign("dset",dset,envir=globalenv()) # debugging
+          if(sfIsRunning())sfExport("dset")
+          #if(MPs[[MP]][AS]=="XSA"|!sfIsRunning()) TACtrial[,AS]<-sapply(1:nsim,get(MPs[[MP]][AS]),dset[[AS]])
+          if(class(get(MPs[[MP]][AS]))=="MP"){
+            if(sfIsRunning()&!MSEparallel){
+              TACtrial[,AS]<-sfSapply(1:nsim,get(MPs[[MP]][AS]),dset[[AS]])
+            }else{
+              TACtrial[,AS]<-sapply(1:nsim,get(MPs[[MP]][AS]),dset[[AS]])
             }
-            if(MPs[[MP]][AS]!="ZeroC"){
-              TACmax=(1+maxTAC[AS])*TAC[,AS]
-              TACmin=(max(0.01,1-maxTAC[AS]))*TAC[,AS]
-              cond=TACtrial[,AS]<TACmin
-              TACtrial[cond,AS]=TACmin[cond]
-              cond=TACtrial[,AS]>TACmax
-              TACtrial[cond,AS]=TACmax[cond]
+          }else if(class(get(MPs[[MP]][AS]))=="MSMP"){
+            if(sfIsRunning()&!MSEparallel){
+              TACtrial[,AS]<-sfSapply(1:nsim,get(MPs[[MP]][AS]),dset,AS=AS)
+            }else{
+              TACtrial[,AS]<-sapply(1:nsim,get(MPs[[MP]][AS]),dset,AS=AS)
             }
-
-            if(y<allyears).Object@TAC[,MP,AS,y-nyears+2]<-TAC[,AS]<-TACtrial[,AS]
-
-          }
-        # Run multi-model multistock MPs - avoid rerunning models 
-        # on the same data
-        } else if( class( get( MPs[[MP]][1] ) ) == "MMMSMP" )
-        {
-          if(sfIsRunning()&!MSEparallel){
-            TACtrial <- t(sfSapply(1:nsim,get(MPs[[MP]][1]),dset))
-          }else{
-            TACtrial <- t(sapply(1:nsim,get(MPs[[MP]][1]),dset))
           }
 
-          for( AS in 1:nAss)
-          {
-            if(MPs[[MP]][AS]!="ZeroC"){
-              TACmax=(1+maxTAC[AS])*TAC[,AS]
-              TACmin=(max(0.01,1-maxTAC[AS]))*TAC[,AS]
-              cond=TACtrial[,AS]<TACmin
-              if( any(is.na(cond)))
-                browser()
-              TACtrial[cond,AS]=TACmin[cond]
-              cond=TACtrial[,AS]>TACmax
-              if( any(is.na(cond)))
-                browser()
-              TACtrial[cond,AS]=TACmax[cond]
-            }
-
-            if(y<allyears).Object@TAC[,MP,AS,y-nyears+2]<-TAC[,AS]<-TACtrial[,AS]
+          if(MPs[[MP]][AS]!="ZeroC"){
+            TACmax=(1+maxTAC[AS])*TAC[,AS]
+            TACmin=(max(0.01,1-maxTAC[AS]))*TAC[,AS]
+            cond=TACtrial[,AS]<TACmin
+            TACtrial[cond,AS]=TACmin[cond]
+            cond=TACtrial[,AS]>TACmax
+            TACtrial[cond,AS]=TACmax[cond]
           }
+
+          if(y<allyears).Object@TAC[,MP,AS,y-nyears+2]<-TAC[,AS]<-TACtrial[,AS]
+
         }
-
 
         testC[testCind]<-TAC[testCind[,c(1,5)]]*TACdist[testCind] # predicted catch by TAC
 
