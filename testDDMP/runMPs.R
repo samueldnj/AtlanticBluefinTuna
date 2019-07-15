@@ -30,70 +30,70 @@ testMPs <- list(  loCap = c("MP_loCap","MP_loCap"),
                   hiCap23M = c("MP_hiCap23M","MP_hiCap23M") )
 
 
-# MSE_OM1 <- new( Class     = "MSE",
-#                 OM        = OM_1,
-#                 Obs       = Perfect_Obs,
-#                 MPs       = testMPs,
-#                 interval  = 3,
-#                 IE        = "Overage_10" )
+MSE_OM1 <- new( Class     = "MSE",
+                OM        = OM_1,
+                Obs       = Perfect_Obs,
+                MPs       = testMPs,
+                interval  = 3,
+                IE        = "Overage_10" )
 
-# save(MSE_OM1, file = "MSEs/MSE_OM1.Rdata")
-# MSE_report( MSE_OM1, dir=file.path(getwd(),"MSEs"), 
-#             Author='Landmark Fisheries Research', 
-#             introtext="Multi-model delay difference assessment", 
-#             filenam="MSE_OM1_report")  
+save(MSE_OM1, file = "MSEs/MSE_OM1.Rdata")
+MSE_report( MSE_OM1, dir=file.path(getwd(),"MSEs"), 
+            Author='Landmark Fisheries Research', 
+            introtext="Multi-model delay difference assessment", 
+            filenam="MSE_OM1_report")  
 
-# MSE_OM2 <- new( Class     = "MSE",
-#                 OM        = OM_2,
-#                 Obs       = Perfect_Obs,
-#                 MPs       = testMPs,
-#                 interval  = 3,
-#                 IE        = "Overage_10" )
+MSE_OM2 <- new( Class     = "MSE",
+                OM        = OM_2,
+                Obs       = Perfect_Obs,
+                MPs       = testMPs,
+                interval  = 3,
+                IE        = "Overage_10" )
 
-# save(MSE_OM2, file = "MSEs/MSE_OM2.Rdata")
-# MSE_report( MSE_OM2, dir=file.path(getwd(),"MSEs"), 
-#             Author='Landmark Fisheries Research', 
-#             introtext="Multi-model delay difference assessment", 
-#             filenam="MSE_OM2_report")  
+save(MSE_OM2, file = "MSEs/MSE_OM2.Rdata")
+MSE_report( MSE_OM2, dir=file.path(getwd(),"MSEs"), 
+            Author='Landmark Fisheries Research', 
+            introtext="Multi-model delay difference assessment", 
+            filenam="MSE_OM2_report")  
 
-# MSE_OM3 <- new( Class     = "MSE",
-#                 OM        = OM_3,
-#                 Obs       = Perfect_Obs,
-#                 MPs       = testMPs,
-#                 interval  = 3,
-#                 IE        = "Overage_10" )
+MSE_OM3 <- new( Class     = "MSE",
+                OM        = OM_3,
+                Obs       = Perfect_Obs,
+                MPs       = testMPs,
+                interval  = 3,
+                IE        = "Overage_10" )
 
-# save(MSE_OM3, file = "MSEs/MSE_OM3.Rdata")
-# MSE_report( MSE_OM3, dir=file.path(getwd(),"MSEs"), 
-#             Author='Landmark Fisheries Research', 
-#             introtext="Multi-model delay difference assessment", 
-#             filenam="MSE_OM3_report")  
+save(MSE_OM3, file = "MSEs/MSE_OM3.Rdata")
+MSE_report( MSE_OM3, dir=file.path(getwd(),"MSEs"), 
+            Author='Landmark Fisheries Research', 
+            introtext="Multi-model delay difference assessment", 
+            filenam="MSE_OM3_report")  
 
-# MSE_OM4 <- new( Class     = "MSE",
-#                 OM        = OM_4,
-#                 Obs       = Perfect_Obs,
-#                 MPs       = testMPs,
-#                 interval  = 3,
-#                 IE        = "Overage_10" )
+MSE_OM4 <- new( Class     = "MSE",
+                OM        = OM_4,
+                Obs       = Perfect_Obs,
+                MPs       = testMPs,
+                interval  = 3,
+                IE        = "Overage_10" )
 
-# save(MSE_OM4, file = "MSEs/MSE_OM4.Rdata")
-# MSE_report( MSE_OM4, dir=file.path(getwd(),"MSEs"), 
-#             Author='Landmark Fisheries Research', 
-#             introtext="Multi-model delay difference assessment", 
-#             filenam="MSE_OM4_report")  
+save(MSE_OM4, file = "MSEs/MSE_OM4.Rdata")
+MSE_report( MSE_OM4, dir=file.path(getwd(),"MSEs"), 
+            Author='Landmark Fisheries Research', 
+            introtext="Multi-model delay difference assessment", 
+            filenam="MSE_OM4_report")  
 
-# MSE_OM5 <- new( Class     = "MSE",
-#                 OM        = OM_5,
-#                 Obs       = Perfect_Obs,
-#                 MPs       = testMPs,
-#                 interval  = 3,
-#                 IE        = "Overage_10" )
-# MSE_report( MSE_OM5, dir=file.path(getwd(),"MSEs"), 
-#             Author='Landmark Fisheries Research', 
-#             introtext="Multi-model delay difference assessment", 
-#             filenam="MSE_OM5_report")  
+MSE_OM5 <- new( Class     = "MSE",
+                OM        = OM_5,
+                Obs       = Perfect_Obs,
+                MPs       = testMPs,
+                interval  = 3,
+                IE        = "Overage_10" )
+MSE_report( MSE_OM5, dir=file.path(getwd(),"MSEs"), 
+            Author='Landmark Fisheries Research', 
+            introtext="Multi-model delay difference assessment", 
+            filenam="MSE_OM5_report")  
 
-# save(MSE_OM5, file = "MSEs/MSE_OM5.Rdata")
+save(MSE_OM5, file = "MSEs/MSE_OM5.Rdata")
 
 MSE_OM6 <- new( Class     = "MSE",
                 OM        = OM_6,

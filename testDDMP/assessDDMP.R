@@ -34,7 +34,7 @@ dyn.load(dynlib('tunaDelay'))
 #' assessDDmm(1,dset = dset_EW,AS = 1, AMs = 1)
 #' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
 assessDDmm <- function( x, dset, 
-                        AMs = c(1,3,5),
+                        AMs = c(1,2,4,7,11),
                         caps = c(25,4),
                         F23M = FALSE,
                         TACrule = c("mean"),
@@ -44,9 +44,17 @@ assessDDmm <- function( x, dset,
   if( AS == 1 )
   {
     # Load the indicesOM list
-    load("indicesOM.RData")
+    load("OMfits/ssbOM.Rdata")
 
-    mmFits <- lapply( X = indicesOM[AMs],
+    omSSB <- ssb$OM_mst[as.character(AMs),,]
+
+    indicesOM         <- vector(mode = "list", length = length(AMs) )
+    names(indicesOM)  <- AMs
+
+    for( aIdx in 1:length(AMs) )
+      indicesOM[[aIdx]] <- omSSB[aIdx,,]
+
+    mmFits <- lapply( X = indicesOM,
                       FUN = fitDD,
                       dset = dset,
                       simNum = x )
@@ -134,36 +142,6 @@ assessDDmm <- function( x, dset,
 class(assessDDmm)<-"MSMP"
 
 
-#' assessDDmm_W
-#' 
-#' @param x a simulation number.
-#' @param dset a list with two positions (1:East  2:West) of simulated data for use by management procedures.
-#' @param AS the management area for which advice is being provided (1:East 2:West)
-#' @param AMs a numeric vector of AM indicator numbers, selecting specific AMs tune to different OMs
-#' @return a TAC recommendation arising from \code{x, dset, AS}.
-#' @export
-#' @examples
-#' assessDDmm_W(1,dset = dset_EW,AS = 1, AMs = 1)
-#' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
-assessDDmm_W <- function( x, dset, 
-                          AMs = c(1,3,5),
-                          caps = c(25,4),
-                          F23M = FALSE,
-                          TACrule = c("mean"),
-                          check = TRUE )
-{
-  TACtable <- read.csv("TACtable.csv", header = TRUE, stringsAsFactors = FALSE )
-
-  TAC_x <-  TACtable %>%
-            filter( nSim == x )
-
-  TAC_W <- TAC_x[1,"TAC_W"]
-
-  return(c(West = TAC_W) )
-
-}
-class(assessDDmm_W)<-"MSMP"
-
 # calcHCR()
 # Calculates stock and area TAC 
 # from the mpOutput, then
@@ -225,7 +203,7 @@ calcHCR <- function(  mpOutput = mmTACs[1],
 # fitDD()
 # Non exported function that fits a single
 # AM in the multi-model/ensemble MP assessDD()
-fitDD <- function(  omIndices = indicesOM[[AMs[1]]],
+fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
                     dset      = dset,
                     simNum    = x )
 {
@@ -285,7 +263,6 @@ fitDD <- function(  omIndices = indicesOM[[AMs[1]]],
   I_gt <- appendOMIndices(  omIndices, 
                             dset = dset, 
                             simNum = simNum )
-
 
   I_gt <- I_gt[-(2 + RRidx),]
   # Reorder
