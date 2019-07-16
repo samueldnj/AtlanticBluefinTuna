@@ -38,11 +38,14 @@ assessDDmm <- function( x, dset,
                         caps = c(25,4),
                         F23M = FALSE,
                         TACrule = c("mean"),
-                        check = TRUE,
+                        check = FALSE,
                         AS = 1 )
 {
   if( AS == 1 )
   {
+    # if(is.null(tStep))
+    #   tStep <<- 1
+    # else tStep <<- tStep + 1 
     # Load the indicesOM list
     load("OMfits/ssbOM.Rdata")
 
@@ -53,6 +56,8 @@ assessDDmm <- function( x, dset,
 
     for( aIdx in 1:length(AMs) )
       indicesOM[[aIdx]] <- omSSB[aIdx,,]
+
+    browser()
 
     mmFits <- lapply( X = indicesOM,
                       FUN = fitDD,
@@ -73,14 +78,62 @@ assessDDmm <- function( x, dset,
 
     outTable <- mmTACs
 
-    # Add new columns for biomass, and NLL
-    outTable$Bnext_E    <- numeric(length(AMs))
-    outTable$Bnext_W    <- numeric(length(AMs))
-
-    for( amIdx in 1:length(AMs) )
+    # Check table
+    if( check )
     {
-      outTable$Bnext_E[amIdx] <- mmFits[[amIdx]]$B_s[1]
-      outTable$Bnext_W[amIdx] <- mmFits[[amIdx]]$B_s[2]
+      # Add new columns for biomass, and NLL
+      outTable$Bnext_E    <- numeric(length(AMs))
+      outTable$Bnext_W    <- numeric(length(AMs))
+      outTable$AM         <- AMs
+      outTable$MSY_Es     <- numeric(length(AMs))
+      outTable$MSY_Ws     <- numeric(length(AMs))
+      outTable$MSY_Ea     <- numeric(length(AMs))
+      outTable$MSY_Wa     <- numeric(length(AMs))
+      outTable$Bmsy_Es    <- numeric(length(AMs))
+      outTable$Bmsy_Ws    <- numeric(length(AMs))
+      outTable$Bmsy_Ea    <- numeric(length(AMs))
+      outTable$Bmsy_Wa    <- numeric(length(AMs))
+      outTable$Fmsy_Es    <- numeric(length(AMs))
+      outTable$Fmsy_Ws    <- numeric(length(AMs))
+      outTable$Fmsy_Ea    <- numeric(length(AMs))
+      outTable$Fmsy_Wa    <- numeric(length(AMs))
+      outTable$CT_E       <- numeric(length(AMs))
+      outTable$CT_W       <- numeric(length(AMs))
+
+      for( amIdx in 1:length(AMs) )
+      {
+        # Biomass, MSY and Fmsy
+        outTable$Bnext_E[amIdx] <- mmFits[[amIdx]]$B_s[1]
+        outTable$Bnext_W[amIdx] <- mmFits[[amIdx]]$B_s[2]
+        outTable$MSY_Es[amIdx]  <- mmFits[[amIdx]]$msy[1]
+        outTable$MSY_Ws[amIdx]  <- mmFits[[amIdx]]$msy[2]
+        outTable$Fmsy_Es[amIdx] <- mmFits[[amIdx]]$Fmsy[1]
+        outTable$Fmsy_Ws[amIdx] <- mmFits[[amIdx]]$Fmsy[2]
+        outTable$Bmsy_Es[amIdx] <- mmFits[[amIdx]]$Bmsy[1]
+        outTable$Bmsy_Ws[amIdx] <- mmFits[[amIdx]]$Bmsy[2]
+        outTable$CT_E[amIdx]    <- mmFits[[amIdx]]$Clast[1]
+        outTable$CT_W[amIdx]    <- mmFits[[amIdx]]$Clast[2]
+
+        B_sa      <- mmFits[[amIdx]]$B_sa
+        Bprop     <- B_sa 
+        for( a in 1:ncol(Bprop))
+          Bprop[,a] <- Bprop[,a] / sum(B_sa[,a])
+
+        # Now compute area Fmsy and MSY
+        # using a biomass weighting
+        msy_s     <- mmFits[[amIdx]]$msy
+        Fmsy_s    <- mmFits[[amIdx]]$Fmsy   
+        Bmsy_s    <- mmFits[[amIdx]]$Bmsy   
+
+        outTable$MSY_Ea[amIdx]  <- sum( Bprop[,1] * msy_s ) 
+        outTable$MSY_Wa[amIdx]  <- sum( Bprop[,2] * msy_s ) 
+        outTable$Fmsy_Ea[amIdx] <- sum( Bprop[,1] * Fmsy_s ) 
+        outTable$Fmsy_Wa[amIdx] <- sum( Bprop[,2] * Fmsy_s ) 
+        outTable$Bmsy_Ea[amIdx] <- sum( Bprop[,1] * Bmsy_s ) 
+        outTable$Bmsy_Wa[amIdx] <- sum( Bprop[,2] * Bmsy_s ) 
+
+
+      }
     }
 
     if( TACrule == "mean" )
@@ -106,13 +159,16 @@ assessDDmm <- function( x, dset,
     # Check that HCR calcs are running correctly
     if(check)
     {
-      if(!file.exists("outTable.csv"))
-        write.csv(  outTable, file = "outTable.csv")
+      outTableFileName <- paste("outTable_sim",x,".csv",sep = "")
+      outTableFilePath <- file.path("outTables",outTableFileName)
+      if(!file.exists(outTableFilePath))
+        write.table(  outTable, file = outTableFilePath, sep = ",",
+                      row.names = FALSE )
       else
-        write.csv(  outTable, 
-                    file = "outTable.csv", 
-                    append = TRUE,
-                    col.names = FALSE )
+        write.table(  outTable, sep = ",",
+                      file = outTableFilePath, 
+                      append = TRUE, col.names = FALSE,
+                      row.names = FALSE )
     }
 
     TACtable <- data.frame(nSim = x, TAC_E = TAC_E, TAC_W = TAC_W )
@@ -156,12 +212,7 @@ calcHCR <- function(  mpOutput = mmTACs[1],
   else
     Fmsy_s  <- mpOutput$Fmsy
 
-
-
-
   # change fmsy_s to ftarget
-
-
 
   # Fmsy is actually HRs, so just
   # apply it as B*F
@@ -389,7 +440,7 @@ fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
 
   pars <- list( logith_s      = c(logit(0.945),logit(0.806)),
                 lnB0_s        = log(c(800,125)),
-                lnM_s         = rep(-2,2),
+                lnM_s         = rep(log(0.1),2),
                 lntau_g       = lntau_g,
                 tauW_a        = rep(0.1,nA),
                 rDev_st       = array(0, dim = c(nS,(nT-1))),
@@ -458,6 +509,7 @@ fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
                     B0_s    = repOpt$B0_s,
                     B1_s    = repOpt$B_st[ ,1],
                     B_s     = repOpt$B_st[ ,nT+1],
+                    Clast   = C_at[,nT],
                     B_sa    = B_sa,
                     rho_s   = repOpt$rho_s,
                     alpha_s = repOpt$alpha_s,

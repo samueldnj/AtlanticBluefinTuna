@@ -9,6 +9,7 @@
 \item{Name}{The name of the observation model object}
 \item{Ccv}{a 2 item vector specifying the range in catch observation error as lognormal sd (upper lower)}
 \item{Cbcv}{a 2 item vector specifying the maximum extend of catch bias as a lognormal sd}
+\item{Cbias}{a single value specifying the fraction of catch that is reported}
 \item{nCAAobs}{a 2 item vector specifying the range in the number of annual catch-at-age observations}
 \item{nCALobs}{a 2 item vector specifying the range in the number of annual catch-at-length observations}
 \item{Lcv}{the variance in lengths by age class log normal sd (currently unused)}

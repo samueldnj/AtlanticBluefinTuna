@@ -1,23 +1,23 @@
 ---
-title: "ABT-MSE: Atlantic Bluefin Tuna Management Strategy Evaluation (v5.1.3)"
-subtitle: "ICCAT Atlantic Wide Research Programme for Bluefin Tuna (GBYP)"
+title: 'ABT-MSE: Atlantic Bluefin Tuna Management Strategy Evaluation (v5.2.2)'
 author: "Tom Carruthers (<t.carruthers@fisheries.ubc.ca>)"
 date: "`r Sys.Date()`"
 output:
   html_document:
-    toc: true
-    toc_float: true
-    number_sections: true
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
   rmarkdown::html_vignette:
-    toc: true
-    number_sections: true
+    number_sections: yes
+    toc: yes
   rmarkdown::pdf_vignette:
-    toc: true
-    number_sections: true    
-vignette: >
-  %\VignetteIndexEntry{ABT-MSE}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+    number_sections: yes
+    toc: yes
+subtitle: ICCAT Atlantic Wide Research Programme for Bluefin Tuna (GBYP)
+vignette: |
+  %\VignetteIndexEntry{ABT-MSE} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 ---
 
 <style type="text/css">
@@ -83,6 +83,18 @@ This guide also provides a reproducible account of how the reference set of oper
 # Version Notes (since v4.0)
 
 The package is subject to ongoing testing and development. If you find a bug or a problem please send a report to <t.carruthers@oceans.ubc.ca> so that it can be fixed!  
+
+## Version 5.2.2
+
+* To allow for robustness OMs 32-33, Implementation model (class IE) 'Overages_20' and Observation model (class Obs) 'Unreported_20' can be specied in which fleets catch 6/5 of their allocation but report 5/6, respectively. 
+
+* The MSE object now returns a slot Fleet_comp that includes the catch composition of each fleet. A 5d array (simulation, MP, fleet, stock, age) 
+
+## Version 5.2.1
+
+* Catchability increases to future CPUE indices can be specified using the qinc slot of the OM object (units are % annual increase and are applied to all simulations and CPUE indices identically)
+
+* TAC allocation improved and now should exactly match TAC specifie. This is now accessible via MSE object slots MSE@TAC (recommended by the CMP) and MSE@TACtaken (the catch weight taken)
 
 ## Version 5.1.3
 
@@ -322,7 +334,7 @@ source("C:/ABT-MSE/Depends.r")
 
 5. Install the ABTMSE R package by opening RStudio and entering the following code at the R console (making sure to change the file path to reflect where you put the ABT-MSE folder on your computer):
 ```{r install_package,eval=F}
-install.packages("C:/ABT-MSE/ABTMSE_5.1.3.tar.gz") 
+install.packages("C:/ABT-MSE/ABTMSE_5.2.2.tar.gz") 
 ```
 6. Check that the installation is successful by finding this help file (the ABTMSE vignette):
 ```{r load_library, eval=F}
@@ -392,7 +404,7 @@ The full design matrix can be found in the list item *Design_Ref* and is just th
 Design$Design_Ref
 ```
 
-This design grid explains the nomenclature of the various operating models (class OM) and their input definition files (class OMI) which are numbered from 1 to 24 corresponding with the rows of this design matrix:
+This design grid explains the nomenclature of the various operating models (class OM) and their input definition files (class OMI) which are numbered from 1 to 12 corresponding with the rows of this design matrix:
 
 ```{r design_list_OMs}
 avail('OM')
@@ -403,7 +415,11 @@ You'll notice that some objects in the ABTMSE package have the extension *\_exam
 
 ### Robustness Trials
 
-Robustness OMs have yet to be specified in this round of OM review. 
+Here is a figure showing the configuration of the various robustness OMs:
+
+<img src="Rob_OMs.jpg" width="800">
+
+To run robustness OMs 32 and 33 you just run OM_1 and OM_2 with the 'Overages_20' implementation error model and the 'Unreported_20' Observation model (6/5 of the TAC taken, 5/6 reported) 
 
 
 ## Running an MSE using pre-specified objects
@@ -1602,8 +1618,8 @@ Here is some code for visualizing the movement from (rows) to (columns) areas un
 *Note that this only works for the default MSE objects that have two stock and three movement age classes*
 
 ```{r plot_mov_dist, fig.width=9,fig.height=5}
-out<-M3read("C:/Users/tcarruth/Dropbox/abft-mse/M3") # get the raw M3 model fit 
-load("C:/Users/tcarruth/Dropbox/abft-mse/M3/OMI")    # load the corresponding OMI object in the same folder
+out<-M3read("C:/Users/tcar_/Dropbox/abft-mse/M3") # get the raw M3 model fit 
+load("C:/Users/tcar_/Dropbox/abft-mse/M3/OMI")    # load the corresponding OMI object in the same folder
 par(mfcol=c(3,2),mai=rep(0.01,4),omi=rep(0.01,4))
 plot_mov_dist(out,OMI_1,pnam=c("Eastern stock","Western stock"),custom=T)
 

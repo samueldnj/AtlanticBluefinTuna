@@ -83,6 +83,8 @@
 \item{area_defs}{a list of area definitions for graphing (lons and lats describing the polygon)}
 \item{areanams}{a character vector of area names}
 \item{Istats}{an array of index fit statistics nsim x nind x 4 (beta, AC, sd, cor)}
+\item{Fleet_comp}{an array of Fleet composition data nsim x MP x nfleet x proyear x length class}
+\item{TACtaken}{an array of TAC actually taken nsim x MP x NAss x proyear}
 \item{MPs}{a list object containing the names of the MPs [nMPs]}
 }
 }

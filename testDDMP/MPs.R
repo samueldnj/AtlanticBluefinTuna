@@ -1,4 +1,26 @@
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # MPs.R
+#
+# Wrappers for the assessDDmm() function for different
+# MP settings (lo/hi caps, assuming F is 2/3 of M etc.)
+#
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+# MP_loCap - a low catch cap is applied,
+# of 20 kt in the East, and 2.5 kt in the West
+MP_test <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(20,2.5),
+                     F23M    = FALSE,
+                     TACrule = "mean",
+                     AS      = AS,
+                     check   = TRUE  )
+  return(TAC)
+}
+class(MP_test)<-"MSMP"
 
 # MP_loCap - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
@@ -6,7 +28,7 @@ MP_loCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,4,7),
+                     AMs     = c(1,2,4,7,11),
                      caps    = c(20,2.5),
                      F23M    = FALSE,
                      TACrule = "mean",
@@ -21,7 +43,7 @@ MP_hiCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                        dset    = dset,
-                       AMs     = c(1,4,7),
+                       AMs     = c(1,2,4,7,11),
                        caps    = c(25,4),
                        F23M    = FALSE,
                        TACrule = "mean",
@@ -39,7 +61,7 @@ MP_loCap23M <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                        dset    = dset,
-                       AMs     = c(1,4,7),
+                       AMs     = c(1,2,4,7,11),
                        caps    = c(20,2.5),
                        F23M    = TRUE,
                        TACrule = "mean",
@@ -57,7 +79,7 @@ MP_hiCap23M <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                        dset    = dset,
-                       AMs     = c(1,4,7),
+                       AMs     = c(1,2,4,7,11),
                        caps    = c(25,4),
                        F23M    = TRUE,
                        TACrule = "mean",

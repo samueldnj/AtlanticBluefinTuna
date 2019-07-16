@@ -227,6 +227,7 @@ setClass("OMI",representation(
 #' \item{Name}{The name of the observation model object}
 #' \item{Ccv}{a 2 item vector specifying the range in catch observation error as lognormal sd (upper lower)}
 #' \item{Cbcv}{a 2 item vector specifying the maximum extend of catch bias as a lognormal sd}
+#' \item{Cbias}{a single value specifying the fraction of catch that is reported}
 #' \item{nCAAobs}{a 2 item vector specifying the range in the number of annual catch-at-age observations}
 #' \item{nCALobs}{a 2 item vector specifying the range in the number of annual catch-at-length observations}
 #' \item{Lcv}{the variance in lengths by age class log normal sd (currently unused)}
@@ -257,7 +258,7 @@ setClass("OMI",representation(
 #' \item{MPind_stats}{a list containing the statistical properties of model fits (currently unused)}
 #' }
 setClass("Obs",representation(Name="character",
-               Ccv="numeric",Cbcv="numeric",                                  # Observation error and bias in total annual catches
+               Ccv="numeric",Cbcv="numeric", Cbias="numeric",                 # Observation error and bias in total annual catches
                nCAAobs="numeric",nCALobs="numeric", Lcv="numeric",            # Number of annual catch at age (CAA) and catch-at-length (CAL) observations
                Ibeta="numeric", Icv="numeric",                                # Hyperstability parameter I^beta and observation error in relative abundance indices
                Mbcv="numeric",                                                # Bias in observation of natural mortality rate
@@ -468,14 +469,14 @@ setClass("TEST",representation(
   # Simulation data -------
   E="array",#dFfinal="array",
   qE="array",
-  qI="array",qCPUE="array",            # Catchability of effort, fishery ind indices and fishery CPUE indices
+  qI="array",qCPUE="array",                                  # Catchability of effort, fishery ind indices and fishery CPUE indices
   sel="array",selpars="array",
   mat="array",M="array",
-  Recdevs="array", R0="array",  muR="array",      # Recruitment deviations, unfished recruitment, mean historical recruitment              #FM="array",,Z="array",                 # Fishing, natural and total instantaneous mortality rate.#B="array",SSB="array",NSB="array",              # Biomass, spawning stock biomass #N="array",SSN="array",NSN="array",              # Numbers, spawning stock numbers #C="array",CAA="array",                          # Catches taken, catch at age taken
+  Recdevs="array", R0="array",  muR="array",                 # Recruitment deviations, unfished recruitment, mean historical recruitment              #FM="array",,Z="array",                 # Fishing, natural and total instantaneous mortality rate.#B="array",SSB="array",NSB="array",              # Biomass, spawning stock biomass #N="array",SSN="array",NSN="array",              # Numbers, spawning stock numbers #C="array",CAA="array",                          # Catches taken, catch at age taken
   lnHR1="array",lnHR2="array",
-  MSY="array",BMSY="array", VBMSY="array",        # Maximum sustainable yield, biomass at maximum sustainable yield
+  MSY="array",BMSY="array", VBMSY="array",                   # Maximum sustainable yield, biomass at maximum sustainable yield
   SSBMSY="array",
-  FMSY="array",UMSY="array",FMSYa="array",         # Fishing mortality rate at maximum sustainable yield
+  FMSY="array",UMSY="array",FMSYa="array",                   # Fishing mortality rate at maximum sustainable yield
   SSBMSY_SSB0="array",#IMSY="numeric",                                  # Relative abundance index at maximum sustainable yield#Linf="array",K="array", #Idist="array",                                   # for plotting OM unfished spatial dist#targpop="numeric",                               # What populations are to be used in MSY / depletion optimization#nZeq="integer",                                 # The number of initial years to calculation equilibrium F
 
   # Observation model

@@ -15,13 +15,13 @@ Rec_Ref<-function(OMI,lev=NA){
 
   }else if(lev=='Names'){
 
-    return(c("W: h=0.6, HS E: h=0.98, 0.98","W: h=0.6 E: HS", "W: h=0.6, HS E: h=0.98, 0.98"))
+    return(c("W: h=0.6 then 0.9, E: h=0.98 then 0.98","W: h=0.6, E:h=0.7", "W/E future shift to first recruitment in level 1"))
 
   }else if(lev=='LongNames'){
 
-    return(c("Level 1: West BH h=0.6 to HS in 1975, East BH h=0.98 R0 before/after 1988",
-             "Level 2: West BH h=0.6, East HS",
-             "Level 3: As level 1 but changes after 10 years. West to BH, East to pre 1988 R0"))
+    return(c("Level 1: West BH h=0.6 to h = 0.9 in 1975, East BH h=0.98 R0 before/after 1988",
+             "Level 2: West BH h=0.6, East BH h=0.7",
+             "Level 3: As level 1 but changes back to first recruitment after 10 years"))
 
   }else{
 
@@ -172,7 +172,7 @@ MatM_Ref2<-function(OMI,lev=NA){
   }else{
 
     matlow<- c(0, 0, 0.25, 0.5, rep(1,OMI@na-4)) # both stocks
-    mathighW<-c(0, 0, 0, 0, 0, 0.01, 0.04, 0.19, 0.56, 0.88, 0.98, 1, rep(1,OMI@na-12)) #both stocks
+    mathighW<-c(0, 0, 0, 0, 0, 0, 0.01, 0.04, 0.19, 0.56, 0.88, 0.98, 1, rep(1,OMI@na-13)) #both stocks
     mathighE<-c(0, 0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, rep(1,OMI@na-8)) #both stocks
 
 

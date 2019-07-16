@@ -78,6 +78,8 @@
 #' \item{area_defs}{a list of area definitions for graphing (lons and lats describing the polygon)}
 #' \item{areanams}{a character vector of area names}
 #' \item{Istats}{an array of index fit statistics nsim x nind x 4 (beta, AC, sd, cor)}
+#' \item{Fleet_comp}{an array of Fleet composition data nsim x MP x nfleet x proyear x length class}
+#' \item{TACtaken}{an array of TAC actually taken nsim x MP x NAss x proyear}
 #' \item{MPs}{a list object containing the names of the MPs [nMPs]}
 #' }
 setClass("MSE",representation(
@@ -142,6 +144,9 @@ setClass("MSE",representation(
   area_defs="list",
   areanams="character",
   Istats="array",
+
+  Fleet_comp="array",
+  TACtaken="array",
 
   MPs="list"
 
@@ -279,25 +284,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   }
   FML[is.na(FML)]<-0
   FM[is.na(FM)]<-0
-  #t(FML[1,1,,30,2,2,])
-  #  s p a y m r
-  #apply(FM[1,1,,30,2,2,],1,sum)
-  #apply(FM[1,2,,38,3,2,],1,sum)
-
-  #aseltemp<-array(NA,c(nsim,npop,nfleets,nages,nlen))
-  #aselind<-TEG(dim(aseltemp))
-  #iALKs<-OM@iALK[,,1,,] # time invariant
-  #aseltemp[aselind]<-OM@sel[aselind[,c(1,3,5)]]*iALKs[aselind[,c(1,2,4,5)]]
-  #asel<-apply(aseltemp,1:4,sum)
-  #asel<-asel/array(apply(asel,1:3,max),dim(asel))
-
-  #rm(aselind); invisible(gc())
-
- # for(y in 1:nyears){
-  #  Find<-as.matrix(expand.grid(1:nsim,1:npop,1:nages,y,1:nsubyears,1:nareas,1:nfleets))
-   # FM[Find]<-OM@qE[Find[,c(1,7)]]*asel[Find[,c(1,2,7,3)]]*OM@E[Find[,c(1,7,4,5,6)]]
-    #rm(Find); invisible(gc()) # delete F index
-  #}
 
   maxRF<-apply(FM[,,,nyears,nsubyears,,],c(1,2,4,5),max)
   Rind<-TEG(c(nsim,npop,nages,nareas,nfleets))
@@ -356,27 +342,15 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   movi<-mov[,,nages,1,,,] # sim, pop, season, from, to
 
   for(y in 1:20){
-
     for(m in 1:nsubyears){
-
       if(m==1){
-
         stemp[,,m,]<-apply(array(rep(stemp[,,nsubyears,],nareas)*movi[,,m,,],c(nsim,npop,nareas,nareas)),c(1,2,4),sum)
-
       }else{
-
         stemp[,,m,]<-apply(array(rep(stemp[,,m-1,],nareas)*movi[,,m,,],c(nsim,npop,nareas,nareas)),c(1,2,4),sum)
-
       }
-
     }
-
   }
-  # debugging
 
-
-  # movi[1,2,1,,]
-  # stemp[1,2,,]
   indN<-as.matrix(expand.grid(1:nsim,1:npop,1:nages,1,1:nsubyears,1:nareas))
   R0ind<-cbind(indN[,1:2],rep(1,nrow(indN)))
   N[indN]=OM@hR0[R0ind]*surv[indN[,1:3]]*stemp[indN[,c(1,2,5,6)]]
@@ -386,13 +360,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   BBa[,,,1]<-rep(apply(BBd[,,,2,],1:2,sum),each=nMPs)
   BB[,,1,1]<-rep(apply(BBd[,,,2,4:7],1,sum),each=nMPs)
   BB[,,2,1]<-rep(apply(BBd[,,,2,1:3],1,sum),each=nMPs)
-
-  # sm p a y s r
-  # N[ 1,1,, 1,1,]
-  # print("------")
-  # N[ 1,2,, 1,1,]
-
-  # got to here
 
   sdur<-1/nsubyears
   canspawn<-array(rep(c(0,1,0,1,0,0,0,0,0,0,0,0,1,0),each=nsim),c(nsim,npop,nareas))
@@ -450,12 +417,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
 
         for(pp in 1:npop){
 
-          #SSBtemp<-apply(SSB[,pp,,1,m,],c(1,3),sum)*canspawn[,pp,] # viable spawning biomass
-          #SSBt<-apply(SSB[,pp,,1,m,],1,sum)
-          #spawnr<-SSBtemp/array(apply(SSBtemp,1,sum),dim(SSBtemp))
-
-           # SSBpR both this and SSB0 are now dynamic
-
           SSB0=OM@hR0[,pp,1]*SSBpR[,pp]    #// Unfished Spawning Stock Biomass
           R0=OM@hR0[,pp,1]
 
@@ -481,17 +442,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
         BB[,,1,y]<-rep(apply(BBd[,,,2,4:7],1,sum),each=nMPs)
         BB[,,2,y]<-rep(apply(BBd[,,,2,1:3],1,sum),each=nMPs)
 
-        #if(y<(nHyears-10)){
-        #  N[,,1,1,m,]<-spawnr*array(OM@hR0[R0ind],dim(spawnr))
-        #}else{
-
-          # N[,,1,1,m,]<-spawnr*array(OM@muR[indN[,1:2]]*exp(OM@lnHR2[indN[,1:2]]),dim(spawnr))
-        #}
-        # sm p a y s r
-        #N[ 1,1,, 1,m,]
-        #print("------")
-        #N[ 1,2,, 1,m,]
-
       }else{   # after spawning subyear
 
         Ntemp<-apply(N[,,,1,m-1,]*exp(-hM*sdur/2),c(1,3,4),sum,na.rm=T)
@@ -510,22 +460,9 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
       }# End of if subyear
     }  # end of subyear
 
-    #     s p a y m r
-    #  N[ 1,2,, 1,1, ]
-    #  N[ 1,2,, 1,2, ]
-    # SSB[1,2,,1,1,]
-
   }    # end of SRA year
 
 
-  #N[1,2,,1,1,]
-
-  # sm p a y s r
-  #N[ 1,1,, 1,1,]
-  #print("------")
-  #N[ 1,2,, 1,1,]
-  #apply(SSB[1,,,1,2,],1,sum,na.rm=T)/SSB0
-  #matplot(apply(SSB[1,,,,2,],c(3,1),sum,na.rm=T))
   rm(hFAT); rm(hZ); rm(hFATind); rm(hZind); invisible(gc())
 
   # Run historical simulation ----------------------------------------------
@@ -555,11 +492,8 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
 
     SPAYMRF2[,5]<-m
     SPAYMR2<-SPAYMRF2[,1:6]
-    #SPAYMR[,5]<-m
-    #VB[SPAYMRF2]<-N[SPAYMR2]*Wt_age[SPAY2]*sel[SPARF2]                    # Calculate vunerable biomassp a y m r f
     Ftot<-apply(FM[,,,y,m,,],1:4,sum)
     Z[SPAYMR2]<-Ftot[SPAR]+M[SPAY]/nsubyears
-
     C[SPAYMRF2]<-N[SPAYMR2]*(1-exp(-Z[SPAYMR2]))*(FM[SPAYMRF2]/Z[SPAYMR2]) # Calculate catches
 
   }
@@ -640,16 +574,9 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
         BB[,,1,nHyears+y]<-rep(apply(BBd[,,,2,4:7],1,sum),each=nMPs)
         BB[,,2,nHyears+y]<-rep(apply(BBd[,,,2,1:3],1,sum),each=nMPs)
 
-
       } # end of pop
     } # end of subyear
   } # end of year
-
-  #par(mfrow=c(2,1),mar=rep(0.2,4)); matplot(t(apply(N[,1,,,1,],c(1,3),sum)),type='l'); matplot(t(apply(N[,2,,,1,],c(1,3),sum)),type='l')
-  #apply(SSB[1,    ,   ,nyears,,],c(1,3),sum)
-
-
-  #N[1,2,,1,1,]
 
 
   if(check){
@@ -676,7 +603,7 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
       matplot(yrs,t(N_R[,pp,]),col=col,lwd=1,add=T,type='l',lty=1)
       mtext(paste(OM@Snames[pp],"stock"),3,line=0.4)
       if(pp==npop){
-        legend('topleft',legend=c("M3 v5.0","ABT-MSE v5.1.3"),text.col=c("red","blue"),bty='n',cex=1.2,text.font=2)
+        legend('topleft',legend=c("M3 v5.0",paste0("ABT-MSE v",packageVersion('ABTMSE'))),text.col=c("red","blue"),bty='n',cex=1.2,text.font=2)
         mtext("Age 1 recruits",2,line=2.5)
       }
       if(nsim<3){
@@ -748,8 +675,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
 
   SSB0=array(OM@hR0[,,1],dim(surv))*apply(surv*Wt_age[,,,1]*mat[,,,1],1,sum)     #// Unfished Spawning Stock Biomass
 
-  # SSB0<-SSB0+OM@muR[1,]*exp(OM@lnHR1[1,])*surv[1,,nages]*Wt_age[1,,nages,1]*mat[1,,nages,1]*exp(-M[1,,nages,1])/(1-exp(-M[1,,nages,1])) #// indefinite integral of surv added to get plus group SSB0
-
   SSBcur<-apply(N[,,,nyears,nsubyears,]*
                   array(Wt_age[,,,nyears]*OM@mat[,,,nyears],c(nsim,npop,nages,nareas)),1:2,sum)
 
@@ -765,8 +690,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   RAI<-apply(SSBall,c(1,4,5,6),sum)
   RAI<-RAI[,1:nyears,,]
   RAI<-RAI/array(apply(RAI,1,mean),dim(RAI))
-
-  #D<-Bcur/SSB0 # sim sam Check against OM@D (remember only targetpop is matched)
 
   # Generate observation errors ---------------------------------------------
 
@@ -805,15 +728,10 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   .Object@SSB<-array(NA,c(nMPs,nsim,npop,allyears))
   .Object@SSBa<-array(NA,c(nMPs,nsim,npop,allyears))
 
-
   # Dynamic B0 calculations -----------------------------------------------------
 
   dynB0h<-array(NA,c(nsim,npop,nyears))
   dynB0<-array(NA,c(nsim,npop,proyears))
-  #SSB0ind<-TEG(dim(SSB0proj))
-  #parind<-cbind(SSB0ind[,1:2],OM@Recind[SSB0ind[,c(1,3)]],rep(2,nrow(SSB0ind)))
-  #SSB0proj[SSB0ind]<-OM@Recpars[parind]*apply(surv*Wt_age[,,,nyears]*mat[,,,nyears],1:2,sum)[SSB0ind[,1:2]]
-  #.Object@SSB0proj<-SSB0proj
 
   for(pp in 1:npop){
 
@@ -868,15 +786,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   if(is.na(MPareas[1]))MPareas<-c(rep(2,3),rep(1,nareas-3))
   nAss<-max(MPareas)
 
- # if(is.na(Allocation)[1]){
-  #  Allocation<-array(0,c(nAss,nfleets))
-   # Cdist<-apply(OM@Cobs[(nyears-2):nyears,,,],3:4,sum)
-    #for(a in 1:nAss)Allocation[a,]<-apply(Cdist[MPareas==a,],2,sum)/sum(Cdist[MPareas==a,])
-  #}
-
-  #if(ncol(Allocation)!=nfleets)stop("You need to specify an allocation array with  (OM@nfleets) columns")
-  #if(length(MPareas)!=nareas)stop("You need to specify an MPareas array with  (OM@nareas) columns")
-
   Assess_data<-array(rep(MPareas,each=nAss)==rep(1:nAss,nareas),c(nAss,nareas)) # logical array for later calculations
 
   # MP index properties -------------------------------------
@@ -886,10 +795,7 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   nind<-max(Obs@MPind$No)
   Index_areas<-array(FALSE,c(nind,nareas))
   Istats<-array(NA,c(nsim,nind,6)) # beta, AC, sd, cor, AC2, sd2
-  Itype<-rep(1,nind)
-  Ilev<-array(NA,c(nsim,nyears+proyears,nareas,2))
-  Ilev[,1:nyears,,1]<-apply(Biomass[,,,1:nyears,,],c(1,4,6),sum)
-  Ilev[,1:nyears,,2]<-apply(SSB[,,,1:nyears,,],c(1,4,6),sum)
+
   Isim<-array(NA,c(nsim,nind,nyears+proyears,2))
   lastI<-array(NA,c(nsim,nind))
   lastobs<-rep(NA,nind)
@@ -899,17 +805,31 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
     id<-subset(Obs@MPind,Obs@MPind$No==i & Obs@MPind$Year<(OM@nyears+2)) # use up to 2016 indices
     yrs<-yrs2<-id$Year
     if(!nyears%in%yrs)yrs2<-c(yrs,nyears)
-    Itype[i]<-id$Type[1]  # Biomass (1) or spawning biomass (2)
-    aind<-as.numeric(strsplit(as.character(id$Areas[1]),"-")[[1]])
-    Index_areas[i,aind]<-TRUE
+    MPQ<-id$Quarter[1]
+    MParea<-id$Areas[1]
+
+    if(grepl('Fleet',id$Fleet[1])){  # is it a fleet vulnerability index?
+      MPFleet<-as.numeric(strsplit(as.character(id$Fleet[1]),"Fleet_")[[1]][2])
+      Bio<-apply(Biomass[,,,1:nyears,MPQ,MParea],c(1,3,4),sum)
+      seli<-apply(FM[,,,nyears,MPQ,MParea,MPFleet],c(1,3),mean) # !! approximation to age selectivity as mean of stocks (very similar growth so inconsequential)
+      seli<-seli/apply(seli,1,max)# normalize to max 1
+      IBref<-apply(Bio*array(seli,dim(Bio)),c(1,3),sum) #; matplot(t(IBref))
+    }else if(id$Fleet[1]=="SSB"){ # is it a spawning stock index?
+      IBref<-apply(SSB[,,,1:nyears,MPQ,MParea],c(1,4),sum)
+    }else{                        # is it a biomass index?
+      IBref<-apply(Biomass[,,,1:nyears,MPQ,MParea],c(1,4),sum)
+    }
+
     lastobs[i]<-max(yrs)
+    futureind<-(lastobs[i]+1):(nyears+proyears) # new indices
+    nonfit<-nyears+(1:proyears)                 # years without fit data
 
     for(s in 1:nsim){
 
-      IB<-Ilev[s,yrs,Index_areas[i,],Itype[i]]
+      IB<-IBref[s,yrs[yrs<=nyears]]#Ilev[s,yrs,Index_areas[i,],Itype[i]]
       if(class(IB)=="matrix")IB<-apply(IB,1,sum,na.rm=T)
 
-      IB2<-Ilev[s,yrs2,Index_areas[i,],Itype[i]]
+      IB2<-IBref[s,yrs2[yrs2<=nyears]]#,Index_areas[i,],Itype[i]]
       if(class(IB2)=="matrix")IB2<-apply(IB2,1,sum,na.rm=T)
 
       Isim[s,i,yrs,1]<-id$Index # these also have to include the latest model year nyears yrs2
@@ -925,27 +845,34 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
 
       procmu <- -0.5*(Istats[s,i,3])^2 # adjusted log normal mean
 
-      futureind<-nyears+1:proyears
       if(PerfInfo){
-        Isim[s,i,futureind,2]<-1
+        Isim[s,i,,2]<-1
       }else{
         Ierr<-rnorm(proyears,procmu, Istats[s,i,6])
         Ierr<-Istats[s,i,5]*Ierr+Ierr*(1-Istats[s,i,5]*Istats[s,i,5])^0.5# # apply a pseudo AR1 autocorrelation
-        #Isim[s,i,nyears:(proyears+nyears),2] <-exp(Ierr*Istats[s,i,3]/sd(Ierr)) # normal
-        Isim[s,i,futureind,2]<-exp(Ierr*Istats[s,i,6]/sd(Ierr)) # normalize so that post autocorrelation has same sd as before
+        Isim[s,i,nonfit,2]<-exp(Ierr*Istats[s,i,6]/sd(Ierr)) # normalize so that post autocorrelation has same sd as before
       }
 
     }
 
   }
 
+  # Catch observation error model ----
+  CobsCV<-array(NA,c(nsim,nAss))
+  Cobs_hist<-array(NA,c(nsim,nAss,nyears))
+  # s y a    #C[SPAYMRF2]
+  Ctemp<-apply(C[,,,1:nyears,,,]*array(Wt_age[,,,nyears],dim(C[,,,1:nyears,,,])),c(1,4,6),sum)
+
+  for(AS in 1:nAss){
+    Cobs_hist[,AS,]<-array(rep(Ann_Cat[Ann_Cat[,2]==AS,3],each=nsim),c(nsim,nyears))
+    CobsCV[,AS]<-apply(apply(Ctemp[,,Assess_data[AS,]],1:2,sum)/Cobs_hist[,AS,],1,sd)
+  }
+
   #  1   2  3   4   5   6
   # beta AC sd cor AC2 sd2
   .Object@Istats<-Istats
-  unique(Obs@MPind$Name)
   Iobs<-Isim[,,1:nyears,1]#Itemp1/array(apply(Itemp2,1:2,mean,na.rm=T),dim(Itemp2))                # normalize to mean 1 post residual error
   # !! CHECK !! These historical indices should be identical among simulations (they are the backward recreation of the statistical fits)
-
 
   # F distribution code (Allocation sums to 1 in East area, and West area),
   Fdist1<-apply(FM[,,,(nyears-Fdistyrs+1):nyears,,,],c(1,5,6,7),sum)# s m r f  # F is the same for both stocks so summing makes no difference
@@ -973,18 +900,21 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
       TACdist[,,AA,ff,AS]<-Fdist[,,AA,ff]*array(rep(Allocation[AA,ff],each=nsim*nsubyears),c(nsim,nsubyears,nAA))
     }
   }
-
+  # auto adjust TACdist *to catch the < 1% of cases where strata are zeros (ie there is fishing distributed in Fdist that isn't in the allocation ff strata)
+  TACdist_adj<-1/apply(TACdist,c(1,5),sum) # summa
+  TACdist[testCind]<-TACdist[testCind]*TACdist_adj[testCind[,c(1,5)]]
 
   dset<-new('list')
 
   # Preallocated arrays
   Itemp<-array(NA,c(nsim,nind,allyears,nareas))
   .Object@TAC<-array(NA,c(nsim,nMPs,nAss,proyears+2))
+  .Object@TACtaken<-array(NA,c(nsim,nMPs,nAss,proyears+2))
   .Object@TAC[,,,1]<-rep(TAC2016,each=nsim*nMPs)
   .Object@TAC[,,,2]<-rep(TAC2017,each=nsim*nMPs)
   .Object@TAC[,,,3]<-rep(TAC2018,each=nsim*nMPs)
   .Object@TAC[,,,4]<-rep(TAC2019,each=nsim*nMPs)
-    # MPs[[1]]<-c("CurC100","CurC100")
+  .Object@Fleet_comp<-array(NA,c(nsim,nMPs,nfleets,allyears,nages))
 
   for(MP in 1:nMPs){
 
@@ -994,59 +924,71 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
 
     #for(i in 1:2)dset[[i]]$MPrec<-rep(curTAC[i],nsim)
 
-    for(y in nyears:(nyears+proyears)){
+    for(y in nyears:(nyears+proyears)){ # for(y in nyears:(upyrs[1]-1)){
+
       # y<-y+1
       if(y==nyears){ # 2016
         TAC<-TACtrial<-array(rep(TAC2016,each=nsim),c(nsim,nAss))
-        testC[testCind]<-TAC[testCind[,c(1,5)]]*TACdist[testCind] # predicted catch by TACapply(testC,c(1,5),sum)
-        #sum(testC[2,,,,2])
-        aggC<-apply(testC,1:4,sum)
-        #apply(testC,c(1,5),sum)==TAC; apply(testC[1,,,,],c(2,4),sum)
       } else if (y==nyears+1){ # 2017
         TAC<-TACtrial<-array(rep(TAC2017,each=nsim),c(nsim,nAss))
-        testC[testCind]<-TAC[testCind[,c(1,5)]]*TACdist[testCind] # predicted catch by TAC
-        aggC<-apply(testC,1:4,sum)
       } else if (y==nyears+2){ # 2018
         TAC<-TACtrial<-array(rep(TAC2018,each=nsim),c(nsim,nAss))
-        testC[testCind]<-TAC[testCind[,c(1,5)]]*TACdist[testCind] # predicted catch by TAC
-        aggC<-apply(testC,1:4,sum)
       } else if(y==nyears+3){ # 2019
         TAC<-TACtrial<-array(rep(TAC2019,each=nsim),c(nsim,nAss))
+      } else if(y==nyears+4){ # 2020
+        TAC<-TACtrial<-array(rep(TAC2019,each=nsim),c(nsim,nAss))
+      }
+
+      if(y>=nyears & y<=nyears+3){
         testC[testCind]<-TAC[testCind[,c(1,5)]]*TACdist[testCind] # predicted catch by TAC
         aggC<-apply(testC,1:4,sum)
+
+        #apply(testC,c(1,5),sum)==TAC; apply(testC[1,,,,],c(2,4),sum)
       }
-      # y<-y+1; print(y) # debugging
 
       cat(".")
 
       if(y%in%upyrs){# Operate MP S P A Y M R
 
-        # Simulate indices ----------------------------------------------
+        # Simulate indices ---------------------------------------------
+        Iobs<-array(0,c(nsim,nind,y-1))
 
-        Ilev[,1:(y-1),,1]<-apply(Biomass[,,,1:(y-1),,],c(1,4,6),sum)
-        Ilev[,1:(y-1),,2]<-apply(SSB[,,,1:(y-1),,],c(1,4,6),sum)
-
-        mind<-as.matrix(expand.grid(1:nsim,1:nind,1:(y-1),1:nareas))
-        Ilev_ind<-as.matrix(cbind(mind[,c(1,3,4)],Itype[mind[,2]]))
-        Itemp[mind]<-Ilev[Ilev_ind]*as.integer(Index_areas[mind[,c(2,4)]])
-
-        if(OM@Ibeta_ignore){ # don't add hyperstability
-          for(i in 1:nind){
-            Isim[,i,(lastobs[i]+1):(y-1),1]<-apply(Itemp[,i,(lastobs[i]+1):(y-1),],1:2,sum,na.rm=T)
-          }
-        }else{
-          for(i in 1:nind){# add hyperstability
-            Isim[,i,(lastobs[i]+1):(y-1),1]<-apply(Itemp[,i,(lastobs[i]+1):(y-1),],1:2,sum,na.rm=T)^array(Istats[,i,1],c(nsim,nind,(y-1)))#add hyperstability
-          }
-        }
-        #
         for(i in 1:nind){
-          Isim[,i,(lastobs[i]+1):(y-1),1]<-Isim[,i,(lastobs[i]+1):(y-1),1]*(1+OM@qinc/100)^(1:((y-1)-lastobs[i]))
-          imod<-1/Isim[,i,lastobs[i],2] # The error differential between last observation and first simulated observation
-          Isim[,i,(lastobs[i]+1):(y-1),1]<-Isim[,i,(lastobs[i]+1):(y-1),1]*(lastI[,i]*imod)/Isim[,i,lastobs[i]+1,1] # normalize to last observed year
-        }
 
-        Iobs<-Isim[,,1:(y-1),1]*Isim[,,1:(y-1),2] # add back in the error
+          id<-subset(Obs@MPind,Obs@MPind$No==i) # use up to 2016 indices
+          yrs<-1:(y-1)
+
+          MPQ<-id$Quarter[1]
+          MParea<-id$Areas[1]
+
+          if(grepl('Fleet',id$Fleet[1])){  # is it a fleet vulnerability index?
+            MPFleet<-as.numeric(strsplit(as.character(id$Fleet[1]),"Fleet_")[[1]][2])
+            Bio<-apply(Biomass[,,,yrs,MPQ,MParea],c(1,3,4),sum)
+            seli<-apply(FM[,,,nyears,MPQ,MParea,MPFleet],c(1,3),mean) # !! approximation to age selectivity as mean of stocks (very similar growth so inconsequential)
+            seli<-seli/apply(seli,1,max)# normalize to max 1
+            IBref<-apply(Bio*array(seli,dim(Bio)),c(1,3),sum) #; matplot(t(IBref))
+          }else if(id$Fleet[1]=="SSB"){ # is it a spawning stock index?
+            IBref<-apply(SSB[,,,yrs,MPQ,MParea],c(1,4),sum)
+          }else{                        # is it a biomass index?
+            IBref<-apply(Biomass[,,,yrs,MPQ,MParea],c(1,4),sum)
+          }
+
+          update<-(lastobs[i]+1):(y-1)
+
+          if(!OM@Ibeta_ignore){ # add hyperstability
+            IBref[,update]<-IBref[,update]^array(Istats[,i,1],c(nsim,length(update)))
+          }
+
+          if(grepl('Fleet',id$Fleet[1])){ # if a CPUE index add catchability increase
+            IBref[,update]<-IBref[,update]*(1+OM@qinc/100)^(1:((y-1)-lastobs[i]))
+          }
+          #        True biomass index (removed error)
+          imod<-(lastI[,i]/Isim[,i,lastobs[i],2])/(IBref[,lastobs[i]]) # The error x mag differential between last observation and first simulated observation
+          Isim[,i,update,1]<-IBref[,update]*imod
+          Iobs[,i,1:lastobs[i]]<-Isim[,i,1:lastobs[i],1]        # don't add error to past observations
+          Iobs[,i,update]<- Isim[,i,update,1]*Isim[,i,update,2] # add error to future observations
+
+        } # end of indices
 
         # if additional data are required
         if(y==nyears+4){
@@ -1064,9 +1006,17 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
           #SPAYMRF
           AA<-Assess_data[AS,]
           nA<-sum(AA)
-          Cobs<-apply(C[,,,1:(y-3),,AA,]*array(Wt_age[,,,nyears],c(nsim,npop,nages,y-3,nsubyears,nA,nfleets)),c(1,4),sum,na.rm=T)*.Object@Cerr[,1:(y-3)]
 
-          dset[[AS]]<-list("Cobs"=cbind(Cobs,.Object@TAC[,MP,AS,y-nyears+1-2]),
+          Cobs<-array(NA,c(nsim,y-3))
+          Cobs[,1:nyears]<-Cobs_hist[,AS,]
+          upind<-(nyears+1):(y-3)
+
+          if(length(upind>0)){
+            Cobs[,upind]<-apply(array(C[,,,upind,,AA,],c(nsim,npop,nages,length(upind),nsubyears,nA,nfleets))*array(Wt_age[,,,nyears],c(nsim,npop,nages,length(upind),nsubyears,nA,nfleets)),c(1,4),sum,na.rm=T)*.Object@Cerr[,upind]
+          }
+            #Cobs<-apply(C[,,,1:(y-3),,AA,]*array(Wt_age[,,,nyears],c(nsim,npop,nages,y-3,nsubyears,nA,nfleets)),c(1,4),sum,na.rm=T)*.Object@Cerr[,1:(y-3)]
+
+          dset[[AS]]<-list("Cobs"=cbind(Cobs,.Object@TAC[,MP,AS,y-nyears-1]),
                            "Iobs"=Iobs[,,1:(y-2)],
                            "K"=OM@Kmu[,AS]*.Object@Kb,        # for now these assume same growth by stock
                            "Linf"=OM@Linfmu[,AS]*.Object@Kb,  # for now these assume same growth by stock
@@ -1128,7 +1078,7 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
             TACtrial[cond,AS]=TACmax[cond]
           }
 
-          if(y<allyears).Object@TAC[,MP,AS,y-nyears+2]<-TAC[,AS]<-TACtrial[,AS]
+          if(y<allyears).Object@TAC[,MP,AS,y-nyears+1]<-TAC[,AS]<-TACtrial[,AS]
 
         }
 
@@ -1140,7 +1090,8 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
         # apply(aggC,1,sum)==apply(TAC,1,sum) # simulation totals match?
 
       }else{
-        .Object@TAC[,MP,,y-nyears+2]<-.Object@TAC[,MP,,y-nyears+1]
+        if(y>(nyears+3)).Object@TAC[,MP,,y-nyears+1]<-.Object@TAC[,MP,,y-nyears] # TAC for next year
+
       } # end of upyrs
 
       SPAYMR[,4]<-y
@@ -1196,14 +1147,9 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
         }
 
         testU<-aggC[,m,,]/array(Btemp,dim(aggC[,m,,])) # implied harvest rate
-
-
-        #Fp<-(-log(1-(do.call(IE,list(testU))))) # subject to implementation error
-        #testC2<-(1-exp(-Fp))*array(Btemp,dim(aggC[,m,,]))
         testC2<-do.call(IE,list(testU))*array(Btemp,dim(aggC[,m,,]))
-        #sum(aggC[1,m,1:3,])
-        #sum(testC2[1,1:3,])
-        #sum(aggC[1,m,Assess_data[2,],])
+        # sum(aggC[1,m,1:3,])
+        # sum(testC2[1,1:3,])
         # apply(testC2,1,sum)==apply(aggC[,m,,],1,sum) # simulation totals match?
         # apply(testC2[,1:4,],1:2,sum)==apply(aggC[,m,1:4,],1:2,sum) # simulation totals match?
 
@@ -1212,7 +1158,9 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
         #tempN<-apply(N[1,,,,,],c(1,5),sum)
         #round(temp/sum(temp)*100,2)
         #CAdist[CAdist<tiny]<-tiny
+        CAdist[CAdist==0]<-tiny # you have to do this otherwise zero fish can lead to missing catches
         CAdistsum<-apply(CAdist,c(1,3,4),sum)                # total in each sim, region and fleet
+
         #tempC<-apply(CAdistsum[1,,],1,sum)
         #round(CAdistsum[1,,]/sum(CAdistsum[1,,])*100,2)
 
@@ -1224,36 +1172,35 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
         C[SPAYMRF2]<-testC2[SRF2]*CAdist[SPRFA2]
         C[SPAYMRF2][is.na(C[SPAYMRF2])]<-0
         #sum(C[1,,,y,m,1:3,])
-        # apply(C[1,2,,y,m,,],2:3,sum) # stock distribution
-        # apply(C[1,2,,y,m,,],2,sum)
+        # apply(C[1,1,,y,m,,],2:3,sum) # stock distribution
+        # apply(C[1,1,,y,m,,],2,sum)
         # apply(C[,,,y,m,,],1,sum,na.rm=T)==apply(testC2,1,sum)
         # apply(C[,,,y,m,1:4,],c(1,4),sum,na.rm=T)==apply(testC2[,1:4,],1:2,sum)
         C[SPAYMRF2]<-C[SPAYMRF2]/Wt_age[SPAL] # divide by weight to get numbers
-        test1<-apply(C[,,,y,m,Assess_data[1,],],1:2,sum)
-        test2<-apply(C[,,,y,m,Assess_data[2,],],1:2,sum)
+       # test1<-apply(C[,,,y,m,Assess_data[1,],],1:2,sum)
+        #test2<-apply(C[,,,y,m,Assess_data[2,],],1:2,sum)
 
-        for(AS in 1:nAss){ # Max F redistribution at the catch-at-numbers scale
+       # for(AS in 1:nAss){ # Max F redistribution at the catch-at-weight scale
 
-          AA<-Assess_data[AS,]
-          Up<-C[,,,y,m,AA,]/array(N[,,,y,m,AA],c(nsim,npop,nages,sum(AA),nfleets)) # additional check on maximum / minimum U
-          Up[is.na(Up)]<-0
-          cond<-Up>0.8
-          Cunder<-array(0,c(nsim,npop,nages,sum(AA),nfleets))
-          Cunder[cond]<-C[,,,y,m,AA,][cond]*(Up[cond]-0.8)/Up[cond]
-          C[,,,y,m,AA,][cond]<-C[,,,y,m,AA,][cond]-Cunder[cond]
-          CunderT<-apply(Cunder,1:3,sum)
-          Cdist<-array(0,c(nsim,npop,nages,sum(AA),nfleets))
-          Cdist[!cond]<-C[,,,y,m,AA,][!cond]
-          Cdist<-(Cdist/array(apply(Cdist,1:3,sum,na.rm=T),c(nsim,npop,nages,sum(AA),nfleets)))*array(CunderT,c(nsim,npop,nages,sum(AA),nfleets))
-          C[,,,y,m,AA,]<-C[,,,y,m,AA,]+Cdist
-          #Fracunder<-apply(Cunder,c(1,3),sum)/apply(C[,,,y,m,AA,],c(1,3),sum)
-          #C[,,,y,m,AA,][!cond]<-C[,,,y,m,AA,][!cond]*(1/(1-array(Fracunder,c(nsim,npop,nages,sum(AA),nfleets))))[!cond]
-        }
+        #  AA<-Assess_data[AS,]
+         # Up<-C[,,,y,m,AA,]/array(N[,,,y,m,AA],c(nsim,npop,nages,sum(AA),nfleets)) # additional check on maximum / minimum U
+        #  Up[is.na(Up)]<-0
+        #  cond<-Up>0.8
+        #  Cunder<-array(0,c(nsim,npop,nages,sum(AA),nfleets))
+        #  Cunder[cond]<-C[,,,y,m,AA,][cond]*(Up[cond]-0.8)/Up[cond]
+        #  C[,,,y,m,AA,][cond]<-C[,,,y,m,AA,][cond]-Cunder[cond]
+        #  CunderT<-apply(Cunder,1:3,sum)
+        #  Cdist<-array(0,c(nsim,npop,nages,sum(AA),nfleets))
+        #  Cdist[!cond]<-C[,,,y,m,AA,][!cond]
+        #  Cdist<-(Cdist/array(apply(Cdist,1:3,sum,na.rm=T),c(nsim,npop,nages,sum(AA),nfleets)))*array(CunderT,c(nsim,npop,nages,sum(AA),nfleets))
 
-        C[SPAYMRF2][is.na(C[SPAYMRF2])]<-0
-        test12<-apply(C[,,,y,m,Assess_data[1,],],1:2,sum)
-        test22<-apply(C[,,,y,m,Assess_data[2,],],1:2,sum)
-        testW<-array(C[SPAYMRF2]*Wt_age[SPAL],c(nsim,npop,nages,nareas,nfleets)) # divide by weight to get numbers
+        #}
+
+        #C[SPAYMRF2][is.na(C[SPAYMRF2])]<-0
+
+        #test12<-apply(C[,,,y,m,Assess_data[1,],],1:2,sum)
+        #test22<-apply(C[,,,y,m,Assess_data[2,],],1:2,sum)
+        #testW<-array(C[SPAYMRF2]*Wt_age[SPAL],c(nsim,npop,nages,nareas,nfleets)) # divide by weight to get numbers
         # apply(testW,1,sum,na.rm=T)==apply(testC2,1,sum)
         # apply(testW[,,,1:4,],c(1,4),sum,na.rm=T)==apply(testC2[,1:4,],1:2,sum)
         # apply(testW[,,,1:4,],c(1,4),sum,na.rm=T)== apply(aggC[,m,1:4,],1:2,sum)
@@ -1301,7 +1248,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
           } # if its the right subyear
         } # end of pop
 
-
       } # end of subyear
 
       BBd<-N[,,,y,,]*rep(Wt_age[,,,1],nareas*nsubyears)
@@ -1325,11 +1271,14 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
     for(aa in 1:2){
       #.Object@CWa[MP,,aa,1:nHyears]=rep(apply(HCobs[,,,MPareas==aa],1,sum),each=nsim)
       .Object@CWa[MP,,aa,]=apply(Ctemp[,,,MPareas==aa],c(1,3),sum)
+      .Object@TACtaken[,MP,aa,1:(proyears+1)]<-.Object@CWa[MP,,aa,nyears+(-0:proyears)]  # .Object@TACtaken<-array(NA,c(nsim,nMPs,nAss,proyears+2))
     }
     .Object@CW[MP,,,]<-apply(Ctemp,1:3,sum)
 
     Ctemp<-apply(Ctemp,c(1,3,4),sum)# SYR
     for(aa in 1:2).Object@C[MP,,aa,]=apply(Ctemp[,,MPareas==aa],1:2,sum)
+
+    .Object@Fleet_comp[,MP,,,]<-apply(C,c(1,7,4,3),sum) # S,F,P,A from SPAYMRF2
 
     SSB2<-apply(N[,,,1:allyears,4,]*array(mat[,,,nyears]*Wt_age[,,,nyears],c(nsim,npop,nages,allyears,nareas)),c(1,2,4),sum)
     .Object@D[MP,,,]<-SSB2/array(SSB2[,,1],dim(SSB2))
