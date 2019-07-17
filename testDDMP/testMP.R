@@ -30,22 +30,14 @@ options( warn = -1 )
 if(!dir.exists("outTables"))
   dir.create("outTables")
 
-testMPs <- list(  test = c("MP_test","MP_test") )
+testMPs <- list(  test = c("MP_testMean","MP_testMean") )
 
-OMlist <- c("OM_1d","OM_2d", "OM_3d")
+OMlist <- c("OM_1d","OM_2d", "OM_3d", "OM_4d", "ROM_1d")
 
 lapply( X = OMlist, 
         FUN = runCMPtest,
         assessInt = 2,
         MPs = testMPs )
-
-
-sfInit(parallel=TRUE, cpus= 6 )
-sfLibrary( ABTMSE )
-sfLibrary( TMB )
-sfClusterCall("loadABT")
-sfSource("assessDDMP.R")
-sfSource("calcEquilibriumDD.R")
 
 runCMPtest( OM = "OM_1",
             MPs = testMPs,

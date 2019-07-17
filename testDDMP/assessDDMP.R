@@ -1,21 +1,6 @@
-
 # ===================================================
 # = functions for model based MPs in TMB ============
 # ===================================================
-
-
-#' Roxygen commands
-#'
-#' This is a dummy function whose purpose 
-#' it is to hold the useDynLib roxygen tag.
-#' This tag will populate the namespace with 
-#' compiled c++ functions upon package install.
-#'
-#' @useDynLib tunaDelay
-#'
-dummy <- function(){
-  return(NULL)
-}
 
 
 # Compile and attach the TMB model
@@ -34,12 +19,13 @@ dyn.load(dynlib('tunaDelay'))
 #' assessDDmm(1,dset = dset_EW,AS = 1, AMs = 1)
 #' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
 assessDDmm <- function( x, dset, 
-                        AMs = c(1,2,4,7,11),
-                        caps = c(25,4),
-                        F23M = FALSE,
-                        TACrule = c("mean"),
-                        check = FALSE,
-                        AS = 1 )
+                        AMs         = c(1,2,4,7,11),
+                        caps        = c(25,4),
+                        F23M        = FALSE,
+                        TACrule     = c("mean"),
+                        check       = FALSE,
+                        AS          = 1,
+                        maxDeltaTAC = 0.2 )
 {
   if( AS == 1 )
   {
@@ -64,15 +50,17 @@ assessDDmm <- function( x, dset,
 
     # Apply the HCR, compute area and stock
     # TAC
-    mmTACs <- lapply( X = mmFits,
-                      FUN = calcHCR,
-                      F23M = F23M )
+    mmTACs <- lapply( X     = mmFits,
+                      FUN   = calcHCR,
+                      F23M  = F23M,
+                      caps  = caps )
+    # Apply weighting
     mmTACs <- do.call( rbind, mmTACs ) %>%
               mutate( zeroMeanNLL = nll - mean(nll),
-                      deltaNLL = (zeroMeanNLL - min(zeroMeanNLL)),
-                      amWts = exp(-deltaNLL/2)/sum(exp(-deltaNLL/2)),
-                      wtdTAC_E = amWts * TAC_E,
-                      wtdTAC_W = amWts * TAC_W )
+                      deltaNLL    = (zeroMeanNLL - min(zeroMeanNLL)),
+                      amWts       = exp(-deltaNLL/2)/sum(exp(-deltaNLL/2)),
+                      wtdTAC_E    = amWts * TAC_E,
+                      wtdTAC_W    = amWts * TAC_W )
 
     outTable <- mmTACs
 
@@ -146,13 +134,35 @@ assessDDmm <- function( x, dset,
       TAC_W <- sum(mmTACs$wtdTAC_W)
     }
 
-    # Apply the caps
-    TAC_E <- min(TAC_E,caps[1])
-    TAC_W <- min(TAC_W,caps[2])
-
     # Scale to kg
     TAC_E <- TAC_E * 1e6
     TAC_W <- TAC_W * 1e6
+
+    # Smooth TACs from interval to interval:
+
+    # Count length of TAC vector
+    nTACs <- length( dset[[1]]$TAC[x,] )
+    # Use penultimate TAC, as there is a bug with
+    # the last one
+    lastTAC_E <- dset[[1]]$TAC[x,nTACs-1]
+    lastTAC_W <- dset[[2]]$TAC[x,nTACs-1]
+    # Calculate the deltaTAC up and down, just
+    # to make following conditionals more readable
+    deltaTACup <- 1 + maxDeltaTAC
+    deltaTACdn <- 1 - maxDeltaTAC
+
+    # Apply maxDeltaTAC in East
+    if( TAC_E/lastTAC_E > deltaTACup )
+      TAC_E <- deltaTACup * lastTAC_E 
+    if( TAC_E/lastTAC_E < deltaTACdn )
+      TAC_E <- deltaTACdn * lastTAC_E 
+
+    # And West
+    if( TAC_W/lastTAC_W > deltaTACup )
+      TAC_W <- deltaTACup * lastTAC_W 
+    if( TAC_W/lastTAC_W < deltaTACdn )
+      TAC_W <- deltaTACdn * lastTAC_W 
+
 
     # Check that HCR calcs are running correctly
     if(check)
@@ -200,7 +210,8 @@ class(assessDDmm)<-"MSMP"
 # Calculates stock and area TAC 
 # from the mpOutput, then
 calcHCR <- function(  mpOutput = mmTACs[1],
-                      F23M     = FALSE )
+                      F23M     = FALSE,
+                      caps     = c(Inf,Inf) )
 {
   # First, calculate TAC by stock
   B_s       <- mpOutput$B_s
@@ -210,13 +221,19 @@ calcHCR <- function(  mpOutput = mmTACs[1],
   else
     Fmsy_s  <- mpOutput$Fmsy
 
+  # Get Bmsy
+  Bmsy_s    <- mpOutput$Bmsy
+
   # change fmsy_s to ftarget
+  Ftarg_s <- rampHCR( B_s = B_s,
+                      Fmsy_s = Fmsy_s,
+                      Bmsy_s = Bmsy_s )
 
   # Fmsy is actually HRs, so just
   # apply it as B*F
-  TAC_s     <- B_s * Fmsy_s
-  for( sIdx in 1:length(B_s))
-    TAC_s[sIdx] <- min( TAC_s[sIdx],msy_s[sIdx])
+  TAC_s     <- B_s * Ftarg_s
+  for( sIdx in 1:length(B_s) )
+    TAC_s[sIdx] <- min( TAC_s[sIdx], msy_s[sIdx] )
 
   # Now compute TAC by area
   B_sa      <- mpOutput$B_sa
@@ -227,6 +244,7 @@ calcHCR <- function(  mpOutput = mmTACs[1],
   # using a biomass weighting
   msy_a     <- msy_s
   Fmsy_a    <- Fmsy_s
+  Bmsy_a    <- Bmsy_s
   B_a       <- colSums(B_sa)
   TAC_a     <- TAC_s
 
@@ -234,19 +252,63 @@ calcHCR <- function(  mpOutput = mmTACs[1],
   # as biomass weighted stock values
   for( aIdx in 1:ncol(B_sa))
   {
-    Fmsy_a[aIdx]  <- sum( Bprop[,aIdx] * Fmsy_s ) 
-    msy_a[aIdx]   <- sum( Bprop[,aIdx] * msy_s )
-    TAC_a[aIdx]   <- min( B_a[aIdx] * Fmsy_a[aIdx], msy_a[aIdx])
+    Fmsy_a[aIdx]    <- sum( Bprop[,aIdx] * Fmsy_s ) 
+    msy_a[aIdx]     <- sum( Bprop[,aIdx] * msy_s )
+    Bmsy_a[aIdx]    <- sum( Bprop[,aIdx] * Bmsy_s )
   }
+
+  # Do calculations for areas instead of stocks
+  Ftarg_a <- rampHCR( B_s = B_a,
+                      Fmsy_s = Fmsy_a,
+                      Bmsy_s = Bmsy_a )
+
+  TAC_a     <- B_a * Ftarg_a
+  for( aIdx in 1:length(B_a) )
+    TAC_a[aIdx] <- min( TAC_a[aIdx], msy_a[aIdx] )
 
   # Take the minimum of TAC_s and TAC_a in
   # each area
   TAC_mat <- rbind( TAC_s, TAC_a )
   TAC_EW  <- apply( X = TAC_mat, FUN = min, MARGIN = 2)
 
+  # Apply the cap
+  for( aIdx in 1:ncol(B_sa) )
+    TAC_EW[aIdx]   <- min( TAC_EW[aIdx], caps[aIdx] )
+
   return( data.frame( nll = mpOutput$nll,
                       TAC_E = TAC_EW[1],
                       TAC_W = TAC_EW[2]  ) )
+}
+
+# Calculate ramped HCR similar to Albacore
+rampHCR <- function(  B_s, 
+                      Fmsy_s, 
+                      Bmsy_s,
+                      LCP = 0.4,
+                      UCP = 1.0 )
+{
+  nS <- length(B_s)
+
+  Ftarg_s <- numeric(length = nS)
+
+  # Current stock status
+  D_s <- B_s / Bmsy_s
+
+  # Calculate gradient of ramp
+  m_s <- (1 - 0.1)/(UCP - LCP)
+
+  # Apply ramped F HCR
+  for( sIdx in 1:nS )
+  {
+    if( D_s[sIdx] <= LCP )
+      Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx]
+    if( D_s[sIdx] >= LCP & D_s[sIdx] <= UCP )
+      Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx] + 0.9 * Fmsy_s[sIdx] * (D_s[sIdx] - LCP) * m_s
+    if( D_s[sIdx] >= UCP )
+      Ftarg_s[sIdx] <- Fmsy_s[sIdx]
+  } 
+
+  return(Ftarg_s)
 }
 
 # fitDD()

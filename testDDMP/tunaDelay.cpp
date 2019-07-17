@@ -484,6 +484,8 @@ Type objective_function<Type>::operator() ()
           rErr_st(s,t) = exp( rDevBrood_st(s,t+broodAdj(s)) );
           R_st(s,t) *= rErr_st(s,t);
         }
+        if( t == nT )
+          R_st(s,t) *= rErr_st(s,t-1);
       }
 
       // Update biomass and numbers

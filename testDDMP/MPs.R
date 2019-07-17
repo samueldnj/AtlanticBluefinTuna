@@ -8,7 +8,7 @@
 
 # MP_loCap - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
-MP_test <- function( x, dset, AS )
+MP_testMean <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
@@ -20,7 +20,23 @@ MP_test <- function( x, dset, AS )
                      check   = TRUE  )
   return(TAC)
 }
-class(MP_test)<-"MSMP"
+class(MP_testMean)<-"MSMP"
+
+# MP_loCap - a low catch cap is applied,
+# of 20 kt in the East, and 2.5 kt in the West
+MP_testAIC <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(20,2.5),
+                     F23M    = FALSE,
+                     TACrule = "AIC",
+                     AS      = AS,
+                     check   = TRUE  )
+  return(TAC)
+}
+class(MP_testAIC)<-"MSMP"
 
 # MP_loCap - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
@@ -89,8 +105,20 @@ MP_hiCap23M <- function( x, dset, AS )
 class(MP_hiCap23M)<-"MSMP"
 
 
-runCMPtest <- function( OM = OMlist[1],
-                        MPs = testMPs,
+
+# runCMPtest()
+# Wrapper function for the new("MSE")
+# call. Allows for lapply functions
+# to be called on a list of OMs. Needed
+# to deploy to servers so we can set and forget
+# Inputs:
+#   OM = character of OM name 
+#         (e.g. "OM_1","OM_1d" or "ROM_1")
+#   MPs = a list of character 2-ples of MP names (E/W)
+#   assessInt = integer of assessment intervals, required
+#               for plotting purposes
+runCMPtest <- function( OM = "OM_1d",
+                        MPs = list( test = c("MP_testMean","MP_testMean") ),
                         assessInt = 2 )
 {
   # Load ABT objects in this environment
@@ -151,4 +179,50 @@ runCMPtest <- function( OM = OMlist[1],
     # Remove checkTables for next run
     system( paste("rm -r ", outTableFiles[i], sep = "") )
   }
+}
+
+# runCMP()
+# Wrapper function for the new("MSE")
+# call. Allows for lapply functions
+# to be called on a list of OMs. Needed
+# to deploy to servers so we can set and forget.
+# Basically the same as runCMPtest() but
+# doesn't plot fit checks
+# Inputs:
+#   OM = character of OM name 
+#         (e.g. "OM_1","OM_1d" or "ROM_1")
+#   MPs = a list of character 2-ples of MP names (E/W)
+#   assessInt = integer of assessment intervals, required
+#               for plotting purposes
+runCMPs <- function(  OM = "OM_1",
+                      MPs = list( test = c("MP_loCap","MP_loCap") ),
+                      assessInt = 2 )
+{
+  # Load ABT objects in this environment
+  loadABT()
+
+  OMobj <- get(OM)
+
+  # Run MSE
+  MSEobj <- new(  Class     = "MSE",
+                  OM        = OMobj,
+                  MPs       = MPs,
+                  interval  = assessInt )
+
+  # Assign MSE to a symbol that is descriptive
+  MSEsymbol <- paste("MSE_",OM,sep = "")
+
+  assign( x = paste("MSE_",OM,sep = ""),
+          value = MSEobj )
+
+  # Save that MSE
+  save( list = MSEsymbol, file = file.path("MSEs",paste(MSEsymbol,".Rdata",sep = "")) )  
+  # Create the report
+  MSE_report( MSEobj, 
+              dir=file.path(getwd(),"MSEs"), 
+              Author='Landmark Fisheries Research', 
+              introtext="Multi-model delay difference assessment", 
+              filenam=paste(MSEsymbol,"_report",sep = ""))  
+
+
 }
