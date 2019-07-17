@@ -377,7 +377,7 @@ Type objective_function<Type>::operator() ()
   bDist_sa.col(1) = propW_s;
   bDist_sa.col(0) = 1 - propW_s;
 
-  array<Type> rErr_st(nS,nT);
+  array<Type> rErr_st(nS,nT+1);
   rErr_st.fill(0);
 
   // Nuisance parameters
@@ -412,7 +412,7 @@ Type objective_function<Type>::operator() ()
 
   // Create a new rDev_st array that arranges
   // the deviations according to brood year
-  array<Type> rDevBrood_st(nS,nT_brood);
+  array<Type> rDevBrood_st(nS,nT_brood + 1);
   rDevBrood_st.fill(0.0);
 
   /* Estimation Procedure */
@@ -430,11 +430,18 @@ Type objective_function<Type>::operator() ()
     rDevBrood_st(s,broodAdj(s)) = rDev_st(s,0);
     for( int t=1; t<nT-1; t++ )
     {
-      if( rType==0 )
+      if( rType == 0 )
         rDevBrood_st(s,t+broodAdj(s)) = rDev_st(s,t);
       else if( rType==1 )
         rDevBrood_st(s,t+broodAdj(s)) = rDevBrood_st(s,t+broodAdj(s)-1) + rDev_st(s,t);
     }
+
+    if( rType == 1 )
+    {
+      rDevBrood_st(s, nT-1 + broodAdj(s)) = rDevBrood_st(s, nT-2 + broodAdj(s));
+      rDevBrood_st(s, nT + broodAdj(s))   = rDevBrood_st(s, nT-2 + broodAdj(s));
+    }
+
   }
 
 
@@ -479,13 +486,11 @@ Type objective_function<Type>::operator() ()
         // Now apply process errors
         //rErr_st(s,t) = exp( rDevBrood_st(s,t + broodAdj(s)) - sigma2R_s(s)/2 );
         // Random walk
-        if( t<nT )
+        if( t <= nT )
         {
           rErr_st(s,t) = exp( rDevBrood_st(s,t+broodAdj(s)) );
           R_st(s,t) *= rErr_st(s,t);
         }
-        if( t == nT )
-          R_st(s,t) *= rErr_st(s,t-1);
       }
 
       // Update biomass and numbers
