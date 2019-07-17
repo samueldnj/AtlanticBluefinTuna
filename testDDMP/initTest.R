@@ -42,7 +42,7 @@ for( pkgIdx in 1:length(githubPackages) )
 
 
 # Re-install local version of ABTMSE
-devtools::install_local("../ABTMSE/", type = "source" )
+devtools::install_local("../ABTMSE/", type = "source", force = TRUE )
 
 library("ABTMSE")
 loadABT()

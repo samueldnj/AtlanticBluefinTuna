@@ -67,7 +67,6 @@
 #' \item{dynB0h}{a 3D array containing dynamic unfished spawning biomass by simulation, stock and historical year [nsim x nstocks x nyears]}
 #' \item{MSY}{a 2D array containing MSY estimates (2018 parameters) [sim x nstocks]}
 #' \item{BMSY}{a 2D array containing BMSY estimates (2018 parameters) [sim x nstocks]}
-#' \item{VBMSY}{a 2D array containing vulnerable BMSY estimates (2018 parameters) [sim x nstocks]}
 #' \item{SSBMSY}{a 2D array containing SSBMSY estimates (2018 parameters) [sim x nstocks]}
 #' \item{UMSY}{a 2D array containing UMSY estimates (2018 parameters) [sim x nstocks]}
 #' \item{FMSYa}{a 2D array containing apical FMSY estimates (2018 parameters) [sim x nstocks]}
@@ -133,7 +132,6 @@ setClass("MSE",representation(
   # operating model MSY quantities
   MSY="array",
   BMSY="array",
-  VBMSY="array",
   SSBMSY="array",
   UMSY="array",
   FMSYa="array",
@@ -187,7 +185,6 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   # All MSY operating model quantities
   .Object@MSY<-OM@MSY
   .Object@BMSY<-OM@BMSY
-  .Object@VBMSY<-OM@VBMSY
   .Object@SSBMSY<-OM@SSBMSY
   .Object@UMSY<-OM@UMSY
   .Object@FMSYa<-OM@FMSYa
@@ -333,6 +330,7 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   Pe[]<-rnorm(nsim*nSR*(LTyrs+allyears),procmu,proccv) # all years are populated but Pe is currently only used in projection
   for (y in 2:(LTyrs+allyears)) Pe[,, y] <- AC * Pe[,, y - 1] +   Pe[,, y] * (1 - AC * AC)^0.5
   Pe<-exp(Pe)
+  Pe<-Pe/array(apply(Pe,1:2,mean),dim(Pe)) # renormalize deviations (that have been subject to AC) to be mean 1
 
   OM@Recdevs[,,nyears+(-(LTyrs-1):0)]<-Pe[,OM@Recind[,1],1:LTyrs] # lower triangle are predicted as mean historical recruitment
 
@@ -694,7 +692,8 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
   # Generate observation errors ---------------------------------------------
 
   .Object@Cimp<-runif(nsim,Obs@Ccv[1],Obs@Ccv[2])
-  .Object@Cb<-trlnorm(nsim,1,Obs@Cbcv)
+  .Object@Cb<-rep(Obs@Cbias,nsim)#trlnorm(nsim,1,Obs@Cbcv)
+
   .Object@Cerr<-array(trlnorm(nsim*allyears,rep(.Object@Cb,allyears),rep(.Object@Cimp,allyears)),c(nsim,allyears))
 
   .Object@Iimp<-runif(nsim,Obs@Icv[1],Obs@Icv[2])
@@ -1043,8 +1042,8 @@ setMethod("initialize", "MSE", function(.Object,OM=OM_example,Obs=Good_Obs,MPs=l
                            "CAL"=CAL,
                            "CAL_bins"=CAL_bins,
                            "MPrec"=TAC[,AS],
-                           "TAC"=matrix(.Object@TAC[,MP,AS,1:(y-nyears+1)],ncol=(y-nyears+1),nrow=nsim),
-                           "curTAC"=rep(TAC2018[AS],nsim)
+                           "TAC"=matrix(.Object@TAC[,MP,AS,1:(y-nyears)],ncol=(y-nyears),nrow=nsim),
+                           "curTAC"=rep(TAC2019[AS],nsim)
                            )
         }
 

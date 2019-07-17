@@ -134,6 +134,7 @@ export(
     "meanFslen",
     "Fageprof",
     "timeFs",
+    "sigR_AC_conv",
 
     "AssignAge",
     "tbin",

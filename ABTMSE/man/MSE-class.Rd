@@ -72,7 +72,6 @@
 \item{dynB0h}{a 3D array containing dynamic unfished spawning biomass by simulation, stock and historical year [nsim x nstocks x nyears]}
 \item{MSY}{a 2D array containing MSY estimates (2018 parameters) [sim x nstocks]}
 \item{BMSY}{a 2D array containing BMSY estimates (2018 parameters) [sim x nstocks]}
-\item{VBMSY}{a 2D array containing vulnerable BMSY estimates (2018 parameters) [sim x nstocks]}
 \item{SSBMSY}{a 2D array containing SSBMSY estimates (2018 parameters) [sim x nstocks]}
 \item{UMSY}{a 2D array containing UMSY estimates (2018 parameters) [sim x nstocks]}
 \item{FMSYa}{a 2D array containing apical FMSY estimates (2018 parameters) [sim x nstocks]}
