@@ -57,8 +57,6 @@ assessDDmm <- function( x, dset,
     for( aIdx in 1:length(AMs) )
       indicesOM[[aIdx]] <- omSSB[aIdx,,]
 
-    browser()
-
     mmFits <- lapply( X = indicesOM,
                       FUN = fitDD,
                       dset = dset,
@@ -268,10 +266,11 @@ fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
   areaIDs   <- c(rep(2,4),rep(1,6))
 
   # Create an index area key
-  idxAreaKey <- Obs_example@MPind[,c("Name","No","Areas")]
+  idxAreaKey <- Good_Obs@MPind[,c("Name","No","Areas")]
   # Assign index types
   idxAreaKey <- unique(idxAreaKey) %>%
-                mutate( idxType = 3)
+                mutate( idxType = 3,
+                        Name = as.character(Name) )
   idxAreaKey[idxAreaKey$Name == "MED_LAR_SUV","idxType"] <- 1
   idxAreaKey[idxAreaKey$Name == "GOM_LAR_SUV","idxType"] <- 2
   
@@ -283,7 +282,7 @@ fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
   # can reorder I_gt
   newIdxOrder <- c( "CAN_ACO_SUV", 
                     "FR_AER_SUV2",
-                    "GBYP_AER_SUV",
+                    "GBYP_AER_SUV_BAR",
                     "GOM_LAR_SUV",
                     "MED_LAR_SUV",
                     "JPN_LL_NEAtl2",
@@ -316,6 +315,7 @@ fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
                             simNum = simNum )
 
   I_gt <- I_gt[-(2 + RRidx),]
+
   # Reorder
   I_gt[3:9,] <- I_gt[(3:9)[numIdxOrder], ]
 
@@ -514,9 +514,9 @@ fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
                     rho_s   = repOpt$rho_s,
                     alpha_s = repOpt$alpha_s,
                     M_s     = repOpt$M_s,
-                    msy     = msyList$msy,
-                    Bmsy    = msyList$Bmsy,
-                    Fmsy    = msyList$Fmsy,
+                    msy     = msyList$msy_s,
+                    Bmsy    = msyList$Bmsy_s,
+                    Fmsy    = msyList$Fmsy_s,
                     nll     = sum(repOpt$nllI_gt[-(1:2),]) )
 
 

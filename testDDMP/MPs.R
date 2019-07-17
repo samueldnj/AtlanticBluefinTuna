@@ -87,3 +87,68 @@ MP_hiCap23M <- function( x, dset, AS )
   return(TAC)
 }
 class(MP_hiCap23M)<-"MSMP"
+
+
+runCMPtest <- function( OM = OMlist[1],
+                        MPs = testMPs,
+                        assessInt = 2 )
+{
+  # Load ABT objects in this environment
+  loadABT()
+
+  OMobj <- get(OM)
+
+  # Run MSE
+  MSEobj <- new(  Class     = "MSE",
+                  OM        = OMobj,
+                  MPs       = MPs,
+                  interval  = assessInt )
+
+  # Assign MSE to a symbol that is descriptive
+  MSEsymbol <- paste("MSEtest_",OM,sep = "")
+
+  assign( x = paste("MSEtest_",OM,sep = ""),
+          value = MSEobj )
+
+  # Save that MSE
+  save( list = MSEsymbol, file = file.path("MSEs",paste(MSEsymbol,".Rdata",sep = "")) )  
+  # Create the report
+  MSE_report( MSEobj, 
+              dir=file.path(getwd(),"MSEs"), 
+              Author='Landmark Fisheries Research', 
+              introtext="Multi-model delay difference assessment", 
+              filenam=paste(MSEsymbol,"_report",sep = ""))  
+
+  # Collect the checkTables
+  outTableFiles <- list.files("./outTables", full.names = TRUE)
+  nSims <- length(outTableFiles)
+  checkTables <- lapply(  X = outTableFiles, FUN = read.csv,
+                          header = TRUE, stringsAsFactors = FALSE )
+
+
+  # Save to output directory
+  if(!dir.exists("MSEs/fitCheck"))
+    dir.create("MSEs/fitCheck")
+
+  if(!dir.exists(file.path("MSEs/fitCheck",OM)))
+    dir.create(file.path("MSEs/fitCheck",OM))
+
+  checkTablesSavePath <- file.path("MSEs/fitCheck",OM,"checkTables.Rdata")
+
+  save( checkTables, file = checkTablesSavePath )
+
+  for( i in 1:nSims )
+  {
+    fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,".png",sep = "")
+    png(  filename = file.path("MSEs/fitCheck",OM,fitCheckPlot),
+          width = 7, height = 11, units = "in", res = 300 )
+    plot_AMfits(  simNum   = i,
+                  MSEobj   = MSEobj,
+                  tables   = checkTables,
+                  MPnum    = 2,
+                  interval = assessInt )
+    dev.off()
+    # Remove checkTables for next run
+    system( paste("rm -r ", outTableFiles[i], sep = "") )
+  }
+}
