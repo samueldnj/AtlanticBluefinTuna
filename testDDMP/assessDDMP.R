@@ -34,19 +34,26 @@ assessDDmm <- function( x, dset,
     # else tStep <<- tStep + 1 
     # Load the indicesOM list
     load("OMfits/ssbOM.Rdata")
+    AMinits <- read.csv("OMfits/AMinits.csv")
 
-    omSSB <- ssb$OM_mst[as.character(AMs),,]
+    omSSB     <- ssb$OM_mst[as.character(AMs),,]
+    omBioPars <- AMinits %>% filter( OM %in% AMs )
 
-    indicesOM         <- vector(mode = "list", length = length(AMs) )
-    names(indicesOM)  <- AMs
+    omInfo         <- vector(mode = "list", length = length(AMs) )
+    names(omInfo)  <- AMs
 
+    # Put OM info into a list for applying AMs to
     for( aIdx in 1:length(AMs) )
-      indicesOM[[aIdx]] <- omSSB[aIdx,,]
+    {
+      omInfo[[aIdx]]$indices <- omSSB[aIdx,,]
+      omInfo[[aIdx]]$bioPars <- omBioPars[aIdx,]
+    }
 
-    mmFits <- lapply( X = indicesOM,
+    mmFits <- lapply( X = omInfo,
                       FUN = fitDD,
                       dset = dset,
                       simNum = x )
+
 
     # Apply the HCR, compute area and stock
     # TAC
@@ -314,15 +321,20 @@ rampHCR <- function(  B_s,
 # fitDD()
 # Non exported function that fits a single
 # AM in the multi-model/ensemble MP assessDD()
-fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
+fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                     dset      = dset,
-                    simNum    = x )
+                    simNum    = x,
+                    bioPars   = omBioPars )
 {
   # Get model dimensions
   nT <- dim(dset[[1]]$Cobs)[2]
   nG <- dim(dset[[1]]$Iobs)[2] - 1
   nA <- 2
   nS <- 2
+
+  omIndices <- omInfo$indices
+  omBioPars <- omInfo$bioPars
+
   # Create area IDs vector
   areaNames <- c("East_A","West_A")
   areaIDs   <- c(rep(2,4),rep(1,6))
@@ -500,18 +512,17 @@ fitDD <- function(  omIndices = indicesOM[[as.character(AMs[1])]],
                 idxType_g     = idxType_g,
                 rType         = 1 )
 
-  pars <- list( logith_s      = c(logit(0.945),logit(0.806)),
-                lnB0_s        = log(c(800,125)),
-                lnM_s         = rep(log(0.1),2),
+  pars <- list( logith_s      = c(logit(omBioPars$steepE),logit(omBioPars$steepW)),
+                lnB0_s        = log(c(omBioPars$B0_E,omBioPars$B0_W)),
+                lnM_s         = rep(log(omBioPars$M),2),
                 lntau_g       = lntau_g,
                 tauW_a        = rep(0.1,nA),
                 rDev_st       = array(0, dim = c(nS,(nT-1))),
                 qDev_tg       = array(0, dim = c((nT-1),nG)),
                 lnsigmaR_s    = rep(log(0.1),2),
                 lnsigmaQ_g    = rep(log(0.1),nG),
-                #lnFinit_s     = rep(-3,2),
                 lnFinit_s     = log(c(0.12,0.12)),
-                logitPropW_s  = logit(c(0.039,0.743)),
+                logitPropW_s  = logit(c(0.102,0.9)),
                 lnq_g         = log(initq_g),
                 sig2Prior     = c(1,2),
                 lnqbar_g      = rep(log(0.5),nG),
