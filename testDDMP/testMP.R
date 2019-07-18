@@ -17,7 +17,7 @@ source("calcEquilibriumDD.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus= 6 )
+sfInit(parallel=TRUE, cpus= 2 )
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -34,10 +34,17 @@ testMPs <- list(  test = c("MP_testMean","MP_testMean") )
 
 OMlist <- c("OM_1d","OM_2d", "OM_3d", "OM_4d", "ROM_1d")
 
-# lapply( X = OMlist, 
-#         FUN = runCMPtest,
-#         assessInt = 2,
-#         MPs = testMPs )
+lapply( X = OMlist, 
+        FUN = runCMPtest,
+        assessInt = 2,
+        MPs = testMPs )
+
+sfInit(parallel=TRUE, cpus= 6 )
+sfLibrary( ABTMSE )
+sfLibrary( TMB )
+sfClusterCall("loadABT")
+sfSource("assessDDMP.R")
+sfSource("calcEquilibriumDD.R")
 
 runCMPtest( OM = "OM_1",
             MPs = testMPs,

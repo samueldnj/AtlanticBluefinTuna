@@ -77,38 +77,60 @@ plot_AMfits <- function(  simNum      = 1,
 
 # Plot a 2 panel plot of the current HCR used in
 # the MP
-plotHCR <- function( Ftarg = 0.16, cap = 2.5 )
+plotHCR <- function(  Ftarg = 0.08, 
+                      cap   = 4,
+                      LCP   = .4,
+                      UCP   = 1.0,
+                      Bmsy  = 57 )
 {
   # Calculate a max B for the x axis
-  maxB <- 1.5 * cap / Ftarg
+  
   # Create a vector of x vals
-  Bseq <- seq(from = 0, to = maxB, length.out = 100 )
+  Dseq <- seq(from = 0, to = 1.5, length.out = 100 )
+
+  Fseq <- rep(0.1, 100)
+
+  # Now split into control points and modify F
+  Fseq[Dseq >= LCP & Dseq <= UCP ] <- 0.1 + 0.9/(UCP - LCP) * (Dseq[Dseq >= LCP & Dseq <= UCP] - LCP)
+  Fseq[Dseq >= UCP ] <- 1.0
+
+  Fseq <- Fseq * Ftarg
+  Bseq <- Dseq * Bmsy
 
   # Create a catch sequence
-  C           <- Ftarg * Bseq
-  C[C >= cap] <- cap 
+  C                   <- Fseq * Bseq
 
-  # Now F sequence
-  F           <- rep(Ftarg,100)
-  F[C >= cap] <- (cap / Bseq)[C >= cap]
+  # Now modify the F sequence with the cap
+  Fcap <- Fseq
+  Fcap[C >= cap] <- (cap / Bseq)[C >= cap]
+  Ccap <- Fcap * Bseq
 
   par(  mfrow = c(2,1), 
         mar = c(2,1,1,1),
         oma = c(3,3,1,1) )
-  plot( x = Bseq, y = F, type = "l",
-        ylim = c(0, 1.5 * Ftarg),
-        xlab = "", ylab = "", las = 1 )
+  plot( x = Bseq, y = Fseq, type = "l",
+        ylim = c(0, 1.5 * Ftarg), lwd = 2,
+        xlab = "", ylab = "", las = 1, col = "grey50" )
     grid()
+    lines( x = Bseq, y = Fcap, lwd = 2 )
     mtext( side = 2, text = "Exploitation Rate (/yr)",
             line = 3)
-    abline( h = cap / Ftarg, lty = 2, lwd = 2 )
+    abline( v = LCP * Bmsy, lty = 2, lwd = 2, col = "red")
+    abline( v = UCP * Bmsy, lty = 2, lwd = 2, col = "orange")
 
   plot( x = Bseq, y = C, type = "l",
-        xlab = "", ylab = "", las = 1,
-        ylim = c(0, 1.5 * max(C)) )
+        xlab = "", ylab = "", las = 1, lwd = 2,
+        ylim = c(0, 1.5 * max(C)), col = "grey50" )
     grid()
+    lines( x = Bseq, y = Ccap, lwd = 2 )
     mtext( side = 2, text = "Catch (kt)", line = 3)
-    abline( h = cap / Ftarg, lty = 2, lwd = 2 )
+    abline( v = LCP * Bmsy, lty = 2, lwd = 2, col = "red")
+    abline( v = UCP * Bmsy, lty = 2, lwd = 2, col = "orange")
+    legend( x = "topright", bty = "n",
+            legend = expression( 0.4*B[MSY], B[MSY], "Uncapped", "Capped" ),
+            col = c("red","orange","grey50","black"),
+            lty = c(2,2,1,1), lwd = 2,
+             )
 
   mtext( side = 1, outer = TRUE, text = "Spawning Biomass (kt)")
 
