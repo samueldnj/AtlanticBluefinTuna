@@ -66,8 +66,9 @@
     Cspline <- splinefun( x=hseq, y=C_sh[s, ] )
     Bspline <- splinefun( x=hseq, y=B_sh[s, ] )
     Fmsy_s[s] <- uniroot(Cspline,range(hseq),deriv=1)$root
-    Bmsy_s[s] <- Bspline(Fmsy_s[s])
-    msy_s[s]  <- Fmsy_s[s]*Bmsy_s[s]
+    BRPs      <- .calcEquilibriumDD(rpt,Fmsy_s[s])
+    Bmsy_s[s] <- BRPs$Be_s[s]
+    msy_s[s]  <- BRPs$Ce_s[s]
 
   }
 

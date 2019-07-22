@@ -22,10 +22,12 @@ assessDDmm <- function( x, dset,
                         AMs         = c(1,2,4,7,11),
                         caps        = c(25,4),
                         F23M        = FALSE,
+                        UCP         = "Bmsy",
                         TACrule     = c("mean"),
                         check       = FALSE,
                         AS          = 1,
-                        maxDeltaTAC = 0.2 )
+                        maxDeltaTAC = 0.2,
+                        mpName      = "assessDDmm" )
 {
   if( AS == 1 )
   {
@@ -60,7 +62,8 @@ assessDDmm <- function( x, dset,
     mmTACs <- lapply( X     = mmFits,
                       FUN   = calcHCR,
                       F23M  = F23M,
-                      caps  = caps )
+                      caps  = caps,
+                      UCP   = UCP )
     # Apply weighting
     mmTACs <- do.call( rbind, mmTACs ) %>%
               mutate( zeroMeanNLL = nll - mean(nll),
@@ -74,6 +77,7 @@ assessDDmm <- function( x, dset,
     # Check table
     if( check )
     {
+      outTable$mpName     <- mpName
       # Add new columns for biomass, and NLL
       outTable$Bnext_E    <- numeric(length(AMs))
       outTable$Bnext_W    <- numeric(length(AMs))
@@ -218,7 +222,8 @@ class(assessDDmm)<-"MSMP"
 # from the mpOutput, then
 calcHCR <- function(  mpOutput = mmTACs[1],
                       F23M     = FALSE,
-                      caps     = c(Inf,Inf) )
+                      caps     = c(Inf,Inf),
+                      UCP      = "Bmsy" )
 {
   # First, calculate TAC by stock
   B_s       <- mpOutput$B_s
@@ -228,8 +233,11 @@ calcHCR <- function(  mpOutput = mmTACs[1],
   else
     Fmsy_s  <- mpOutput$Fmsy
 
-  # Get Bmsy
-  Bmsy_s    <- mpOutput$Bmsy
+  # Get Upper control point
+  if( UCP == "Bmsy" )
+    Bmsy_s    <- mpOutput$Bmsy
+  if( UCP == ".4B0") 
+    Bmsy_s <- 0.4 * mpOutput$B0_s
 
   # change fmsy_s to ftarget
   Ftarg_s <- rampHCR( B_s = B_s,

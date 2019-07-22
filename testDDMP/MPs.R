@@ -6,8 +6,10 @@
 #
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-# MP_loCap - a low catch cap is applied,
-# of 20 kt in the East, and 2.5 kt in the West
+# MP_testMean - a low catch cap is applied,
+# of 20 kt in the East, and 2.5 kt in the West,
+# TACs are averaged over 5 AMs with even weighting,
+# and checktables are produced for MP development
 MP_testMean <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
@@ -17,13 +19,16 @@ MP_testMean <- function( x, dset, AS )
                      F23M    = FALSE,
                      TACrule = "mean",
                      AS      = AS,
-                     check   = TRUE  )
+                     check   = TRUE,
+                     mpName  = "MP_testMean"  )
   return(TAC)
 }
 class(MP_testMean)<-"MSMP"
 
-# MP_loCap - a low catch cap is applied,
+# MP_testAIC - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
+# TACs are averaged over 5 AMs with AIC weighting,
+# and checktables are produced for MP development
 MP_testAIC <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
@@ -33,7 +38,8 @@ MP_testAIC <- function( x, dset, AS )
                      F23M    = FALSE,
                      TACrule = "AIC",
                      AS      = AS,
-                     check   = TRUE  )
+                     check   = TRUE,
+                     mpName  = "MP_testAIC"  )
   return(TAC)
 }
 class(MP_testAIC)<-"MSMP"
@@ -104,6 +110,44 @@ MP_hiCap23M <- function( x, dset, AS )
 }
 class(MP_hiCap23M)<-"MSMP"
 
+# MP_loCap23M.4B0 - Same as loCap_23M, but
+# uses a proxy of .4B0 for Bmsy in the MP, rather 
+# than the estimated value from the reference points
+# calc
+MP_loCap23M.4B0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm(  x       = x,
+                      dset    = dset,
+                      AMs     = c(1,2,4,7,11),
+                      caps    = c(20,2.5),
+                      F23M    = TRUE,
+                      TACrule = "mean",
+                      AS      = AS,
+                      UCP     = ".4B0",
+                      mpName  = "loCap23M.4B0" )
+
+  return(TAC)
+}
+class(MP_loCap23M.4B0)<-"MSMP"
+
+# MPtest_loCap23M.4B0 - Same as MP_loCap23M.4B0, but
+# outputs a checktable for MP development
+MPtest_loCap23M.4B0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm(  x       = x,
+                      dset    = dset,
+                      AMs     = c(1,2,4,7,11),
+                      caps    = c(20,2.5),
+                      F23M    = TRUE,
+                      TACrule = "mean",
+                      check   = TRUE,
+                      AS      = AS,
+                      UCP     = ".4B0",
+                      mpName  = "MPtest_loCap23M.4B0" )
+
+  return(TAC)
+}
+class(MPtest_loCap23M.4B0)<-"MSMP"
 
 
 # runCMPtest()
@@ -124,7 +168,12 @@ runCMPtest <- function( OM = "OM_1d",
   # Load ABT objects in this environment
   loadABT()
 
+  # get OM as an environment variable from
+  # the char vector label
   OMobj <- get(OM)
+
+  # Count MPs
+  nMPs  <- length(MPs)
 
   # Run MSE
   MSEobj <- new(  Class     = "MSE",
@@ -167,15 +216,24 @@ runCMPtest <- function( OM = "OM_1d",
 
   for( i in 1:nSims )
   {
-    fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,".png",sep = "")
-    png(  filename = file.path("MSEs/fitCheck",OM,fitCheckPlot),
-          width = 7, height = 11, units = "in", res = 300 )
-    plot_AMfits(  simNum   = i,
-                  MSEobj   = MSEobj,
-                  tables   = checkTables,
-                  MPnum    = 2,
-                  interval = assessInt )
-    dev.off()
+    for( j in 1:nMPs )
+    {
+      MPid <- MPs[[j]][1]
+      # Create a directory for the MP if it doesn't exist
+      if( !dir.exists(file.path("MSEs/fitCheck",OM,MPid)) )
+        dir.create(file.path("MSEs/fitCheck",OM,MPid))
+      
+      fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
+      png(  filename = file.path("MSEs/fitCheck",OM,MPid,fitCheckPlot),
+            width = 8.5, height = 11, units = "in", res = 300 )
+      plot_TACperformance(  simNum   = i,
+                            MSEobj   = MSEobj,
+                            tables   = checkTables,
+                            MPlist   = MPs,
+                            MPnum    = j,
+                            interval = assessInt )
+      dev.off()
+    }
     # Remove checkTables for next run
     system( paste("rm -r ", outTableFiles[i], sep = "") )
   }

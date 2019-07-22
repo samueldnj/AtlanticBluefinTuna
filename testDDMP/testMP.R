@@ -30,9 +30,13 @@ options( warn = -1 )
 if(!dir.exists("outTables"))
   dir.create("outTables")
 
-testMPs <- list(  test = c("MP_testMean","MP_testMean") )
+testMPs <- list(  testMean = c("MP_testMean","MP_testMean"),
+                  testAIC  = c("MP_testAIC","MP_testAIC"),
+                  loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0") )
 
-OMlist <- c("OM_1d","OM_2d", "OM_3d", "OM_4d", "ROM_1d")
+OMlist <- c("OM_1d","OM_2d", "OM_3d", "OM_4d", 
+            "ROM_1d", "ROM_2d", "ROM_3d","ROM_4d",
+            "ROM_21d" )
 
 lapply( X = OMlist, 
         FUN = runCMPtest,
