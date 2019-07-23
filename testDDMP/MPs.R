@@ -53,7 +53,6 @@ MP_loCap <- function( x, dset, AS )
                      AMs     = c(1,2,4,7,11),
                      caps    = c(20,2.5),
                      F23M    = FALSE,
-                     check   = TRUE,
                      TACrule = "mean",
                      AS      = AS,
                      mpName  = "MP_loCap"  )
@@ -71,7 +70,6 @@ MP_hiCap <- function( x, dset, AS )
                        caps    = c(25,4),
                        F23M    = FALSE,
                        TACrule = "mean",
-                       check   = TRUE,
                        AS      = AS,
                        mpName  = "MP_hiCap" )
   return(TAC)
@@ -91,7 +89,6 @@ MP_loCap23M <- function( x, dset, AS )
                        caps    = c(20,2.5),
                        F23M    = TRUE,
                        TACrule = "mean",
-                       check   = TRUE,
                        AS      = AS,
                        mpName  = "MP_loCap23M" )
   return(TAC)
@@ -111,7 +108,6 @@ MP_hiCap23M <- function( x, dset, AS )
                        caps    = c(25,4),
                        F23M    = TRUE,
                        TACrule = "mean",
-                       check   = TRUE,
                        AS      = AS,
                        mpName  = "MP_hiCap23M" )
   return(TAC)
@@ -130,7 +126,6 @@ MP_loCap23M.4B0 <- function( x, dset, AS )
                       caps    = c(20,2.5),
                       F23M    = TRUE,
                       TACrule = "mean",
-                      check   = TRUE,
                       AS      = AS,
                       UCP     = ".4B0",
                       mpName  = "MP_loCap23M.4B0" )
@@ -149,7 +144,7 @@ MPtest_loCap23M.4B0 <- function( x, dset, AS )
                       caps    = c(20,2.5),
                       F23M    = TRUE,
                       TACrule = "mean",
-                      check   = TRUE,
+                      check   = TRUE
                       AS      = AS,
                       UCP     = ".4B0",
                       mpName  = "MPtest_loCap23M.4B0" )
