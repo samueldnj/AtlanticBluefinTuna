@@ -181,6 +181,7 @@ assessDDmm <- function( x, dset,
     {
       outTableFileName <- paste("outTable_sim",x,".csv",sep = "")
       outTableFilePath <- file.path("outTables",outTableFileName)
+
       if(!file.exists(outTableFilePath))
         write.table(  outTable, file = outTableFilePath, sep = ",",
                       row.names = FALSE )

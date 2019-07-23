@@ -10,7 +10,7 @@
 # of 20 kt in the East, and 2.5 kt in the West,
 # TACs are averaged over 5 AMs with even weighting,
 # and checktables are produced for MP development
-MP_testMean <- function( x, dset, AS )
+MPtest_Mean <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
@@ -23,13 +23,13 @@ MP_testMean <- function( x, dset, AS )
                      mpName  = "MP_testMean"  )
   return(TAC)
 }
-class(MP_testMean)<-"MSMP"
+class(MPtest_Mean)<-"MSMP"
 
 # MP_testAIC - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
 # TACs are averaged over 5 AMs with AIC weighting,
 # and checktables are produced for MP development
-MP_testAIC <- function( x, dset, AS )
+MPtest_AIC <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
@@ -42,7 +42,26 @@ MP_testAIC <- function( x, dset, AS )
                      mpName  = "MP_testAIC"  )
   return(TAC)
 }
-class(MP_testAIC)<-"MSMP"
+class(MPtest_AIC)<-"MSMP"
+
+# MPtest_loCap23M.4B0 - Same as MP_loCap23M.4B0, but
+# outputs a checktable for MP development
+MPtest_loCap23M.4B0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm(  x       = x,
+                      dset    = dset,
+                      AMs     = c(1,2,4,7,11),
+                      caps    = c(20,2.5),
+                      F23M    = TRUE,
+                      TACrule = "mean",
+                      check   = TRUE,
+                      AS      = AS,
+                      UCP     = ".4B0",
+                      mpName  = "MPtest_loCap23M.4B0" )
+
+  return(TAC)
+}
+class(MPtest_loCap23M.4B0)<-"MSMP"
 
 # MP_loCap - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
@@ -134,25 +153,6 @@ MP_loCap23M.4B0 <- function( x, dset, AS )
 }
 class(MP_loCap23M.4B0)<-"MSMP"
 
-# MPtest_loCap23M.4B0 - Same as MP_loCap23M.4B0, but
-# outputs a checktable for MP development
-MPtest_loCap23M.4B0 <- function( x, dset, AS )
-{
-  TAC <- assessDDmm(  x       = x,
-                      dset    = dset,
-                      AMs     = c(1,2,4,7,11),
-                      caps    = c(20,2.5),
-                      F23M    = TRUE,
-                      TACrule = "mean",
-                      check   = TRUE
-                      AS      = AS,
-                      UCP     = ".4B0",
-                      mpName  = "MPtest_loCap23M.4B0" )
-
-  return(TAC)
-}
-class(MPtest_loCap23M.4B0)<-"MSMP"
-
 
 # runCMPtest()
 # Wrapper function for the new("MSE")
@@ -169,6 +169,12 @@ runCMPtest <- function( OM = "OM_1d",
                         MPs = list( test = c("MP_testMean","MP_testMean") ),
                         assessInt = 2 )
 {
+  library(ABTMSE)
+  library(TMB)
+
+  source("assessDDMP.R")
+  source("calcEquilibriumDD.R")
+  source("MPs.R")
   # Load ABT objects in this environment
   loadABT()
 
@@ -197,7 +203,7 @@ runCMPtest <- function( OM = "OM_1d",
   MSE_report( MSEobj, 
               dir=file.path(getwd(),"MSEs"), 
               Author='Landmark Fisheries Research', 
-              introtext="Multi-model delay difference assessment", 
+              introtext=paste("Multi-model delay difference assessment on", OM,sep =""), 
               filenam=paste(MSEsymbol,"_report",sep = ""))  
 
   # Collect the checkTables
@@ -260,6 +266,13 @@ runCMPs <- function(  OM = "OM_1",
                       MPs = list( test = c("MP_loCap","MP_loCap") ),
                       assessInt = 2 )
 {
+  library(ABTMSE)
+  library(TMB)
+
+  source("assessDDMP.R")
+  source("calcEquilibriumDD.R")
+  source("MPs.R")
+
   # Load ABT objects in this environment
   loadABT()
 
@@ -283,7 +296,7 @@ runCMPs <- function(  OM = "OM_1",
   MSE_report( MSEobj, 
               dir=file.path(getwd(),"MSEs"), 
               Author='Landmark Fisheries Research', 
-              introtext="Multi-model delay difference assessment", 
+              introtext=paste("Multi-model delay difference assessment on", OM,sep =""), 
               filenam=paste(MSEsymbol,"_report",sep = ""))  
 
 
