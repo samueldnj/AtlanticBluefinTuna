@@ -24,9 +24,20 @@ sfSource("calcEquilibriumDD.R")
 
 options( warn = -1 )
 
-testMPs <- list(  loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
+shortListMPs <- list( loCap = c("MP_loCap","MP_loCap"),
+                      loCap23M = c("MP_loCap23M","MP_loCap23M"),
+                      hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
+                      loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
+
+testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
+                    MPtest_AIC = c("MPtest_AIC","MPtest_AIC"),
+                    MPtest_loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0"))
+
+
 
 OMvec <- paste( "OM_", 1:15,sep = "" )
+
+ROMvec <- paste( "OM_", 1:31, "d",sep = "" )
 
 OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
