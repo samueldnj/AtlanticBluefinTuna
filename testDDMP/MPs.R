@@ -20,7 +20,7 @@ MPtest_Mean <- function( x, dset, AS )
                      TACrule = "mean",
                      AS      = AS,
                      check   = TRUE,
-                     mpName  = "MP_testMean"  )
+                     mpName  = "MPtest_Mean"  )
   return(TAC)
 }
 class(MPtest_Mean)<-"MSMP"
@@ -39,7 +39,7 @@ MPtest_AIC <- function( x, dset, AS )
                      TACrule = "AIC",
                      AS      = AS,
                      check   = TRUE,
-                     mpName  = "MP_testAIC"  )
+                     mpName  = "MPtest_AIC"  )
   return(TAC)
 }
 class(MPtest_AIC)<-"MSMP"

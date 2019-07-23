@@ -43,13 +43,20 @@ testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
 
 # OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-ROMvec <- paste( "ROM_", 1:30, "d", sep = "" )
-
+ROMvec <- paste( "ROM_", 1:31, "d", sep = "" )
 
 lapply( X = ROMvec, 
-        FUN = runCMPtest,
+        FUN = runCMPs,
         assessInt = 2,
-        MPs = testMPs )
+        MPs = shortListMPs )
+
+
+# lapply( X = ROMvec, 
+#         FUN = runCMPtest,
+#         assessInt = 2,
+#         MPs = testMPs )
+
+
 
 # parallel::parLapply(  cl = ROMclust,
 #                       X = ROMvec,

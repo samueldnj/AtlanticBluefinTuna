@@ -12,10 +12,6 @@
 # Load packages
 cranPackages <- c("coda",
                   "tidyverse",
-                  "reshape2",
-                  "ggforce",
-                  "ggplot2",
-                  "GGally",
                   "TMB",
                   "RColorBrewer",
                   "parallel",
@@ -23,10 +19,8 @@ cranPackages <- c("coda",
                   "wesanderson",
                   "scales",
                   "beepr",
-                  "tmbstan",
                   "bookdown",
                   "kableExtra" ,
-                  "ggridges",
                   "here")
 
 for( pkg in cranPackages )
