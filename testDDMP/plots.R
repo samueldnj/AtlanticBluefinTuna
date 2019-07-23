@@ -142,9 +142,6 @@ plotHCR <- function(  Ftarg = 0.08,
 
 }
 
-load("./MSEs/MSEtest_ROM_1d.Rdata")
-load("./MSEs/fitCheck/ROM_1d/checkTables.Rdata")
-
 plot_TACperformance <- function(  simNum      = 1,
                                   MSEobj      = MSEtest_ROM_1d,
                                   tables      = checkTables,
@@ -166,8 +163,6 @@ plot_TACperformance <- function(  simNum      = 1,
   # stock in the rows (E/W) and time in the columns
   # Pick out the correct MP
   MPid <- MPlist[[MPnum]][1]
-
-  browser()
 
   # Now, get the right checkTable
   checkTable <- tables[[simNum]] %>%
