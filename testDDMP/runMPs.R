@@ -37,12 +37,12 @@ testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
 
 OMvec <- paste( "OM_", 1:15,sep = "" )
 
-ROMvec <- paste( "OM_", 1:31, "d",sep = "" )
+ROMvec <- paste( "OM_", 1:31, sep = "" )
 
 OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-lapply( X = OMvec, 
+lapply( X = ROMvec, 
         FUN = runCMPs,
         assessInt = 2,
-        MPs = testMPs )
+        MPs = shortListMPs )
 
