@@ -15,7 +15,7 @@ source("assessDDMP.R")
 source("calcEquilibriumDD.R")
 source("MPs.R")
 
-sfInit(parallel=TRUE, cpus= detectCores() - 2)
+sfInit(parallel=TRUE, cpus = 2)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -25,11 +25,13 @@ sfSource("calcEquilibriumDD.R")
 options( warn = -1 )
 
 testMPs <- list(  loCap = c("MP_loCap","MP_loCap"),
-                  hiCap = c("MP_hiCap","MP_hiCap"),
                   loCap23M = c("MP_loCap23M","MP_loCap23M"),
-                  hiCap23M = c("MP_hiCap23M","MP_hiCap23M") )
+                  hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
+                  loCap23M.4B0 = c("loCap23M.4B0","loCap23M.4B0") )
 
-OMvec <- paste( "OM_", 1:14,sep = "" )
+OMvec <- paste( "OM_", 1:15,"d",sep = "" )
+
+OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
 lapply( X = OMvec, 
         FUN = runCMPs,

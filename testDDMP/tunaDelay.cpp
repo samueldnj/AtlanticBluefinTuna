@@ -372,6 +372,23 @@ Type objective_function<Type>::operator() ()
   array<Type>   propCatch_sat(nS,nA,nT);
   propCatch_sat.setZero();
 
+
+  B_st.setZero();
+  N_st.setZero();
+  R_st.setZero();
+  S_st.setZero();
+  wbarhat_st.setZero();
+  F_st.setZero();
+  Z_st.setZero();
+  D_st.setZero();
+  U_st.setZero();
+  B_at.setZero();
+  N_at.setZero();
+  B_sat.setZero();
+  N_sat.setZero();
+  wbarhat_at.setZero();
+  wbarhat_sat.setZero();
+
   // West == 1
   // East == 0
   bDist_sa.col(1) = propW_s;
@@ -454,7 +471,11 @@ Type objective_function<Type>::operator() ()
     {
       // Compute total mortality and initial survivorship
       // Borrow arrays here
-      F_st.col(t) = exp(lnFinit_s);
+      // Set initial F_st if fished initialisation
+      for( int s = 0; s < nS; s++ )
+        if( initBioCode_s(s) == 1 )
+          F_st(s,t) += Finit_s(s);
+
       Z_st.col(t) = M_s + F_st.col(t);
       S_st.col(t) = exp( -1. * Z_st.col(t) );
 

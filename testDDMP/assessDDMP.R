@@ -19,15 +19,16 @@ dyn.load(dynlib('tunaDelay'))
 #' assessDDmm(1,dset = dset_EW,AS = 1, AMs = 1)
 #' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
 assessDDmm <- function( x, dset, 
-                        AMs         = c(1,2,4,7,11),
-                        caps        = c(25,4),
-                        F23M        = FALSE,
-                        UCP         = "Bmsy",
-                        TACrule     = c("mean"),
-                        check       = FALSE,
-                        AS          = 1,
-                        maxDeltaTAC = 0.2,
-                        mpName      = "assessDDmm" )
+                        AMs           = c(1,2,4,7,11),
+                        caps          = c(25,4),
+                        F23M          = FALSE,
+                        UCP           = "Bmsy",
+                        TACrule       = c("mean"),
+                        check         = FALSE,
+                        AS            = 1,
+                        maxDeltaTACup = 0.2,
+                        maxDeltaTACdn = 0.5,
+                        mpName        = "assessDDmm" )
 {
   if( AS == 1 )
   {
@@ -159,8 +160,8 @@ assessDDmm <- function( x, dset,
     lastTAC_W <- dset[[2]]$TAC[x,nTACs-1]
     # Calculate the deltaTAC up and down, just
     # to make following conditionals more readable
-    deltaTACup <- 1 + maxDeltaTAC
-    deltaTACdn <- 1 - maxDeltaTAC
+    deltaTACup <- 1 + maxDeltaTACup
+    deltaTACdn <- 1 - maxDeltaTACdn
 
     # Apply maxDeltaTAC in East
     if( TAC_E/lastTAC_E > deltaTACup )

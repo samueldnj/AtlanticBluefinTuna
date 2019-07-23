@@ -30,18 +30,19 @@ options( warn = -1 )
 if(!dir.exists("outTables"))
   dir.create("outTables")
 
-testMPs <- list(  testMean = c("MP_testMean","MP_testMean"),
-                  testAIC  = c("MP_testAIC","MP_testAIC"),
-                  loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0") )
+testMPs <- list(  loCap = c("MP_loCap","MP_loCap"),
+                  loCap23M = c("MP_loCap23M","MP_loCap23M"),
+                  hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
+                  loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
 
-OMlist <- c("OM_1d","OM_2d", "OM_3d", "OM_4d", 
-            "ROM_1d", "ROM_2d", "ROM_3d","ROM_4d",
-            "ROM_21d" )
+# OMvec <- paste( "OM_", 1:15,"d",sep = "" )
 
-lapply( X = OMlist, 
-        FUN = runCMPtest,
-        assessInt = 2,
-        MPs = testMPs )
+# OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
+
+# lapply( X = OMvec, 
+#         FUN = runCMPtest,
+#         assessInt = 2,
+#         MPs = testMPs )
 
 sfInit(parallel=TRUE, cpus= 6 )
 sfLibrary( ABTMSE )
