@@ -455,8 +455,8 @@ Type objective_function<Type>::operator() ()
 
     if( rType == 1 )
     {
-      rDevBrood_st(s, nT-1 + broodAdj(s)) = rDevBrood_st(s, nT-2 + broodAdj(s));
-      rDevBrood_st(s, nT + broodAdj(s))   = rDevBrood_st(s, nT-2 + broodAdj(s));
+      rDevBrood_st(s, nT-1 + broodAdj(s)) = rDevBrood_st(s, nT-2 + broodAdj(s)) + rDev_st(s,nT - 1);
+      rDevBrood_st(s, nT + broodAdj(s))   = rDevBrood_st(s, nT-2 + broodAdj(s)) + rDev_st(s,nT - 1);
     }
 
   }

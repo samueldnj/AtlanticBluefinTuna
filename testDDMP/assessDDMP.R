@@ -422,7 +422,7 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
 
   # Fix phases
   phases <- list()
-  phases$logith_s       <-  -1
+  phases$logith_s       <-  -2
   phases$lnB0_s         <-   1
   phases$lnM_s          <-  -1
   phases$lntau_g        <-   1
@@ -527,7 +527,7 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 lnM_s         = rep(log(omBioPars$M),2),
                 lntau_g       = lntau_g,
                 tauW_a        = rep(0.1,nA),
-                rDev_st       = array(0, dim = c(nS,(nT-1))),
+                rDev_st       = array(0, dim = c(nS,(nT))),
                 qDev_tg       = array(0, dim = c((nT-1),nG)),
                 lnsigmaR_s    = rep(log(0.1),2),
                 lnsigmaQ_g    = rep(log(0.1),nG),
@@ -537,8 +537,8 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 sig2Prior     = c(1,2),
                 lnqbar_g      = rep(log(0.5),nG),
                 lntauq_g      = rep(log(0.05),nG),
-                h_alpha       = c(6,9),
-                h_beta        = c(4,1),
+                h_alpha       = 20*c(omBioPars$steepE,omBioPars$steepE),
+                h_beta        = 20 - 20*c(omBioPars$steepE,omBioPars$steepE),
                 tau2IGa_g     = rep(10,nG),
                 tau2IGb_g     = rep(0.01 * 11, nG ) )
 

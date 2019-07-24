@@ -43,7 +43,7 @@ testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
 
 # OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-ROMvec <- paste( "ROM_", 1:31, "d", sep = "" )
+ROMvec <- paste( "ROM_", c(18:31), "d", sep = "" )
 
 lapply( X = ROMvec, 
         FUN = runCMPs,
