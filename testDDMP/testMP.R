@@ -39,16 +39,19 @@ testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
                     MPtest_AIC = c("MPtest_AIC","MPtest_AIC"),
                     MPtest_loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0"))
 
-# OMvec <- paste( "OM_", 1:15,"d",sep = "" )
+msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
+                      MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
+                      MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
 
-# OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
+OMvec <- paste( "OM_", 1:15,"d",sep = "" )
+OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
 ROMvec <- paste( "ROM_", c(18:31), "d", sep = "" )
 
-lapply( X = ROMvec, 
+lapply( X = OMvec, 
         FUN = runCMPs,
         assessInt = 2,
-        MPs = shortListMPs )
+        MPs = msyCapMPs )
 
 
 # lapply( X = ROMvec, 

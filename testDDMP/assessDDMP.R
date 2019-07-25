@@ -20,7 +20,7 @@ dyn.load(dynlib('tunaDelay'))
 #' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
 assessDDmm <- function( x, dset, 
                         AMs           = c(1,2,4,7,11),
-                        caps          = c(25,4),
+                        caps          = c(Inf,Inf),
                         F23M          = FALSE,
                         UCP           = "Bmsy",
                         TACrule       = c("mean"),
@@ -30,14 +30,14 @@ assessDDmm <- function( x, dset,
                         maxDeltaTACdn = 0.5,
                         mpName        = "assessDDmm" )
 {
+  areaNames <- c("East","West")
   if( AS == 1 )
   {
-    # if(is.null(tStep))
-    #   tStep <<- 1
-    # else tStep <<- tStep + 1 
     # Load the indicesOM list
     load("OMfits/ssbOM.Rdata")
     AMinits <- read.csv("OMfits/AMinits.csv")
+    # Area names for saving stuff
+    
 
     omSSB     <- ssb$OM_mst[as.character(AMs),,]
     omBioPars <- AMinits %>% filter( OM %in% AMs )
@@ -57,164 +57,175 @@ assessDDmm <- function( x, dset,
                       dset = dset,
                       simNum = x )
 
+    # Make a table of fit info to save to WD
+    fitTable <- matrix(NA, nrow = length(AMs), ncol = 16)
+    colnames(fitTable) <- c(  "AM", 
+                              "Bnext_E", 
+                              "Bnext_W",
+                              "MSY_Es", 
+                              "MSY_Ws", 
+                              "Bmsy_Es",
+                              "Bmsy_Ws",
+                              "Fmsy_Es",
+                              "Fmsy_Ws",
+                              "propW_Es",
+                              "propW_Ws",
+                              "M_Es",
+                              "M_Ws",
+                              "B0_Es",
+                              "B0_Ws",
+                              'nll' )
+    fitTable <- as.data.frame(fitTable)
+    fitTable$AM <- AMs
 
-    # Apply the HCR, compute area and stock
-    # TAC
-    mmTACs <- lapply( X     = mmFits,
-                      FUN   = calcHCR,
-                      F23M  = F23M,
-                      caps  = caps,
-                      UCP   = UCP )
-    # Apply weighting
-    mmTACs <- do.call( rbind, mmTACs ) %>%
-              mutate( zeroMeanNLL = nll - mean(nll),
-                      deltaNLL    = (zeroMeanNLL - min(zeroMeanNLL)),
-                      amWts       = exp(-deltaNLL/2)/sum(exp(-deltaNLL/2)),
-                      wtdTAC_E    = amWts * TAC_E,
-                      wtdTAC_W    = amWts * TAC_W )
-
-    outTable <- mmTACs
-
-    # Check table
-    if( check )
+    for( amIdx in 1:length(AMs) )
     {
-      outTable$mpName     <- mpName
-      # Add new columns for biomass, and NLL
-      outTable$Bnext_E    <- numeric(length(AMs))
-      outTable$Bnext_W    <- numeric(length(AMs))
-      outTable$AM         <- AMs
-      outTable$MSY_Es     <- numeric(length(AMs))
-      outTable$MSY_Ws     <- numeric(length(AMs))
-      outTable$MSY_Ea     <- numeric(length(AMs))
-      outTable$MSY_Wa     <- numeric(length(AMs))
-      outTable$Bmsy_Es    <- numeric(length(AMs))
-      outTable$Bmsy_Ws    <- numeric(length(AMs))
-      outTable$Bmsy_Ea    <- numeric(length(AMs))
-      outTable$Bmsy_Wa    <- numeric(length(AMs))
-      outTable$Fmsy_Es    <- numeric(length(AMs))
-      outTable$Fmsy_Ws    <- numeric(length(AMs))
-      outTable$Fmsy_Ea    <- numeric(length(AMs))
-      outTable$Fmsy_Wa    <- numeric(length(AMs))
-      outTable$CT_E       <- numeric(length(AMs))
-      outTable$CT_W       <- numeric(length(AMs))
-
-      for( amIdx in 1:length(AMs) )
-      {
-        # Biomass, MSY and Fmsy
-        outTable$Bnext_E[amIdx] <- mmFits[[amIdx]]$B_s[1]
-        outTable$Bnext_W[amIdx] <- mmFits[[amIdx]]$B_s[2]
-        outTable$MSY_Es[amIdx]  <- mmFits[[amIdx]]$msy[1]
-        outTable$MSY_Ws[amIdx]  <- mmFits[[amIdx]]$msy[2]
-        outTable$Fmsy_Es[amIdx] <- mmFits[[amIdx]]$Fmsy[1]
-        outTable$Fmsy_Ws[amIdx] <- mmFits[[amIdx]]$Fmsy[2]
-        outTable$Bmsy_Es[amIdx] <- mmFits[[amIdx]]$Bmsy[1]
-        outTable$Bmsy_Ws[amIdx] <- mmFits[[amIdx]]$Bmsy[2]
-        outTable$CT_E[amIdx]    <- mmFits[[amIdx]]$Clast[1]
-        outTable$CT_W[amIdx]    <- mmFits[[amIdx]]$Clast[2]
-
-        B_sa      <- mmFits[[amIdx]]$B_sa
-        Bprop     <- B_sa 
-        for( a in 1:ncol(Bprop))
-          Bprop[,a] <- Bprop[,a] / sum(B_sa[,a])
-
-        # Now compute area Fmsy and MSY
-        # using a biomass weighting
-        msy_s     <- mmFits[[amIdx]]$msy
-        Fmsy_s    <- mmFits[[amIdx]]$Fmsy   
-        Bmsy_s    <- mmFits[[amIdx]]$Bmsy   
-
-        outTable$MSY_Ea[amIdx]  <- sum( Bprop[,1] * msy_s ) 
-        outTable$MSY_Wa[amIdx]  <- sum( Bprop[,2] * msy_s ) 
-        outTable$Fmsy_Ea[amIdx] <- sum( Bprop[,1] * Fmsy_s ) 
-        outTable$Fmsy_Wa[amIdx] <- sum( Bprop[,2] * Fmsy_s ) 
-        outTable$Bmsy_Ea[amIdx] <- sum( Bprop[,1] * Bmsy_s ) 
-        outTable$Bmsy_Wa[amIdx] <- sum( Bprop[,2] * Bmsy_s ) 
-
-
-      }
+      # Biomass, MSY and Fmsy
+      fitTable$Bnext_E[amIdx]   <- mmFits[[amIdx]]$B_s[1]
+      fitTable$Bnext_W[amIdx]   <- mmFits[[amIdx]]$B_s[2]
+      fitTable$MSY_Es[amIdx]    <- mmFits[[amIdx]]$msy[1]
+      fitTable$MSY_Ws[amIdx]    <- mmFits[[amIdx]]$msy[2]
+      fitTable$Fmsy_Es[amIdx]   <- mmFits[[amIdx]]$Fmsy[1]
+      fitTable$Fmsy_Ws[amIdx]   <- mmFits[[amIdx]]$Fmsy[2]
+      fitTable$Bmsy_Es[amIdx]   <- mmFits[[amIdx]]$Bmsy[1]
+      fitTable$Bmsy_Ws[amIdx]   <- mmFits[[amIdx]]$Bmsy[2]
+      fitTable$propW_Es[amIdx]  <- mmFits[[amIdx]]$propW_s[1]
+      fitTable$propW_Ws[amIdx]  <- mmFits[[amIdx]]$propW_s[2]
+      fitTable$M_Es[amIdx]      <- mmFits[[amIdx]]$M_s[1]
+      fitTable$M_Ws[amIdx]      <- mmFits[[amIdx]]$M_s[2]
+      fitTable$B0_Es[amIdx]     <- mmFits[[amIdx]]$B0_s[1]
+      fitTable$B0_Ws[amIdx]     <- mmFits[[amIdx]]$B0_s[2]
+      fitTable$nll[amIdx]       <- mmFits[[amIdx]]$nll
     }
 
-    if( TACrule == "mean" )
-    {
-      TAC_E <- mean(mmTACs$TAC_E)
-      TAC_W <- mean(mmTACs$TAC_W)
-    }
+    # Write fitTable out
+    if(!dir.exists("./fitTables"))
+      dir.create("./fitTables")
 
-    if( TACrule == "AIC" )
-    {
-      TAC_E <- sum(mmTACs$wtdTAC_E)
-      TAC_W <- sum(mmTACs$wtdTAC_W)
-    }
+    fitTableFileName <- paste( "assDD_fitTable_",x,".csv",sep = "")
 
-    # Scale to kg
-    TAC_E <- TAC_E * 1e6
-    TAC_W <- TAC_W * 1e6
+    write.csv( fitTable, file = file.path("fitTables",fitTableFileName) )
 
-    # Smooth TACs from interval to interval:
-
-    # Count length of TAC vector
-    nTACs <- length( dset[[1]]$TAC[x,] )
-    # Use penultimate TAC, as there is a bug with
-    # the last one
-    lastTAC_E <- dset[[1]]$TAC[x,nTACs-1]
-    lastTAC_W <- dset[[2]]$TAC[x,nTACs-1]
-    # Calculate the deltaTAC up and down, just
-    # to make following conditionals more readable
-    deltaTACup <- 1 + maxDeltaTACup
-    deltaTACdn <- 1 - maxDeltaTACdn
-
-    # Apply maxDeltaTAC in East
-    if( TAC_E/lastTAC_E > deltaTACup )
-      TAC_E <- deltaTACup * lastTAC_E 
-    if( TAC_E/lastTAC_E < deltaTACdn )
-      TAC_E <- deltaTACdn * lastTAC_E 
-
-    # And West
-    if( TAC_W/lastTAC_W > deltaTACup )
-      TAC_W <- deltaTACup * lastTAC_W 
-    if( TAC_W/lastTAC_W < deltaTACdn )
-      TAC_W <- deltaTACdn * lastTAC_W 
-
-
-    # Check that HCR calcs are running correctly
-    if(check)
-    {
-      outTableFileName <- paste("outTable_sim",x,".csv",sep = "")
-      outTableFilePath <- file.path("outTables",outTableFileName)
-
-      if(!file.exists(outTableFilePath))
-        write.table(  outTable, file = outTableFilePath, sep = ",",
-                      row.names = FALSE )
-      else
-        write.table(  outTable, sep = ",",
-                      file = outTableFilePath, 
-                      append = TRUE, col.names = FALSE,
-                      row.names = FALSE )
-    }
-
-    TACtable <- data.frame(nSim = x, TAC_E = TAC_E, TAC_W = TAC_W )
-
-    if(!dir.exists("./TACtables"))
-      dir.create("./TACtables")
-
-    TACtableFileName <- paste( "assDD_TACtable_",x,".csv",sep = "")
-
-    write.csv( TACtable, file = file.path("TACtables",TACtableFileName) )
-
-
-    # Return TAC
-    return(c( East = TAC_E ))
   }
+
+  # if AS == 2, read in TACtables for this
+  # sim number
   if( AS == 2 )
   {
-    TACtableFileName <- paste( "assDD_TACtable_",x,".csv",sep = "")
-    TACtable <- read.csv( file.path("TACtables",TACtableFileName), 
+    fitTableFileName <- paste( "assDD_fitTable_",x,".csv",sep = "")
+    fitTable <- read.csv( file = file.path("fitTables",fitTableFileName),
                           header = TRUE, stringsAsFactors = FALSE )
-
-    TAC_W <-  TACtable$TAC_W[1]
-
-    return(c(West = TAC_W) ) 
   }
+  
+  # Apply the HCR, compute area and stock
+  # TAC
+  mmTACs <- lapply( X         = AMs,
+                    FUN       = calcHCR,
+                    fitTable  = fitTable,
+                    F23M      = F23M,
+                    caps      = caps,
+                    UCP       = UCP,
+                    AS        = AS )
+  # Apply weighting
+  mmTACs <- do.call( rbind, mmTACs ) %>%
+            mutate( zeroMeanNLL = nll - mean(nll),
+                    deltaNLL    = (zeroMeanNLL - min(zeroMeanNLL)),
+                    amWts       = exp(-deltaNLL/2)/sum(exp(-deltaNLL/2)),
+                    wtdTAC      = amWts * TAC )
+
+  if( TACrule == "mean" )
+  {
+    TAC <- mean(mmTACs$TAC)
+  }
+
+  if( TACrule == "AIC" )
+  {
+    TAC <- sum(mmTACs$wtdTAC)
+  }
+
+  # Scale to kg
+  TAC <- TAC * 1e6
+
+  # Smooth TACs from interval to interval:
+
+  # Count length of TAC vector
+  nTACs <- length( dset[[1]]$TAC[x,] )
+  # Use penultimate TAC, as there is a bug with
+  # the last one
+  lastTAC <- dset[[AS]]$TAC[x,nTACs-1]
+  # Calculate the deltaTAC up and down, just
+  # to make following conditionals more readable
+  deltaTACup <- 1 + maxDeltaTACup
+  deltaTACdn <- 1 - maxDeltaTACdn
+
+  # Apply maxDeltaTAC
+  if( TAC/lastTAC > deltaTACup )
+    TAC <- deltaTACup * lastTAC 
+  if( TAC/lastTAC < deltaTACdn )
+    TAC <- deltaTACdn * lastTAC 
+
+  # Check table
+  if( check )
+  {
+    # Combine fitTable and outTable
+    outTable            <- left_join( fitTable, mmTACs, by = "nll" )
+    outTable$mpName     <- mpName
+    outTable$area       <- areaNames[AS]
+    # Add new columns for biomass, and NLL
+    outTable$MSY_Ea     <- numeric(length(AMs))
+    outTable$MSY_Wa     <- numeric(length(AMs))
+    
+    
+    outTable$Bmsy_Ea    <- numeric(length(AMs))
+    outTable$Bmsy_Wa    <- numeric(length(AMs))
+    
+    outTable$Fmsy_Ea    <- numeric(length(AMs))
+    outTable$Fmsy_Wa    <- numeric(length(AMs))
+  
+
+    for( amIdx in 1:length(AMs) )
+    {
+      # Biomass, MSY and Fmsy
+      B_s       <- c(fitTable[amIdx,]$Bnext_E, fitTable[amIdx,]$Bnext_W)
+      propW_s   <- c(fitTable[amIdx,]$propW_E, fitTable[amIdx,]$propW_W)
+
+      B_sa      <- matrix(NA, ncol = 2, nrow = 2)
+      B_sa[,1]  <- (1 - propW_s) * B_s
+      B_sa[,2]  <- propW_s * B_s
+      # Calculate the proportion of each area biomass that is a
+      # given stocks
+      Bprop     <- B_sa 
+      for( a in 1:ncol(Bprop))
+        Bprop[,a] <- Bprop[,a] / sum(B_sa[,a])
+
+      # Now compute area Fmsy and MSY
+      # using a biomass weighting
+      outTable$MSY_Ea[amIdx]  <- sum( Bprop[,1] * fitTable[amIdx,]$MSY_Es  ) 
+      outTable$MSY_Wa[amIdx]  <- sum( Bprop[,2] * fitTable[amIdx,]$MSY_Ws  ) 
+      outTable$Fmsy_Ea[amIdx] <- sum( Bprop[,1] * fitTable[amIdx,]$Fmsy_Es ) 
+      outTable$Fmsy_Wa[amIdx] <- sum( Bprop[,2] * fitTable[amIdx,]$Fmsy_Ws ) 
+      outTable$Bmsy_Ea[amIdx] <- sum( Bprop[,1] * fitTable[amIdx,]$Bmsy_Es ) 
+      outTable$Bmsy_Wa[amIdx] <- sum( Bprop[,2] * fitTable[amIdx,]$Bmsy_Ws ) 
+
+
+    }
+    areaNames <- c("East","West")
+    outTableFileName <- paste("outTable_sim",x,areaNames[AS],".csv",sep = "")
+    outTableFilePath <- file.path("outTables",outTableFileName)
+
+    if(!file.exists(outTableFilePath))
+      write.table(  outTable, file = outTableFilePath, sep = ",",
+                    row.names = FALSE )
+    else
+      write.table(  outTable, sep = ",",
+                    file = outTableFilePath, 
+                    append = TRUE, col.names = FALSE,
+                    row.names = FALSE )
+  }
+
+  # Return TAC
+  return( TAC )
+
 }
 class(assessDDmm)<-"MSMP"
 
@@ -222,24 +233,30 @@ class(assessDDmm)<-"MSMP"
 # calcHCR()
 # Calculates stock and area TAC 
 # from the mpOutput, then
-calcHCR <- function(  mpOutput = mmTACs[1],
+calcHCR <- function(  AM       = 1,
+                      fitTable = fitTable,
                       F23M     = FALSE,
                       caps     = c(Inf,Inf),
-                      UCP      = "Bmsy" )
+                      UCP      = "Bmsy",
+                      AS       = 1 )
 {
+  
   # First, calculate TAC by stock
-  B_s       <- mpOutput$B_s
-  msy_s     <- mpOutput$msy
+  fitTable  <- fitTable[fitTable$AM == AM,]
+
+
+  B_s       <- c(fitTable$Bnext_E, fitTable$Bnext_W)
+  msy_s     <- c(fitTable$MSY_E, fitTable$MSY_W)
   if( F23M )
-    Fmsy_s  <- mpOutput$M_s*2/3
+    Fmsy_s  <- c(fitTable$M_E, fitTable$M_W)*2/3
   else
-    Fmsy_s  <- mpOutput$Fmsy
+    Fmsy_s  <- c(fitTable$Fmsy_E, fitTable$Fmsy_W)
 
   # Get Upper control point
   if( UCP == "Bmsy" )
-    Bmsy_s    <- mpOutput$Bmsy
+    Bmsy_s    <- c(fitTable$Bmsy_E, fitTable$Bmsy_W)
   if( UCP == ".4B0") 
-    Bmsy_s <- 0.4 * mpOutput$B0_s
+    Bmsy_s <- 0.4 * c(fitTable$B0_E, fitTable$B0_W)
 
   # change fmsy_s to ftarget
   Ftarg_s <- rampHCR( B_s = B_s,
@@ -253,7 +270,13 @@ calcHCR <- function(  mpOutput = mmTACs[1],
     TAC_s[sIdx] <- min( TAC_s[sIdx], msy_s[sIdx] )
 
   # Now compute TAC by area
-  B_sa      <- mpOutput$B_sa
+
+  # Apportion biomass
+  B_sa      <- matrix(NA, nrow = 2, ncol = 2)
+  B_sa[,1]  <- c((1 - fitTable$propW_E)*B_s[1],(1 - fitTable$propW_W)*B_s[2])
+  B_sa[,2]  <- c((fitTable$propW_E)*B_s[1],(fitTable$propW_W)*B_s[2])
+  # Calculate the proportion of each area biomass that is a
+  # given stocks
   Bprop     <- B_sa 
   for( a in 1:ncol(Bprop))
     Bprop[,a] <- Bprop[,a] / sum(B_sa[,a])
@@ -292,9 +315,8 @@ calcHCR <- function(  mpOutput = mmTACs[1],
   for( aIdx in 1:ncol(B_sa) )
     TAC_EW[aIdx]   <- min( TAC_EW[aIdx], caps[aIdx] )
 
-  return( data.frame( nll = mpOutput$nll,
-                      TAC_E = TAC_EW[1],
-                      TAC_W = TAC_EW[2]  ) )
+  return( data.frame( nll = fitTable$nll,
+                      TAC = TAC_EW[AS]) )
 }
 
 # Calculate ramped HCR similar to Albacore
@@ -592,6 +614,7 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                     B0_s    = repOpt$B0_s,
                     B1_s    = repOpt$B_st[ ,1],
                     B_s     = repOpt$B_st[ ,nT+1],
+                    propW_s = repOpt$propW_s,
                     Clast   = C_at[,nT],
                     B_sa    = B_sa,
                     rho_s   = repOpt$rho_s,
