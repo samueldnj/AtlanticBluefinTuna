@@ -342,7 +342,7 @@ getMPnames <- function( MSEobj )
 }
 
 # plotAllMSEs
-plotAllMSEs <- function(  OMvec = paste("ROM_",1:16,"d",sep = ""), 
+plotAllMSEs <- function(  OMvec = paste("OM_",1:15,"d",sep = ""), 
                           prefix = NULL )
 {
   MSElist <- lapply( X = OMvec, FUN = loadMSE, prefix = prefix )
@@ -378,7 +378,7 @@ plotAllMSEs <- function(  OMvec = paste("ROM_",1:16,"d",sep = ""),
 # MSE performance metrics Br30 (B_2046/Bmsy) and
 # AvC30 (Average catch in 2046) for all MPs and OMs
 plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""), 
-                          prefix = "test",
+                          prefix = NULL,
                           ptcex = 1 )
 {
   MSElist <- lapply( X = OMvec, FUN = loadMSE, prefix = prefix )

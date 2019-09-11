@@ -665,8 +665,8 @@ Type objective_function<Type>::operator() ()
     
     // If initialising at fished eqbm, use a Jeffreys Prior
     // on initial F
-//    if( initBioCode_s(s) == 1 )
-//      nlpProc += lnFinit_s(s);
+    if( initBioCode_s(s) == 1 )
+      nlpProc += 0.5 * pow((Finit_s(s) - 0.04)/0.02,2);
 
     // IG prior on sig2R
 //    nlpProc += (sig2Prior(0)+Type(1))*2.*lnsigmaR_s(s) + sig2Prior(1)/sigma2R_s(s);
@@ -685,16 +685,17 @@ Type objective_function<Type>::operator() ()
   Type nlpObsErr = 0;
   nlpObsErr += ((tau2IGa_g+Type(1))*2*lntau_g+tau2IGb_g/tau2_g).sum();
   
-  // Apply Jeffreys prior to B0
-  Type nlpB0 = 0.;
+  Type nlpM = 0;
   for( int s = 0; s < nS; s++ )
-    nlpB0 -= log(1./B0_s(s));
+    nlpM += 0.5 * pow((M_s(s) - 0.1)/.01,2);
+
   
 
   objFun += nllObs;
   objFun += nllI_gt.sum();
   objFun += nlph;
   objFun += nlpW;
+  objFun += nlpM;
   objFun += nlpProc;
   objFun += bioPenScale*bioPen;
   //objFun += nlpObsErr;

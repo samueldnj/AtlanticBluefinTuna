@@ -75,6 +75,9 @@ assessDDmm <- function( x, dset,
                               "B0_Es",
                               "B0_Ws",
                               'nll' )
+
+
+
     fitTable <- as.data.frame(fitTable)
     fitTable$AM <- AMs
 
@@ -549,11 +552,11 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 lnM_s         = rep(log(omBioPars$M),2),
                 lntau_g       = lntau_g,
                 tauW_a        = rep(0.1,nA),
-                rDev_st       = array(0, dim = c(nS,(nT))),
+                rDev_st       = array(0, dim = c(nS,(nT-1))),
                 qDev_tg       = array(0, dim = c((nT-1),nG)),
                 lnsigmaR_s    = rep(log(0.1),2),
                 lnsigmaQ_g    = rep(log(0.1),nG),
-                lnFinit_s     = log(c(0.12,0.12)),
+                lnFinit_s     = log(c(0.04,0.04)),
                 logitPropW_s  = logit(c(0.102,0.9)),
                 lnq_g         = log(initq_g),
                 sig2Prior     = c(1,2),
