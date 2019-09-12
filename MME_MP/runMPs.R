@@ -15,7 +15,7 @@ source("assessDDMP.R")
 source("calcEquilibriumDD.R")
 source("MPs.R")
 
-sfInit(parallel=TRUE, cpus = 2)
+sfInit(parallel=TRUE, cpus = detectCores() - 1)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -24,29 +24,35 @@ sfSource("calcEquilibriumDD.R")
 
 options( warn = -1 )
 
-shortListMPs <- list( loCap = c("MP_loCap","MP_loCap"),
-                      loCap23M = c("MP_loCap23M","MP_loCap23M"),
-                      hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
-                      loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
+# shortListMPs <- list( loCap = c("empMP_loCap","empMP_loCap"),
+#                       loCap23M = c("empMP_loCap23M","empMP_loCap23M"),
+#                       hiCap23M = c("empMP_hiCap23M","empMP_hiCap23M"),
+#                       loCap23M.4B0 = c("empMP_loCap23M.4B0","empMP_loCap23M.4B0") )
 
 testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
                     MPtest_AIC = c("MPtest_AIC","MPtest_AIC"),
                     MPtest_loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0"))
 
-msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
-                      MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
-                      MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
+msyCapMPs    <- list( empMP_msyCap = c("empMP_msyCap","empMP_msyCap"),
+                      empMP_msyCap.4B0 = c("empMP_msyCapF23M","empMP_msyCapF23M") )
 
 
 
-OMvec <- paste( "OM_", 1:15,sep = "" )
+
+OMdvec <- paste( "OM_", 1:15, "d",sep = "" )
+OMvec <- paste( "OM_", 1:15, sep = "" )
 
 ROMvec <- paste( "OM_", 1:31, sep = "" )
 
 OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-lapply( X = ROMvec, 
-        FUN = runCMPs,
-        assessInt = 2,
-        MPs = msyCapMPs )
+msyCapMSEs <- lapply( X = OMdvec, 
+                      FUN = runCMPs,
+                      assessInt = 2,
+                      MPs = msyCapMPs )
+
+testMSEs <- lapply( X = OMdvec, 
+                    FUN = runCMPtest,
+                    assessInt = 2,
+                    MPs = msyCapMPs )
 

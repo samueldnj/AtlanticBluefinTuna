@@ -78,6 +78,23 @@ empMP_msyCap.4B0 <- function( x, dset, AS )
 }
 class(empMP_msyCap.4B0)<-"MSMP"
 
+# MP_msyCap - a catch cap at estimated
+# MSY is applied
+empMP_msyCapF23M.4B0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  OMs     = c(1,2,4,7,11),
+                  caps    = c(Inf,Inf),
+                  TACrule = "mean",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "empMP_msyCap.4B0"  )
+  return(TAC)
+}
+class(empMP_msyCap.4B0)<-"MSMP"
+
 
 # MP_loCap - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
