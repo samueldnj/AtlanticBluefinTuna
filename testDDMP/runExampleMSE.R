@@ -31,19 +31,13 @@ testMPs <- list(  baseMM    = c("assessDDmm","assessDDmm"),
                   loCap23M  = c("MP_loCap23M","MP_loCap23M"),
                   hiCap23M  = c("MP_hiCap23M","MP_hiCap23M") )
 
-sfInit(parallel=TRUE, cpus=2)
+sfInit(parallel=TRUE, cpus=detectCores()-1)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
 sfSource("assessDDMP.R")
 sfSource("calcEquilibriumDD.R")
 
-# MSE_ex <- new(  'MSE', 
-#                 OM=OM_example,
-#                 Obs=Perfect_Obs,
-#                 MPs=testMPs,
-#                 interval=3,
-#                 IE="Overage_10")
 
 MSE_OM1d <- new(  'MSE', 
                   OM=OM_1d,
@@ -52,12 +46,12 @@ MSE_OM1d <- new(  'MSE',
                   interval=3,
                   IE="Overage_10")
 
-# MSE_1 <- new( 'MSE', 
-#               OM=OM_1,
-#               Obs=Perfect_Obs,
-#               MPs=testMPs,
-#               interval=3,
-#               IE="Overage_10")
+MSE_1 <- new( 'MSE', 
+              OM=OM_1,
+              Obs=Perfect_Obs,
+              MPs=testMPs,
+              interval=3,
+              IE="Overage_10")
 
 
 # MSE_2 <- new( 'MSE', 

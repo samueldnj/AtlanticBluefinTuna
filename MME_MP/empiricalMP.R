@@ -22,13 +22,13 @@
 #' empMMMP(1,dset = dset_EW,AS = 1, AMs = 1)
 #' sapply(1:10,empMMMP,dset = dset_EW, AS = 1, AMs = 1 )
 empMMMP <- function(  x, dset, 
+                      AS            = 1,
                       OMs           = c(1,2,4,7,11),
                       caps          = c(Inf,Inf),
                       UCP           = "Bmsy",
                       TACrule       = c("mean"),
                       wts           = rep(0,5),
                       check         = TRUE,
-                      AS            = 1,
                       maxDeltaTACup = 0.2,
                       maxDeltaTACdn = 0.5,
                       propW         = c(.102,.9),

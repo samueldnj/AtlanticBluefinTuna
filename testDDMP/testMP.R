@@ -43,11 +43,15 @@ msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
                       MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
                       MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
 
+
+# Best set of OMs to run a quick test on.
 OMvec <- paste( "OM_", 1:15,"d",sep = "" )
 OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
+# Robustness OMs
 ROMvec <- paste( "ROM_", c(18:31), "d", sep = "" )
 
+# Running CMPs on the msyCapMPs list.
 lapply( X = OMvec, 
         FUN = runCMPs,
         assessInt = 2,

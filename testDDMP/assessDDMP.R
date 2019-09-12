@@ -12,20 +12,28 @@ dyn.load(dynlib('tunaDelay'))
 #' @param x a simulation number.
 #' @param dset a list with two positions (1:East  2:West) of simulated data for use by management procedures.
 #' @param AS the management area for which advice is being provided (1:East 2:West)
-#' @param AMs a numeric vector of AM indicator numbers, selecting specific AMs tune to different OMs
+#' @param AMs a numeric vector of AM indicator numbers, selecting specific AMs tuned to different OMs
+#' @param caps a 2-numeric defining precautionary caps for each area. Inf implies that AM MSY is used.
+#' @param F23M a boolean indicating whether 2/3 M is used in place of Fmsy for HCRs
+#' @param UCP a char vector for the upper control point on the HCR, with either "Bmsy" or ".4B0"
+#' @param TACrule the method for combining TACs, either "mean" or "AIC"
+#' @param check A boolean indicating whether check tables of TAC and projected biomass are saved to ./outTables/
+#' @maxDeltaTACup max proportional increase in TAC
+#' @maxDeltaTACdn max proportional decrease in TAC
+#' @mpName character vector showing mpName for saving into check tables
 #' @return a TAC recommendation arising from \code{x, dset, AS}.
 #' @export
 #' @examples
 #' assessDDmm(1,dset = dset_EW,AS = 1, AMs = 1)
-#' sapply(1:10,assessDD,dset = dset_EW, AS = 1, AMs = 1 )
+#' sapply(1:10,assessDDmm,dset = dset_EW, AS = 1, AMs = 1 )
 assessDDmm <- function( x, dset, 
+                        AS            = 1,
                         AMs           = c(1,2,4,7,11),
                         caps          = c(Inf,Inf),
                         F23M          = FALSE,
                         UCP           = "Bmsy",
                         TACrule       = c("mean"),
                         check         = FALSE,
-                        AS            = 1,
                         maxDeltaTACup = 0.2,
                         maxDeltaTACdn = 0.5,
                         mpName        = "assessDDmm" )

@@ -14,6 +14,7 @@ source("initTest.R")
 source("assessDDMP.R")
 source("calcEquilibriumDD.R")
 source("MPs.R")
+source("plots.R")
 
 sfInit(parallel=TRUE, cpus = 2)
 sfLibrary( ABTMSE )

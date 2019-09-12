@@ -22,12 +22,12 @@ dsetComb <- list( E = dset_example_East,
 # dset for 3 OMs
 checkTAC <- empMMMP(  x = 1, 
                       dset = dsetComb, 
-                      OMs = c(1,4,7) )
+                      OMs = c(1,2,4,5,7,8,10,11) )
 
 
 # Now define an MP list and run the MSE on OM_1
-testMPs <- list(  baseMM    = c("empMMMP","empMMMP") )
-#                   loCap     = c("MP_loCap","MP_loCap"),
+testMPs <- list(  baseEmpMP    = c("empMMMP","empMMMP") )
+                  # loCap     = c("MP_loCap","MP_loCap"),
 #                   hiCap     = c("MP_hiCap","MP_hiCap"),
 #                   loCap23M  = c("MP_loCap23M","MP_loCap23M"),
 #                   hiCap23M  = c("MP_hiCap23M","MP_hiCap23M") )
@@ -40,7 +40,7 @@ testMPs <- list(  baseMM    = c("empMMMP","empMMMP") )
 # sfSource("calcEquilibriumDD.R")
 
 MSE_ex <- new(  'MSE', 
-                OM=OM_1d,
+                OM=OM_1,
                 Obs=Perfect_Obs,
                 MPs=testMPs,
                 interval=3,

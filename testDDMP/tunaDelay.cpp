@@ -1,5 +1,5 @@
 // ><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><>><><>><><>><><>><>
-// hierDelayAssess.cpp
+// tunaDelay.cpp
 // 
 // A multi-stock Schnute-Deriso state-space spatially implicit Delay-Difference 
 // model. Built to fit to the ABFT-MSE operating model data.
