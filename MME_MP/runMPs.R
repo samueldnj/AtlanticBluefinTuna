@@ -11,8 +11,7 @@
 
 # Load the ABTMSE package
 source("initTest.R")
-source("assessDDMP.R")
-source("calcEquilibriumDD.R")
+source("empiricalMP.R")
 source("MPs.R")
 
 sfInit(parallel=TRUE, cpus = detectCores() - 1)
