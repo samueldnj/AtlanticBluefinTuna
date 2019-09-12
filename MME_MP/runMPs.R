@@ -18,8 +18,7 @@ sfInit(parallel=TRUE, cpus = detectCores() - 1)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
-sfSource("assessDDMP.R")
-sfSource("calcEquilibriumDD.R")
+sfSource("empiricalMP.R")
 
 options( warn = -1 )
 
