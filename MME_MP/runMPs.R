@@ -19,6 +19,7 @@ sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
 sfSource("empiricalMP.R")
+sfSource("MPs.R")
 
 options( warn = -1 )
 
