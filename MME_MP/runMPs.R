@@ -15,7 +15,7 @@ source("empiricalMP.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus = 2)
+sfInit(parallel=TRUE, cpus = detectCores() - 1 )
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -40,21 +40,21 @@ msyCapMPs    <- list( empMP_msyCap = c("empMP_msyCap","empMP_msyCap"),
 
 
 
-OMdvec <- paste( "OM_", 1:2, "d",sep = "" )
-OMvec <- paste( "OM_", 1:2, sep = "" )
+OMdvec <- paste( "OM_", 1:15, "d",sep = "" )
+OMvec <- paste( "OM_", 1:15, sep = "" )
 
 ROMvec <- paste( "OM_", 1:31, sep = "" )
 
 OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-msyCapMSEs <- lapply( X = OMdvec, 
+msyCapMSEs <- lapply( X = OMvec, 
                       FUN = runCMPs,
                       assessInt = 2,
                       MPs = msyCapMPs,
-                      checkMPs = FALSE,
+                      checkMPs = TRUE,
                       projFolderName = "msyCaps" )
 
-testMSEs <- lapply( X = OMdvec, 
+testMSEs <- lapply( X = OMvec, 
                     FUN = runCMPs,
                     assessInt = 2,
                     MPs = msyCapMPs,
