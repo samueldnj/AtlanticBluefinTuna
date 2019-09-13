@@ -50,9 +50,7 @@ We chose a tuning subset of five reference grid operating models to tune our
 estimation procedures. These five OMs were chosen to span the three main axes 
 of operating model uncertainties (stock-recruit steepness, natural 
 mortality/maturity, and stock mixing), as well as the range of spawning 
-stock biomass scales and dynamics.
-
-***FIGURES OF BIOMASS ESTIMATES***
+stock biomass scales and dynamics (Figure 1).
 
 
 ## Empirical Estimation Procedure

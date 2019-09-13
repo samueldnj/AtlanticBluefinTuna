@@ -173,13 +173,15 @@ plot_TACperformance <- function(  simIdx      = 1,
 
   # Now, get the right checkTables
   westCheckTable <- do.call("rbind", westTables ) %>%
-                      filter( simNum == simIdx)
+                      filter( simNum == simIdx,
+                              mpName == MPlist[[MPidx]][2])
 
   eastCheckTable <- do.call("rbind", eastTables ) %>%
-                      filter( simNum == simIdx)
+                      filter( simNum == simIdx,
+                              mpName == MPlist[[MPidx]][2])
 
-  if( westCheckTable$mpName != westMPid | eastCheckTable$mpName != eastMPid |
-      westCheckTable$simNum != simIdx | eastCheckTable$simNum != simIdx )
+  if( any(westCheckTable$mpName != westMPid) | any(eastCheckTable$mpName != eastMPid) |
+      any(westCheckTable$simNum != simIdx) | any(eastCheckTable$simNum != simIdx) )
   {
 
     message("MPname or simNum doesn't match! Wrong table read in.\n")
