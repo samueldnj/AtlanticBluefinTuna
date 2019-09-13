@@ -6,7 +6,7 @@
 #
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-checkMP <- TRUE
+checkMP <<- TRUE
 
 # MP_testMean - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West,
@@ -164,9 +164,11 @@ class(empMP_loCap.4B0)<-"MSMP"
 #   MPs = a list of character 2-ples of MP names (E/W)
 #   assessInt = integer of assessment intervals, required
 #               for plotting purposes
-runCMPtest <- function( OM = "OM_1d",
-                        MPs = list( test = c("MP_testMean","MP_testMean") ),
-                        assessInt = 2 )
+runCMPs <- function(  OM = "OM_1d",
+                      MPs = list( test = c("empMPtest_Mean","empMPtest_Mean") ),
+                      assessInt = 2,
+                      checkMPs = FALSE,
+                      projFolderName = NULL )
 {
   library(ABTMSE)
   library(TMB)
@@ -176,7 +178,7 @@ runCMPtest <- function( OM = "OM_1d",
   # Load ABT objects in this environment
   loadABT()
 
-  checkMP <- TRUE
+  checkMP <<- checkMPs
 
   # Clear outTables directory
   outTableFiles <- list.files("./outTables", full.names = TRUE)
@@ -191,6 +193,8 @@ runCMPtest <- function( OM = "OM_1d",
   # Count MPs
   nMPs  <- length(MPs)
 
+  checkMP <<- checkMPs
+
   # Run MSE
   MSEobj <- new(  Class     = "MSE",
                   OM        = OMobj,
@@ -203,69 +207,80 @@ runCMPtest <- function( OM = "OM_1d",
   assign( x = paste("MSEtest_",OM,sep = ""),
           value = MSEobj )
 
+  if(!is.null(projFolderName))
+  {
+    projFolderPath <- file.path("MSEs",projFolderName)
+    dir.create(file.path("MSEs",projFolderName))
+  }
+  else projFolderPath <- "MSEs"
+
   # Save that MSE
-  save( list = MSEsymbol, file = file.path("MSEs",paste(MSEsymbol,".Rdata",sep = "")) )  
+  save( list = MSEsymbol, file = file.path(projFolderPath,paste(MSEsymbol,".Rdata",sep = "")) )  
   # Create the report
   MSE_report( MSEobj, 
-              dir=file.path(getwd(),"MSEs"), 
+              dir=file.path(getwd(),projFolderPath), 
               Author='Landmark Fisheries Research', 
               introtext=paste("Multi-model delay difference assessment on", OM,sep =""), 
               filenam=paste(MSEsymbol,"_report",sep = ""))  
 
   # Collect the checkTables
-  outTableFiles <- list.files("./outTables", full.names = TRUE)
-  nSims <- dim(MSEobj@SSB)[2]
-
-  westCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "West") ]
-  eastCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "East") ]
-
-  westCheckTables <- lapply(  X = westCheckTableFiles, FUN = read.csv,
-                              header = TRUE, stringsAsFactors = FALSE )
-
-  eastCheckTables <- lapply(  X = eastCheckTableFiles, FUN = read.csv,
-                              header = TRUE, stringsAsFactors = FALSE )
-
-  if(length(westCheckTables) != nSims | length(eastCheckTables) != nSims )
-    browser(cat("Wrong number of checkTables") )
-
-
-  # Save to output directory
-  if(!dir.exists("MSEs/fitCheck"))
-    dir.create("MSEs/fitCheck")
-
-  if(!dir.exists(file.path("MSEs/fitCheck",OM)))
-    dir.create(file.path("MSEs/fitCheck",OM))
-
-  checkTablesSavePath <- file.path("MSEs/fitCheck",OM,"checkTables.Rdata")
-
-  ewCheckTableList <- list( east = eastCheckTables, west = westCheckTables)
-
-  save( ewCheckTableList, 
-        file = checkTablesSavePath )
-
-  for( i in 1:nSims )
+  if( checkMPs )
   {
-    for( j in 1:nMPs )
+    outTableFiles <- list.files("./outTables", full.names = TRUE)
+    nSims <- dim(MSEobj@SSB)[2]
+
+    westCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "West") ]
+    eastCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "East") ]
+
+    westCheckTables <- lapply(  X = westCheckTableFiles, FUN = read.csv,
+                                header = TRUE, stringsAsFactors = FALSE )
+
+    eastCheckTables <- lapply(  X = eastCheckTableFiles, FUN = read.csv,
+                                header = TRUE, stringsAsFactors = FALSE )
+
+    if(length(westCheckTables) != nSims | length(eastCheckTables) != nSims )
+      browser(cat("Wrong number of checkTables") )
+
+
+    # Save to output directory
+    fitCheckFolder <- file.path(projFolderPath,"fitCheck")
+    if(!dir.exists(fitCheckFolder))
+      dir.create(fitCheckFolder)
+
+    if(!dir.exists(file.path(fitCheckFolder,OM)))
+      dir.create(file.path(fitCheckFolder,OM))
+
+    checkTablesSavePath <- file.path(fitCheckFolder,OM,"checkTables.Rdata")
+
+    ewCheckTableList <- list( east = eastCheckTables, west = westCheckTables)
+
+    save( ewCheckTableList, 
+          file = checkTablesSavePath )
+
+    for( i in 1:nSims )
     {
-      MPid <- names(MPs)[j]
-      # Create a directory for the MP if it doesn't exist
-      if( !dir.exists(file.path("MSEs/fitCheck",OM,MPid)) )
-        dir.create(file.path("MSEs/fitCheck",OM,MPid))
-      
-      fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
-      png(  filename = file.path("MSEs/fitCheck",OM,MPid,fitCheckPlot),
-            width = 8.5, height = 11, units = "in", res = 300 )
-      plot_TACperformance(  simNum      = i,
-                            MSEobj      = MSEobj,
-                            westTables  = westCheckTables,
-                            eastTables  = eastCheckTables,
-                            MPlist      = MPs,
-                            MPidx       = j,
-                            interval    = assessInt )
-      dev.off()
+      for( j in 1:nMPs )
+      {
+        MPid <- names(MPs)[j]
+        # Create a directory for the MP if it doesn't exist
+        if( !dir.exists(file.path(fitCheckFolder,OM,MPid)) )
+          dir.create(file.path(fitCheckFolder,OM,MPid))
+        
+        fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
+        png(  filename = file.path(fitCheckFolder,OM,MPid,fitCheckPlot),
+              width = 8.5, height = 11, units = "in", res = 300 )
+        plot_TACperformance(  simNum      = i,
+                              MSEobj      = MSEobj,
+                              westTables  = westCheckTables,
+                              eastTables  = eastCheckTables,
+                              MPlist      = MPs,
+                              MPidx       = j,
+                              interval    = assessInt )
+        dev.off()
+      }
+      # Remove checkTables for next run
+      system( paste("rm -r ", outTableFiles[i], sep = "") )
     }
-    # Remove checkTables for next run
-    system( paste("rm -r ", outTableFiles[i], sep = "") )
   }
   return(MSEobj)
 }
@@ -283,7 +298,7 @@ runCMPtest <- function( OM = "OM_1d",
 #   MPs = a list of character 2-ples of MP names (E/W)
 #   assessInt = integer of assessment intervals, required
 #               for plotting purposes
-runCMPs <- function(  OM = "OM_1",
+runCMPsOld <- function(  OM = "OM_1",
                       MPs = list( test = c("MP_loCap","MP_loCap") ),
                       assessInt = 2,
                       report = TRUE,
@@ -341,7 +356,7 @@ runCMPs <- function(  OM = "OM_1",
 #   MPs = a list of character 2-ples of MP names (E/W)
 #   assessInt = integer of assessment intervals, required
 #               for plotting purposes
-runCMPs <- function(  OM = "OM_1",
+runCMPsOlder <- function(  OM = "OM_1",
                       MPs = list( test = c("MP_loCap","MP_loCap") ),
                       assessInt = 2,
                       report = TRUE,
