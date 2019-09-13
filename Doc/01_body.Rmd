@@ -44,10 +44,9 @@ to management indices.
 
 ## Choice of operating models
 
-Some of the following can be moved to the subsections...
-
-We chose a tuning subset of five reference grid operating models to tune our 
-estimation procedures. These five OMs were chosen to span the three main axes 
+We chose a tuning subset of five reference grid operating models,
+namely OMs 1, 2, 4, 7, and 11, to tune our  estimation procedures. 
+These five OMs were chosen to span the three main axes 
 of operating model uncertainties (stock-recruit steepness, natural 
 mortality/maturity, and stock mixing), as well as the range of spawning 
 stock biomass scales and dynamics (Figure 1).
@@ -133,7 +132,14 @@ fishing mortality at all time steps $t \geq 1$, which were used in
 the survival calculation to progress numbers and biomass to the 
 next time step.
 
-Random walk in process errors...
+We modeled recruitment process errors as a simple random
+walk, rather than indepent deviations from the stock recruit curve.
+We chose a random walk as it was more able to capture dynamic
+recruitment regimes. Furthermore, random walks would also make 
+projected recruitments, which are an important component of 
+projected biomass in a delay difference formulation, less
+likely to be average, and more like the estimated
+recruitment in the last year of the assessment period.
 
 Because this is a model-based MP and the time-series of approved 
 management indices are rather short, we included two additional indices.
@@ -141,11 +147,11 @@ These indices were the M3 model yearly spawning stock biomass estimates
 for the East and West stocks. These biomass time series were assumed to be
 observed with catchability $q = 1$ and an observation error
 CV of $5 \%$. This allowed our AMs to estimate catchability for the 
-approved indices and scale them to the spawning stock biomass, which was 
-required for extending the fit to the approved indices in the projections,
-as well as making sensible estimates of biological parameters despite the
-complexity difference between the operating model and the assesment
-models.
+approved indices and scale them appropriately to the spawning stock biomass 
+from the associated operating model, which was required for extending the 
+fit to the approved indices in the projections, as well as making sensible
+estimates of biological parameters despite the complexity mismatch between 
+the operating model and the assesment models.
 
 
 ### Reference Points
@@ -250,8 +256,16 @@ a maximum decrease of 50%, compared to the previous management interval.
 
 ## Fits of Delay Difference AMs to historical data
 
-The addition of spawning stock biomass as absolute stock indices allowed
-the delay difference models to fit to historical biomass well. 
+We found that by fitting the delay difference assessment model to operating
+model biomass, we could recapture the operating model biomass series
+faithfully (Figures 2 and 3). Management indices were then able to scale
+to the stock biomass and estimates of catchability parameters were suitable
+for the delay difference assessment (Figure 3).
+
+The similarity between assessment model estimates of biological parameters
+and equilibria, and operating model estimates of the same parwas mixed 
+
+
 
 ## Performance in projections
 

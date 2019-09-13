@@ -14,6 +14,8 @@ for( k in 1:5 )
 
 ```
 
+\newpage
+
 # Tables
 
 ```{r ddEqbmTable, echo = FALSE, warning =  FALSE }
@@ -104,7 +106,7 @@ knitr::include_graphics("data/OMbiomass.pdf")
 
 
 ```{r AMfitPlotsCaptions, echo = FALSE, include = FALSE, warning = FALSE}
-amBiomassCap <- "Spawning stock biomass estimates by stock (left hand column) and area (right hand column) from the delay difference stock assessment model fit to OM 1. Total area catch is shown split into East stock (red bars) and West stock (blue bars)."
+amBiomassCap <- "Spawning stock biomass estimates by stock (left hand column) and area (right hand column) from the delay difference stock assessment model fit to OM 1. Total area catch is shown split into East stock (red bars) and West stock (blue bars). Note that the catch scale is exaggerated with respect to the biomass, so that West stock catch is visible in the East area."
 
 amIdxFitsCap <- "Fits of the delay difference stock assessment model to stock and area management indices, with the associated catchability estimates. Data are shown as circles, while the lines indicate the model biomass scaled by catchability. East Stock and West Stock indices are the spawning stock biomass estimates from operating model 1."
 
