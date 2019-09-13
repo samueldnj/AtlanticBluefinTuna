@@ -146,7 +146,10 @@ empMMMP <- function(  x, dset,
     outTable$mpName     <- mpName
     outTable$area       <- areaNames[AS]
     outTable$simNum     <- x
-    
+      
+    if(!dir.exists("outTables"))
+      dir.create("outTables")
+
     outTableFileName <- paste("outTable_sim",x,areaNames[AS],".csv",sep = "")
     outTableFilePath <- file.path("outTables",outTableFileName)
 

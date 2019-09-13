@@ -14,12 +14,12 @@ source("initTest.R")
 source("empiricalMP.R")
 source("MPs.R")
 
-sfInit(parallel=TRUE, cpus = detectCores() - 1)
-sfLibrary( ABTMSE )
-sfLibrary( TMB )
-sfClusterCall("loadABT")
-sfSource("empiricalMP.R")
-sfSource("MPs.R")
+# sfInit(parallel=TRUE, cpus = detectCores() - 1)
+# sfLibrary( ABTMSE )
+# sfLibrary( TMB )
+# sfClusterCall("loadABT")
+# sfSource("empiricalMP.R")
+# sfSource("MPs.R")
 
 options( warn = -1 )
 
@@ -33,7 +33,7 @@ testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
                     MPtest_loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0"))
 
 msyCapMPs    <- list( empMP_msyCap = c("empMP_msyCap","empMP_msyCap"),
-                      empMP_msyCap.4B0 = c("empMP_msyCapF23M","empMP_msyCapF23M") )
+                      empMP_msyCap.4B0 = c("empMP_msyCap.4B0","empMP_msyCap.4B0") )
 
 
 
