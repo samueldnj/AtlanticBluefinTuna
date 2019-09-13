@@ -146,7 +146,7 @@ empMP_hiCap.4B0 <- function( x, dset, AS )
                   AS      = AS,
                   check   = checkMP,
                   UCP     = ".4B0",
-                  mpName  = "empMP_loCap.4B0" )
+                  mpName  = "empMP_hiCap.4B0" )
 
   return(TAC)
 }
