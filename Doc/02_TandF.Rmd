@@ -1,0 +1,103 @@
+
+```{r ddAMfitsToHist, echo = FALSE, warning = FALSE}
+
+AMs <- c(1,2,4,7,11)
+
+AMfitList <- vector(mode = "list", length = 5)
+
+for( k in 1:5 )
+{
+  load(file.path("../tunaDelayMP/AM",AMs[k],"/outList.Rdata"))
+  AMfitList[[k]] <- outList
+}
+
+
+```
+
+# Tables
+
+```{r ddEqbmTable, echo = FALSE, warning =  FALSE }
+eqbmTab <- read.csv( "./data/eqbmTable.csv", header = T,
+                      stringsAsFactors = FALSE ) 
+
+eqbmTabCap <- "Unfished and fished equilibrium quantities for the delay-difference population dynamics."
+
+csasdown::csas_table(  eqbmTab, caption = eqbmTabCap )
+
+```
+
+\newpage
+
+
+```{r ddModelTable, echo = FALSE, warning =  FALSE }
+ddModelTab <- read.csv( "./data/ddModelTab.csv", header = T,
+                        stringsAsFactors = FALSE ) 
+
+ddModelTabCap <- "Process and observation model components of the delay difference stock assessment model used in BC Sablefish management procedures. Initialisation values for biomass, numbers, and recruitment are equilibrium unfished values from Table 2."
+
+csasdown::csas_table(   ddModelTab, 
+                        caption = ddModelTabCap,
+                        format = kable_format ) %>% 
+            group_rows("Model Free Parameters", 1, 1, bold =T, italic = F ) %>%
+            group_rows("Initialisation $(t = 1)$", 2, 4, bold =T, italic = F, escape = F ) %>%
+            group_rows("Mixed Area Biomass", 5, 6, bold =T, italic = F, escape = F ) %>%
+            group_rows("Stock Specific Catch", 7, 7, bold =T, italic = F, escape = F ) %>%
+            group_rows("Time series Reconstruction $(2 \\\\leq t \\\\leq T)$", 8, 11, bold =T, italic = F, escape = F ) %>%
+            group_rows("Statistical Model", 12, 15, bold =T, italic = F ) 
+
+```
+
+\newpage
+
+```{r ddAMHistFitTable, echo = FALSE, warning = FALSE}
+
+ddAMFitTableCap <- "Delay difference assessment model estimates of unfished biomass, natural mortality, and biological reference points, when fit to the tuning grid of operating models 1, 2, 4, 7, and 11."
+
+colNamesFitTable <- c(  "AM", 
+                        "$B_{0,MED}$", 
+                        "$B_{MSY,MED}$", 
+                        "$F_{MSY,MED}$", 
+                        "$MSY_{MED}$", 
+                        "$M_{MED}$",
+                        "$B_{0,GOM}$", 
+                        "$B_{MSY,GOM}$", 
+                        "$F_{MSY,GOM}$", 
+                        "$MSY_{GOM}$", 
+                        "$M_{GOM}$")
+
+amFitTable <- matrix(NA, nrow = 5, ncol = length(colNamesFitTable))
+colnames(amFitTable) <- colNamesFitTable
+amFitTable <- as.data.frame(amFitTable)
+
+for( k in 1:length(AMs) )
+{
+  amFitTable$AM[k] <- AMs[k]
+  amFitTable[k,c("$B_{0,MED}$","$B_{0,GOM}$")] <- round(AMfitList[[k]]$mpOutput$B0_s,2)
+  amFitTable[k,c("$B_{MSY,MED}$","$B_{MSY,GOM}$")] <- round(AMfitList[[k]]$mpOutput$Bmsy,2)
+  amFitTable[k,c("$F_{MSY,MED}$","$F_{MSY,GOM}$")] <- round(AMfitList[[k]]$mpOutput$Fmsy,2)
+  amFitTable[k,c("$MSY_{MED}$","$MSY_{GOM}$")] <- round(AMfitList[[k]]$mpOutput$msy,2)
+  amFitTable[k,c("$M_{MED}$","$M_{GOM}$")] <- round(AMfitList[[k]]$repOpt$M_s,2)
+
+}
+
+csasdown::csas_table( amFitTable,
+                      caption = ddAMFitTableCap,
+                      format = kable_format,
+                      landscape = TRUE ) %>%
+          add_header_above( c(" " = 1, "Mediterranean Spawners" = 5, "Gulf of Mexico Spawners" = 5 ),
+                    bold = T )
+
+```
+
+# Figures
+
+
+```{r OMbioCaption, echo = FALSE, include = FALSE, warning = FALSE}
+OMbioCap <- "Operating model spawning stock biomasses for the full reference grid for both the Mediterannean stock (East) and Gulf of Mexico stock (West). Each colour corresponds to a different OM from the reference grid."
+```
+
+```{r heatMapPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=OMbioCap}
+# Include the graphics
+knitr::include_graphics("data/OMbiomass.pdf")
+
+```

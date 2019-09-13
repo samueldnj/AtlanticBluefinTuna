@@ -1,0 +1,268 @@
+# Introduction
+
+The International Commission for the Conservation of Atlantic
+Tunas (ICCAT) is currently conducting a management strategy evaluation (MSE)
+for Atlantic bluefin tuna (ref ICCAT 2019). The technical core 
+of an MSE is closed loop simulation testing of candidate managment 
+procedures (CMPs) that provide harvest advice in the presence
+of uncertainty. Uncertainty is captured by a set of operating models,
+which represent a plausible range of states for the
+management system.
+
+The operating models for Atlantic bluefin tuna are based on different
+hypotheses (fits) of a multi-stock, multi-area, age- and length-structured 
+model known as the Modifiable Multi-stock Model (M3), with 4 fishing 
+seasons per year, that allow for mixing of fish from both stocks in each area in a given
+season (**REF TSD**). Given the inherent complexity of such 
+a model, it is impossible to use the same structure within a management
+procedure, as management procedures must be able to be tested within
+simulations in a timely manner. Therefore, management procedures must 
+be designed that are of lower levels of complexity than the operating model. 
+
+In this paper, we develop and test two classes of CMPs that use multi-model inference
+to provide harvest advice in the MSE framework. The first class is 
+based on an empirical index-based method of estimating spawning stock
+biomass, and the second replaces the empirical method with a multi-stock
+state-space delay difference stock assessment model. Both classess are
+made up of five biomass estimation and harvest control rules that are 
+tuned to one of five reference grid operating models. Catch advice from each 
+sub-procedure is then combined to produce area-specific TACs. 
+
+# Methods
+
+Our candidate management procedures were based on multi-model inference 
+[@rossi2019inferring], combining estimates of biomass and associated catch
+advice from sub-procedures tuned to a subset of the reference grid of
+multi-stock operating models. This multi-model formulation allowed us to 
+capture the biological uncertainty represented by the reference grid 
+of operating models.
+
+We defined two classes of MP: empirical and model based. The empirical MPs
+scale larval indices by OM estimates of catchability, while the 
+model-based MPs fit state space delay difference assessment model
+to management indices.
+
+## Choice of operating models
+
+Some of the following can be moved to the subsections...
+
+We chose a tuning subset of five reference grid operating models to tune our 
+estimation procedures. These five OMs were chosen to span the three main axes 
+of operating model uncertainties (stock-recruit steepness, natural 
+mortality/maturity, and stock mixing), as well as the range of spawning 
+stock biomass scales and dynamics.
+
+***FIGURES OF BIOMASS ESTIMATES***
+
+
+## Empirical Estimation Procedure
+
+The empirical estimation procedure used a simple moving average of
+the two spawning stock larvel survey indices. For each time step $t$,
+and stock $s \in \{GOM, MED\}$ the current average larvel index is 
+calculated as
+\begin{align}
+\bar{I}_{s,t} & = \frac{\sum_{t'= t-3}^{t} I_{s,t'}}{4}, 
+\end{align}
+where $I_{s,t}$ is the larval index for stock $s$ at time $t$. We then
+scaled the smoothed survey indices to multiple biomass estimates, one
+for every operating model in the tuning subset, by using the appropriate 
+larval survey catchability parameter, e.g
+\begin{equation}
+\hat{B}_{s,t,k} = \frac{\bar{I}_{s,t}}{q_{s,k}},
+\end{equation}
+where $q_{s,k}$ is the stock larval index catchability parameter from
+the tuning operating model $k \in \{1,2,4,7,11\}$. 
+
+Spawning stock biomass was then translated to area biomass using an
+assumed constant distribution of biomass for stock mixing
+\begin{equation}
+P = (p_{s,a}) =  \left( \begin{array}{cc}
+                .898 & .102 \\
+                .1 & .9
+            \end{array}
+    \right),                    
+\end{equation}
+found by averaging the proportion of stock biomass in each area
+over the historical period in the tuning set of OMs. The rows 
+of matrix $P$ are indexed by spawning stocks $\{MED, GOM\}$, and the 
+columns are indexed by management area $\{ E, W\}$. This generates
+an area specific biomass
+\begin{equation}
+B_a = \sum_{s} p_{s,a} B_s,
+\end{equation}
+where $s \in \{MED, GOM\}$, $a \in \{E, W\}$.
+
+## Delay Difference Model
+
+For the model-based class of procedures, the simple index scaling
+method of the empirical procedure is replaced by a state-space
+multi-stock delay difference assessment model. The two spawning
+stocks are assumed to be distinct spawning stocks for the larval
+surveys, but are mixed using the distribution $P$ for 
+the other management indices and the observed catches. 
+
+
+### Equilibiria
+
+Because there is no mixing of spawners, each stock has the simple Delay
+Difference equilibrium states, which can be expressed as a function
+of long-term fishing mortality $f = F_s$. The equations for equilibria 
+in Table 1 were used to initialise the model at a fished equilibrium 
+in 1965, as well as estimate biological reference points for use in 
+the harvest control rules.
+
+### Biomass time series reconstruction
+
+Each assessment model was initialised in a fished state in 1965. To do so,
+we estimated an initial fishing mortality rate $F_(s,0)$, and assumed
+that the stock was at the fished equilibrium defined in Table 1. Other free
+parameters were unfished biomass $B_{s,0}$, catchability $q_g$ and 
+observation error uncertainty $\tau_g$ for biomass and abundance indices,
+and recruitment process error deviations $\omega_{s,t}$ for 
+$t \in 1966,..., 2014$ (Table 2).
+
+We assumed the that proportion $p_{s,a}$ of 
+stock~$s \in \{MED,GOM\}$ in area~$a \in \{E,W\}$ was 
+constant, allowing the fluctuations in stock biomass to 
+account for the mixing dynamics. We also assumed that the stocks
+were homogeneously mixed in each area, so that total stock specific 
+catch was the sum of the area specific catches, split according 
+to the proportion to the stock biomass in each area (eqn ref).
+
+We used a numerical Newton-Rhapson method to solve for instantaneous
+fishing mortality at all time steps $t \geq 1$, which were used in 
+the survival calculation to progress numbers and biomass to the 
+next time step.
+
+Random walk in process errors...
+
+Because this is a model-based MP and the time-series of approved 
+management indices are rather short, we included two additional indices.
+These indices were the M3 model yearly spawning stock biomass estimates 
+for the East and West stocks. These biomass time series were assumed to be
+observed with catchability $q = 1$ and an observation error
+CV of $5 \%$. This allowed our AMs to estimate catchability for the 
+approved indices and scale them to the spawning stock biomass, which was 
+required for extending the fit to the approved indices in the projections,
+as well as making sensible estimates of biological parameters despite the
+complexity difference between the operating model and the assesment
+models.
+
+
+### Reference Points
+
+Reference points for each stock were estimated from the equilibrium
+values in (Table 1). The optimal fishing mortality rate $F_{MSY}$
+was found by numerically solving for the stationary point of the yield
+curve, and was in turn used to estimate the optimal equilibrium
+biomass $B_{MSY}$ associated with that mortality rate.
+
+We estimated area based reference points for use in harvest control
+rules, which were the stock-area biomass weighted averages of
+the stock-specific reference points, i.e.
+\begin{align}
+B_{MSY,a} & = \sum_{s} \frac{B_{s,a}}{B_a} B_{MSY,s}, \\
+F_{MSY,a} & = \sum_{s} \frac{B_{s,a}}{B_a} F_{MSY,s},
+\end{align}
+where $B_{s,a} = p_{s,a} B_s$.
+
+## Harvest Control Rules
+
+SAM: make a table of HCR design dimensions (UCPs, Umax, Caps)
+
+For each of the five sub-procedures we defined a ramped harvest 
+control rule with upper and lower control points and a maximum harvest
+rate. The control points and maximum harvest rates for these rules were 
+based either based on the associated operating model's biological reference
+points, or the , and a precautionary TAC cap was used to limit removals in 
+cases of bias in projected biomass or reference point estimates.
+
+Our ramped harvest control rule was based off the rules used for
+albacore tuna [ref]. These rules requires an upper control point ($UCP$), 
+a lower control point ($LCP$) and a maximum target harvest rate $U_{max}$. 
+The general form of the rules (ignoring AM, area, and stock indices):
+
+\begin{align}
+U_{targ} =  \left\{\begin{array}{ll} 
+                0.1 \cdot U_{max} & B \leq LCP \\
+                U_{max} * (0.1  + 0.9 \frac{B}{UCP - LCP} ) & LCP \leq B \leq UCP \\
+                U_{max} & UCP \leq B 
+            \end{array} \right.
+\end{align}
+
+
+For all HCRs, we set $LCP = .4 UCP$, and tested two options for the 
+upper control point: $UCP = B_{MSY}$ or $UCP = .4 B_0$. We also tested 
+two options for the maximum target harvest rate at $U_{max} = F_{MSY}$ 
+and $U_{max} = \frac{2\cdot M}{3}$. Under the empirical management
+procedures, control points were taken from the tuning
+grid of operating models, while under the model-based MPs,
+control points were taken as the delay difference model
+equilibria.
+
+Both home-stock- and area-based harvest control rules were applied for
+East and West area TACs. For example, in the East area, HCRs were applied
+based on East (MED) spawning stock biomass compared to the East stock
+control points and harvest rates, and East area biomass compared to mixed 
+stock control points and harvest rates. Mixed area based control points 
+and harvest rates were averaged over the two stocks present in the area, 
+weighted by the proportion of stock specific biomass in that area 
+(e.g. see area-based reference points calcs in previous section), and 
+the lower of the two TACs was chosen. From this, the West TAC would almost 
+always be managed according to the Gulf of Mexico spawning stock harvest 
+control rules, and the East TAC would almost always be managed according
+to the mixed East Area harvest control rule, as this includes the weaker
+stock.
+
+We applied a TAC cap in each area to make the HCRs more precautionary. This
+extra precaution is required to guard against optimistic assessment errors 
+and biases in reference point calculations, both of which are  
+caused by the complexity mismatch between the AMs and the OMs. We tested
+three kinds of caps: a high cap of 25 kt in the East, and 4 kt in the West;
+a low cap of 20 kt in the East, and 2.5 kt in West; and a cap of the 
+stock and area based MSY, which was derived from assessment model 
+equilibria (Table 1).
+
+
+## Providing catch advice by area
+
+To provide a single TAC at each time step we averaged over the TAC 
+advice from the 5 sub-procedures for both the empirical and 
+model-based MPs. For the model-based MP, we tested two weightings 
+for the averaging: equal weighting (standard mean), and weighting 
+by Akaike's Information Criterion (AIC). For the empirical MPs,
+we fully tested only a simple average weighting, but started 
+development on a stochastic approximation method to tune the
+weighting to specific biomass objectives.
+
+To calculate the AIC weighting across the tuning grid, we used only 
+the observation model likelihood components for the approved management 
+indices. This is because the approved management indices were data 
+that were common among the tuning grid AMs, while the included OM 
+spawning stock biomass indices differed between AMs, invalidating 
+the assumptions of AIC.
+
+Final TACs were then smoothed with respect to the previous management
+interval's TAC. This smoothing allowed a maximum increase of 20%, and 
+a maximum decrease of 50%, compared to the previous management interval.
+
+
+# Results
+
+## Fits of Delay Difference AMs to historical data
+
+The addition of spawning stock biomass as absolute stock indices allowed
+the delay difference models to fit to historical biomass well. 
+
+## Performance in projections
+
+
+
+### Empirical MPs
+
+### Delay Difference Model-based MPs
+
+
+# Discussion
+

@@ -269,7 +269,7 @@ runCMPs <- function(  OM = "OM_1d",
         fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
         png(  filename = file.path(fitCheckFolder,OM,MPid,fitCheckPlot),
               width = 8.5, height = 11, units = "in", res = 300 )
-        plot_TACperformance(  simNum      = i,
+        plot_TACperformance(  simIdx      = i,
                               MSEobj      = MSEobj,
                               westTables  = westCheckTables,
                               eastTables  = eastCheckTables,

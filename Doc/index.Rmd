@@ -1,0 +1,114 @@
+---  
+title: "Two classes of multi-model candidate management procedures for Atlantic bluefin tuna."
+author: Sean P. Cox, Samuel D. N. Johnson, Stephen P. Rossi
+geometry: letterpaper
+nocaption: false
+abstract: "We developed two classes of management procedures for Atlantic bluefin tuna based on multi-model inference. The basis of the procedures were  estimation methods tuned to five operating models from the reference OM grid. For the empirical class, we used OM catchability and a stationary stock mixing distribution to estimate area biomass from the larval indices. For model-based class of MPs, we tuned 5 delay difference assessment models  to each of the 5 operating models, matching stock recruit steepness and biomass  for the recent historical period from 1965 - 2016. At each time step, estimates of current (empirical) or projected (model-based) biomass were generated from approved management indices. These estimates were used in harvest control rules to generate area-specific TACs, and the five TACs were  averaged to produce harvest advice for the East and West area. Multiple MPs  were then defined based on varying precautionary TAC caps, maximum target  harvest rates, and HCR control points. We found that MPs with lower caps,  lower maximum harvest rates and control points avoided overfishing on the  reference grid more often. We also found that the subset of OMs that our AMs  were tuned to managed to capture the uncertainty well."
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage[table]{xcolor}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{caption}
+- \usepackage{pdflscape}
+always_allow_html: yes
+output: 
+  pdf_document:
+    keep_tex: true
+    fig_caption: true
+    latex_engine: pdflatex
+    template: ~/Work/write/templates/tex/basic.latex
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    df_print: kable
+    keep_md: false
+  word_document:
+    df_print: kable
+    reference_docx: /Users/sdnjohnson/Work/write/templates/docx/basic.docx
+  bookdown::pdf_document2:
+    keep_tex: true
+    fig_caption: true
+    latex_engine: pdflatex
+    template: ~/Work/write/templates/tex/basic.latex
+    fig_width: 7
+    fig_height: 6
+  bookdown::html_document2:
+    self_contained: true
+    df_print: kable
+    keep_md: false
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: false
+  bookdown::word_document2:
+    df_print: kable
+    reference_docx: /Users/sdnjohnson/Work/write/templates/docx/basic.docx
+---
+
+```{r setup, echo=FALSE, cache=FALSE, message=FALSE, results='hide', warning=FALSE}
+library(knitr)
+if (is_latex_output()) {
+  knitr_figs_dir <- "knitr-figs-pdf"
+  knitr_cache_dir <- "knitr-cache-pdf"
+  fig_out_type <- "png"
+  kable_format <- "latex"
+} else if( is_html_output()) {
+  knitr_figs_dir <- "knitr-figs-html"
+  knitr_cache_dir <- "knitr-cache-html"
+  fig_out_type <- "png"
+  kable_format <- "html"
+} else {
+  knitr_figs_dir <- "knitr-figs-docx"
+  knitr_cache_dir <- "knitr-cache-docx"
+  fig_out_type <- "png"
+  kable_format <- "pandoc"
+}
+
+fig_asp <- 0.618
+fig_width <- 9
+fig_out_width <- "6in"
+fig_dpi <- 180
+fig_align <- "center"
+fig_pos <- "htb"
+opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  comment = "#>",
+  fig.path = knitr_figs_dir,
+  cache.path = knitr_cache_dir,
+  fig.asp = fig_asp,
+  fig.width = fig_width,
+  out.width = fig_out_width,
+  echo = FALSE,
+  #  autodep = TRUE,
+  #  cache = TRUE,
+  cache.comments = FALSE,
+  dev = fig_out_type,
+  dpi = fig_dpi,
+  fig.align = fig_align,
+  fig.pos = fig_pos
+)
+options(xtable.comment = FALSE)
+options(kableExtra.latex.load_packages = FALSE)
+options(knitr.kable.NA = '')
+```
+
+```{r load-libraries, cache=FALSE}
+# add other packages here:
+library(csasdown)
+library(kableExtra)
+```

@@ -142,7 +142,7 @@ plotHCR <- function(  Ftarg = 0.08,
 
 }
 
-plot_TACperformance <- function(  simNum      = 1,
+plot_TACperformance <- function(  simIdx      = 1,
                                   MSEobj      = MSEtest_ROM_1d,
                                   westTables  = westCheckTables,
                                   eastTables  = eastCheckTables,
@@ -151,14 +151,14 @@ plot_TACperformance <- function(  simNum      = 1,
                                   interval    = 2  )
 { 
   # First, pull SSB from the MSEobj
-  SSB <- MSEobj@SSB[MPidx + 1,simNum,,]/1e6
+  SSB <- MSEobj@SSB[MPidx + 1,simIdx,,]/1e6
 
   # Now get catch quantities
-  CWa <- MSEobj@CWa[MPidx + 1,simNum,,]/1e6
-  TAC <- MSEobj@TAC[simNum,MPidx+1,,]/1e6
+  CWa <- MSEobj@CWa[MPidx + 1,simIdx,,]/1e6
+  TAC <- MSEobj@TAC[simIdx,MPidx+1,,]/1e6
   # And reference points
-  Bmsy_s <- MSEobj@BMSY[simNum,]
-  Fmsy_s <- MSEobj@UMSY[simNum,]
+  Bmsy_s <- MSEobj@BMSY[simIdx,]
+  Fmsy_s <- MSEobj@UMSY[simIdx,]
 
   # Now we have a matrix of biomasses with
   # stock in the rows (E/W) and time in the columns
@@ -166,18 +166,22 @@ plot_TACperformance <- function(  simNum      = 1,
   eastMPid <- MPlist[[MPidx]][1]
   westMPid <- MPlist[[MPidx]][2]
 
-  # Now, get the right checkTables
-  westCheckTable <- westTables[[simNum]] %>%
-                    filter( mpName == westMPid )
+  # Get the index for the check tables with the
+  # correct simIdx - OR: Rbind the tables and filter
 
-  eastCheckTable <- eastTables[[simNum]] %>%
-                    filter( mpName == eastMPid )
+
+
+  # Now, get the right checkTables
+  westCheckTable <- do.call("rbind", westTables ) %>%
+                      filter( simNum == simIdx)
+
+  eastCheckTable <- do.call("rbind", eastTables ) %>%
+                      filter( simNum == simIdx)
 
   if( westCheckTable$mpName != westMPid | eastCheckTable$mpName != eastMPid |
-      westCheckTable$simNum != simNum | eastCheckTable$simNum != simNum )
+      westCheckTable$simNum != simIdx | eastCheckTable$simNum != simIdx )
   {
-    
-    
+
     message("MPname or simNum doesn't match! Wrong table read in.\n")
     browser()
   }

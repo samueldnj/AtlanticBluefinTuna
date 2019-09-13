@@ -49,9 +49,9 @@ empMMMP <- function(  x, dset,
   # Now smooth MED and GOM - average last
   # four points - maybe use Loess smoother later
   nT        <- dim(dset[[AS]]$Iobs)[3]
-  GOMsmooth <- mean(  dset[[AS]]$Iobs[,GOMidxNo,(nT-3):nT],
+  GOMsmooth <- mean(  dset[[AS]]$Iobs[x,GOMidxNo,(nT-3):nT],
                       na.rm = T)
-  MEDsmooth <- mean(  dset[[AS]]$Iobs[,MEDidxNo,(nT-3):nT],
+  MEDsmooth <- mean(  dset[[AS]]$Iobs[x,MEDidxNo,(nT-3):nT],
                       na.rm = T)
 
   fitTable <- OMpars

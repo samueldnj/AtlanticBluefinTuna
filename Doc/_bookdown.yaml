@@ -1,0 +1,5 @@
+book_filename: "tunaMPs"
+rmd_files: ["index.Rmd",
+            "01_body.Rmd",
+            "02_TandF.Rmd"]
+delete_merged_file: true
