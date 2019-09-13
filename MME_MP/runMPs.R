@@ -14,12 +14,12 @@ source("initTest.R")
 source("empiricalMP.R")
 source("MPs.R")
 
-# sfInit(parallel=TRUE, cpus = detectCores() - 1)
-# sfLibrary( ABTMSE )
-# sfLibrary( TMB )
-# sfClusterCall("loadABT")
-# sfSource("empiricalMP.R")
-# sfSource("MPs.R")
+sfInit(parallel=TRUE, cpus = detectCores() - 1)
+sfLibrary( ABTMSE )
+sfLibrary( TMB )
+sfClusterCall("loadABT")
+sfSource("empiricalMP.R")
+sfSource("MPs.R")
 
 options( warn = -1 )
 
