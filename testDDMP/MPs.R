@@ -244,6 +244,9 @@ runCMPs <- function(  OM = "OM_1d",
   checkMP <<- checkMPs
 
   # Clear outTables directory
+  if(!dir.exists("./outTables"))
+    dir.create("./outTables")
+  
   outTableFiles <- list.files("./outTables", full.names = TRUE)
   if( length(outTableFiles) > 0)
     unlink(outTableFiles)
