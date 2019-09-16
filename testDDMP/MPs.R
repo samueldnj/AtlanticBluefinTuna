@@ -6,7 +6,7 @@
 #
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-checkMP <- TRUE
+checkMP <<- TRUE
 
 # MP_testMean - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West,

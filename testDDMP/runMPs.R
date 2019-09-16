@@ -16,7 +16,7 @@ source("calcEquilibriumDD.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus = 2)
+sfInit(parallel=TRUE, cpus = detectCores()-1)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -53,14 +53,18 @@ OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 msyMPs <- lapply( X = OMvec, 
                   FUN = runCMPs,
                   assessInt = 2,
-                  MPs = msyCapMPs )
+                  MPs = msyCapMPs,
+                  checkMPs = TRUE,
+                  projFolder = "msyMPs" )
 
 save( msyMPs, file = "msyCapMSEs.RData")
 
 slMPs <- lapply(  X = OMvec, 
                   FUN = runCMPs,
                   assessInt = 2,
-                  MPs = shortListMPs )
+                  MPs = shortListMPs,
+                  checkMPs = TRUE,
+                  projFolder = "shortListMPs" )
 
 save( slMPs, file = "shortListCapMSEs.RData")
 
