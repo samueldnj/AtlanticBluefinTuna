@@ -351,15 +351,15 @@ runCMPsOld <- function( OM = "OM_1",
                         MPs = list( test = c("MP_loCap","MP_loCap") ),
                         assessInt = 2 )
 {
-  library(ABTMSE)
-  library(TMB)
+  # library(ABTMSE)
+  # library(TMB)
 
-  source("assessDDMP.R")
-  source("calcEquilibriumDD.R")
-  source("MPs.R")
+  # source("assessDDMP.R")
+  # source("calcEquilibriumDD.R")
+  # source("MPs.R")
 
   # Load ABT objects in this environment
-  loadABT()
+  # loadABT()
 
   OMobj <- get(OM)
 
