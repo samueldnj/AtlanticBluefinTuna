@@ -29,14 +29,18 @@ shortListMPs <- list( loCap = c("MP_loCap","MP_loCap"),
                       loCap23M = c("MP_loCap23M","MP_loCap23M"),
                       hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
                       loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
-
-testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
-                    MPtest_AIC = c("MPtest_AIC","MPtest_AIC"),
-                    MPtest_loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0"))
-
 msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
                       MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
                       MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
+
+
+# testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
+#                     MPtest_AIC = c("MPtest_AIC","MPtest_AIC"),
+#                     MPtest_loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0"))
+
+# msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
+#                       MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
+#                       MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
 
 
 
@@ -46,8 +50,17 @@ ROMvec <- paste( "OM_", 1:31, sep = "" )
 
 OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-lapply( X = ROMvec, 
-        FUN = runCMPs,
-        assessInt = 2,
-        MPs = msyCapMPs )
+msyMPs <- lapply( X = OMvec, 
+                  FUN = runCMPs,
+                  assessInt = 2,
+                  MPs = msyCapMPs )
+
+save( msyMPs, file = "msyCapMSEs.RData")
+
+slMPs <- lapply(  X = OMvec, 
+                  FUN = runCMPs,
+                  assessInt = 2,
+                  MPs = shortListMPs )
+
+save( slMPs, file = "shortListCapMSEs.RData")
 
