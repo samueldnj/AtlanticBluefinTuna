@@ -33,7 +33,7 @@ assessDDmm <- function( x, dset,
                         F23M          = FALSE,
                         UCP           = "Bmsy",
                         TACrule       = c("mean"),
-                        check         = FALSE,
+                        check         = TRUE,
                         maxDeltaTACup = 0.2,
                         maxDeltaTACdn = 0.5,
                         mpName        = "assessDDmm" )
@@ -525,6 +525,8 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
   # for brood year
   nT_brood  <- nT + diff(range(kage_s)) 
 
+  B0_s <- c(omBioPars$B0_E,omBioPars$B0_W)
+
   # Prior on proportion of each stock in W area:
   # Update later to be a prior based
   # on each AM's conditioning OM
@@ -556,7 +558,7 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 rType         = 1 )
 
   pars <- list( logith_s      = c(logit(omBioPars$steepE),logit(omBioPars$steepW)),
-                lnB0_s        = log(c(omBioPars$B0_E,omBioPars$B0_W)),
+                lnB0_s        = log(B0_s),
                 lnM_s         = rep(log(omBioPars$M),2),
                 lntau_g       = lntau_g,
                 tauW_a        = rep(0.1,nA),
@@ -573,7 +575,8 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 h_alpha       = 20*c(omBioPars$steepE,omBioPars$steepE),
                 h_beta        = 20 - 20*c(omBioPars$steepE,omBioPars$steepE),
                 tau2IGa_g     = rep(10,nG),
-                tau2IGb_g     = rep(0.01 * 11, nG ) )
+                tau2IGb_g     = rep(0.01 * 11, nG ),
+                mB0_s         = B0_s )
 
 
   # message("\nFitting tunaDelay AM to Tuna data in ", nA, " areas.\n", sep = "")

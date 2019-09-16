@@ -287,6 +287,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(h_beta);       // Steepness beta prior beta parameter
   PARAMETER_VECTOR(tau2IGa_g);    // IG prior a par on obs error variance
   PARAMETER_VECTOR(tau2IGb_g);    // IG prior b par on obs error variance
+  PARAMETER_VECTOR(mB0_s);        // Prior mean B0
 
   // // Multilevel M prior
   // PARAMETER(lnMbar);              // Average M
@@ -430,7 +431,9 @@ Type objective_function<Type>::operator() ()
   // Create a new rDev_st array that arranges
   // the deviations according to brood year
   array<Type> rDevBrood_st(nS,nT_brood + 1);
+  array<Type> omega_st(nS,nT + 1);
   rDevBrood_st.fill(0.0);
+  omega_st.fill(0.0);
 
   /* Estimation Procedure */
   // First, calculate recruitment and equilibrium parameters
@@ -444,23 +447,32 @@ Type objective_function<Type>::operator() ()
   // SDNJ: revise so we can use a segment operation
   for( int s = 0; s < nS; s++ )
   {
-    rDevBrood_st(s,broodAdj(s)) = rDev_st(s,0);
+    rDevBrood_st(s,broodAdj(s)) = 0.0;
+    omega_st(s,0) = 0.0;
+
     for( int t=1; t<nT-1; t++ )
     {
       if( rType == 0 )
-        rDevBrood_st(s,t+broodAdj(s)) = rDev_st(s,t);
+      {
+        rDevBrood_st(s,t+broodAdj(s)) = rDev_st(s,t-1);
+        omega_st(s,t) = rDev_st(s,t-1);
+      }
       else if( rType==1 )
-        rDevBrood_st(s,t+broodAdj(s)) = rDevBrood_st(s,t+broodAdj(s)-1) + rDev_st(s,t);
+      {
+        rDevBrood_st(s,t+broodAdj(s)) = rDevBrood_st(s,t+broodAdj(s)-1) + rDev_st(s,t-1);
+        omega_st(s,t) = omega_st(s,t-1) + rDev_st(s,t-1);
+      }
     }
 
     if( rType == 1 )
     {
-      rDevBrood_st(s, nT-1 + broodAdj(s)) = rDevBrood_st(s, nT-2 + broodAdj(s)) + rDev_st(s,nT - 1);
-      rDevBrood_st(s, nT + broodAdj(s))   = rDevBrood_st(s, nT-2 + broodAdj(s)) + rDev_st(s,nT - 1);
+      rDevBrood_st(s, nT-1 + broodAdj(s)) = rDevBrood_st(s, nT-2 + broodAdj(s)) + rDev_st(s,nT - 2);
+      omega_st(s,nT - 1) = omega_st(s,nT-2) + rDev_st(s,nT - 2);
+
+      rDevBrood_st(s, nT + broodAdj(s))   = rDevBrood_st(s, nT-1 + broodAdj(s));
+      omega_st(s,nT) = omega_st(s,nT-1);
     }
-
   }
-
 
 
   // ---------------- Population Dynamics (process model) ---------------- //
@@ -509,7 +521,7 @@ Type objective_function<Type>::operator() ()
         // Random walk
         if( t <= nT )
         {
-          rErr_st(s,t) = exp( rDevBrood_st(s,t+broodAdj(s)) );
+          rErr_st(s,t) = exp( omega_st(s,t) );
           R_st(s,t) *= rErr_st(s,t);
         }
       }
@@ -663,10 +675,10 @@ Type objective_function<Type>::operator() ()
     vector<Type> devVec = rDev_st.matrix().row(s);
     nlpProc -= dnorm( devVec, Type(0), sigmaR_s(s), true).sum();
     
-    // If initialising at fished eqbm, use a Jeffreys Prior
+    // If initialising at fished eqbm, use a normal prio with 100% CV
     // on initial F
     if( initBioCode_s(s) == 1 )
-      nlpProc += 0.5 * pow((Finit_s(s) - 0.04)/0.02,2);
+      nlpProc -= dnorm( Finit_s(s), M_s(s), M_s(s), true);
 
     // IG prior on sig2R
 //    nlpProc += (sig2Prior(0)+Type(1))*2.*lnsigmaR_s(s) + sig2Prior(1)/sigma2R_s(s);
@@ -678,12 +690,21 @@ Type objective_function<Type>::operator() ()
   nlph -= ((h_alpha - 1) * log(h_s) + (h_beta - 1)*log(1 - h_s)).sum();
   
 
-  for( int s = 0; s < nS; s++ )
-    nlpW -= dnorm( propW_s(s), prPropW_sp(s,0), prPropW_sp(s,1), TRUE );
+  // for( int s = 0; s < nS; s++ )
+  //   nlpW -= dnorm( propW_s(s), prPropW_sp(s,0), prPropW_sp(s,1), TRUE );
 
   // Obs error SD prior
   Type nlpObsErr = 0;
-  nlpObsErr += ((tau2IGa_g+Type(1))*2*lntau_g+tau2IGb_g/tau2_g).sum();
+  // nlpObsErr += ((tau2IGa_g+Type(1))*2*lntau_g+tau2IGb_g/tau2_g).sum();
+
+  // Apply log-normal prior to B0 around a given mean - supplied from
+  // OMs
+  Type nlpB0 = 0.;
+  for( int s = 0; s < nS; s++ )
+  {
+    Type tmpMean = log(mB0_s(s));
+    nlpB0 -= dnorm( lnB0_s(s), tmpMean, Type(.05), true);
+  }
   
   Type nlpM = 0;
   for( int s = 0; s < nS; s++ )
@@ -699,7 +720,7 @@ Type objective_function<Type>::operator() ()
   objFun += nlpProc;
   objFun += bioPenScale*bioPen;
   //objFun += nlpObsErr;
-  //objFun +=  nlpB0;
+  objFun +=  nlpB0;
 
   // transform lnqhat
   qhat_g = exp(lnqhat_g);

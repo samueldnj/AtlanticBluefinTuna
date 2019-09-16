@@ -52,7 +52,7 @@ mortality/maturity, and stock mixing), as well as the range of spawning
 stock biomass scales and dynamics (Figure 1).
 
 
-## Empirical Estimation Procedure
+## Empirical estimation procedure
 
 The empirical estimation procedure used a simple moving average of
 the two spawning stock larvel survey indices. For each time step $t$,
@@ -90,7 +90,7 @@ B_a = \sum_{s} p_{s,a} B_s,
 \end{equation}
 where $s \in \{MED, GOM\}$, $a \in \{E, W\}$.
 
-## Delay Difference Model
+## Delay difference model
 
 For the model-based class of procedures, the simple index scaling
 method of the empirical procedure is replaced by a state-space
@@ -117,7 +117,9 @@ that the stock was at the fished equilibrium defined in Table 1. Other free
 parameters were unfished biomass $B_{s,0}$, catchability $q_g$ and 
 observation error uncertainty $\tau_g$ for biomass and abundance indices,
 and recruitment process error deviations $\omega_{s,t}$ for 
-$t \in 1966,..., 2014$ (Table 2).
+$t \in 1966,..., 2014$ (Table 2). Stock recruit steepness $h_s$
+and natural mortality $M_s$ were fixed to the estimated values from 
+the associated operating model.
 
 We assumed the that proportion $p_{s,a}$ of 
 stock~$s \in \{MED,GOM\}$ in area~$a \in \{E,W\}$ was 
@@ -153,6 +155,14 @@ fit to the approved indices in the projections, as well as making sensible
 estimates of biological parameters despite the complexity mismatch between 
 the operating model and the assesment models.
 
+Finally, we applied a log-normal prior distribution to unfished 
+biomass $B_{0,s}$. This was applied to prevent the unfished biomass from 
+being estimated too close to the initial biomass for the assessment period,
+and producing optimistic estimates of initial and current biomass
+depletion. For each AM, the prior mean was defined as the estimate from the
+associated operating model and we assumed a log standard deviation of 0.05.
+
+
 
 ### Reference Points
 
@@ -171,9 +181,7 @@ F_{MSY,a} & = \sum_{s} \frac{B_{s,a}}{B_a} F_{MSY,s},
 \end{align}
 where $B_{s,a} = p_{s,a} B_s$.
 
-## Harvest Control Rules
-
-SAM: make a table of HCR design dimensions (UCPs, Umax, Caps)
+## Harvest control rules
 
 For each of the five sub-procedures we defined a ramped harvest 
 control rule with upper and lower control points and a maximum harvest
@@ -252,6 +260,11 @@ interval's TAC. This smoothing allowed a maximum increase of 20%, and
 a maximum decrease of 50%, compared to the previous management interval.
 
 
+## Simulation experiments and performance metrics
+
+We
+
+
 # Results
 
 ## Fits of Delay Difference AMs to historical data
@@ -262,18 +275,36 @@ faithfully (Figures 2 and 3). Management indices were then able to scale
 to the stock biomass and estimates of catchability parameters were suitable
 for the delay difference assessment (Figure 3).
 
-The similarity between assessment model estimates of biological parameters
-and equilibria, and operating model estimates of the same parwas mixed 
+We found that assessment model estimates of biological parameters
+and equilibria, and operating model estimates of the same quantities, were
+less consistently similar. While the log-normal prior on unfished biomass
+worked well to keep $B_{0,s}$ estimates close to the operating model values,
+the model equilibria were often biased. For example, in AMs 1, 4, and 7, the
+DD model Fmsy values for the Mediterannean spawning stock are at least 0.17, 
+in contrast with the operating model values, which were at most 0.13. Similarly,
+in the same assessment models, Bmsy values were around 50% of the corresponding
+operating model values. This led to similar values for maximum sustainable
+yield $MSY$, indicating that the biases in Fmsy and Bmsy were negatively correlated.
+These biases have implications for the performance of MPs that rely on the
+AM reference point estimates to set TACs, which we describe below.
+
 
 
 
 ## Performance in projections
 
 
-
 ### Empirical MPs
 
+
+
 ### Delay Difference Model-based MPs
+
+We found MPs that used proxy values for the upper control point
+and maximum target fishing mortality rate peformed better than those that
+relied on the delay difference model reference points.
+
+
 
 
 # Discussion

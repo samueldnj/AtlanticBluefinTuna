@@ -6,6 +6,8 @@
 #
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
+checkMP <- TRUE
+
 # MP_testMean - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West,
 # TACs are averaged over 5 AMs with even weighting,
@@ -19,7 +21,7 @@ MPtest_Mean <- function( x, dset, AS )
                      F23M    = FALSE,
                      TACrule = "mean",
                      AS      = AS,
-                     check   = TRUE,
+                     check   = checkMP,
                      mpName  = "MPtest_Mean"  )
   return(TAC)
 }
@@ -38,7 +40,7 @@ MPtest_AIC <- function( x, dset, AS )
                      F23M    = FALSE,
                      TACrule = "AIC",
                      AS      = AS,
-                     check   = TRUE,
+                     check   = checkMP,
                      mpName  = "MPtest_AIC"  )
   return(TAC)
 }
@@ -54,7 +56,7 @@ MPtest_loCap23M.4B0 <- function( x, dset, AS )
                       caps    = c(20,2.5),
                       F23M    = TRUE,
                       TACrule = "mean",
-                      check   = TRUE,
+                      check   = checkMP,
                       AS      = AS,
                       UCP     = ".4B0",
                       mpName  = "MPtest_loCap23M.4B0" )
@@ -73,6 +75,7 @@ MP_msyCap <- function( x, dset, AS )
                      caps    = c(Inf,Inf),
                      F23M    = FALSE,
                      TACrule = "mean",
+                     check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_loCap"  )
   return(TAC)
@@ -89,6 +92,7 @@ MP_msyCapF23M <- function( x, dset, AS )
                      caps    = c(Inf,Inf),
                      F23M    = TRUE,
                      TACrule = "mean",
+                     check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_loCap"  )
   return(TAC)
@@ -105,6 +109,7 @@ MP_msyCapF23M.4B0 <- function( x, dset, AS )
                      caps    = c(Inf,Inf),
                      F23M    = TRUE,
                      TACrule = "mean",
+                     check   = checkMP,
                      AS      = AS,
                      UCP     = ".4B0",
                      mpName  = "MP_loCap"  )
@@ -123,6 +128,7 @@ MP_loCap <- function( x, dset, AS )
                      caps    = c(20,2.5),
                      F23M    = FALSE,
                      TACrule = "mean",
+                     check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_loCap"  )
   return(TAC)
@@ -139,6 +145,7 @@ MP_hiCap <- function( x, dset, AS )
                        caps    = c(25,4),
                        F23M    = FALSE,
                        TACrule = "mean",
+                       check   = checkMP,
                        AS      = AS,
                        mpName  = "MP_hiCap" )
   return(TAC)
@@ -158,6 +165,7 @@ MP_loCap23M <- function( x, dset, AS )
                        caps    = c(20,2.5),
                        F23M    = TRUE,
                        TACrule = "mean",
+                       check   = checkMP,
                        AS      = AS,
                        mpName  = "MP_loCap23M" )
   return(TAC)
@@ -177,6 +185,7 @@ MP_hiCap23M <- function( x, dset, AS )
                        caps    = c(25,4),
                        F23M    = TRUE,
                        TACrule = "mean",
+                       check   = checkMP,
                        AS      = AS,
                        mpName  = "MP_hiCap23M" )
   return(TAC)
@@ -195,6 +204,7 @@ MP_loCap23M.4B0 <- function( x, dset, AS )
                       caps    = c(20,2.5),
                       F23M    = TRUE,
                       TACrule = "mean",
+                      check   = checkMP,
                       AS      = AS,
                       UCP     = ".4B0",
                       mpName  = "MP_loCap23M.4B0" )
@@ -204,7 +214,7 @@ MP_loCap23M.4B0 <- function( x, dset, AS )
 class(MP_loCap23M.4B0)<-"MSMP"
 
 
-# runCMPtest()
+# runCMPs()
 # Wrapper function for the new("MSE")
 # call. Allows for lapply functions
 # to be called on a list of OMs. Needed
@@ -215,9 +225,11 @@ class(MP_loCap23M.4B0)<-"MSMP"
 #   MPs = a list of character 2-ples of MP names (E/W)
 #   assessInt = integer of assessment intervals, required
 #               for plotting purposes
-runCMPtest <- function( OM = "OM_1d",
-                        MPs = list( test = c("MP_testMean","MP_testMean") ),
-                        assessInt = 2 )
+runCMPs <- function(  OM = "OM_1d",
+                      MPs = list( test = c("MP_testMean","MP_testMean") ),
+                      assessInt = 2,
+                      checkMPs = FALSE,
+                      projFolderName = NULL )
 {
   library(ABTMSE)
   library(TMB)
@@ -227,6 +239,14 @@ runCMPtest <- function( OM = "OM_1d",
   source("MPs.R")
   # Load ABT objects in this environment
   loadABT()
+
+  # Set Check switch
+  checkMP <<- checkMPs
+
+  # Clear outTables directory
+  outTableFiles <- list.files("./outTables", full.names = TRUE)
+  if( length(outTableFiles) > 0)
+    unlink(outTableFiles)
 
   # get OM as an environment variable from
   # the char vector label
@@ -247,56 +267,71 @@ runCMPtest <- function( OM = "OM_1d",
   assign( x = paste("MSEtest_",OM,sep = ""),
           value = MSEobj )
 
+  if(!is.null(projFolderName))
+  {
+    projFolderPath <- file.path("MSEs",projFolderName)
+    dir.create(file.path("MSEs",projFolderName))
+  }
+  else projFolderPath <- "MSEs"
+
   # Save that MSE
-  save( list = MSEsymbol, file = file.path("MSEs",paste(MSEsymbol,".Rdata",sep = "")) )  
+  save( list = MSEsymbol, file = file.path(projFolderPath,paste(MSEsymbol,".Rdata",sep = "")) )  
   # Create the report
   MSE_report( MSEobj, 
-              dir=file.path(getwd(),"MSEs"), 
+              dir=file.path(getwd(),projFolderPath), 
               Author='Landmark Fisheries Research', 
               introtext=paste("Multi-model delay difference assessment on", OM,sep =""), 
               filenam=paste(MSEsymbol,"_report",sep = ""))  
 
   # Collect the checkTables
   outTableFiles <- list.files("./outTables", full.names = TRUE)
-  nSims <- length(outTableFiles)
-  checkTables <- lapply(  X = outTableFiles, FUN = read.csv,
-                          header = TRUE, stringsAsFactors = FALSE )
 
-
-  # Save to output directory
-  if(!dir.exists("MSEs/fitCheck"))
-    dir.create("MSEs/fitCheck")
-
-  if(!dir.exists(file.path("MSEs/fitCheck",OM)))
-    dir.create(file.path("MSEs/fitCheck",OM))
-
-  checkTablesSavePath <- file.path("MSEs/fitCheck",OM,"checkTables.Rdata")
-
-  save( checkTables, file = checkTablesSavePath )
-
-  for( i in 1:nSims )
+  if( checkMPs )
   {
-    for( j in 1:nMPs )
+    nSims <- length(outTableFiles)
+    checkTables <- lapply(  X = outTableFiles, FUN = read.csv,
+                            header = TRUE, stringsAsFactors = FALSE )
+
+
+    # Save to output directory
+    if(!dir.exists("MSEs/fitCheck"))
+      dir.create("MSEs/fitCheck")
+
+    if(!dir.exists(file.path("MSEs/fitCheck",OM)))
+      dir.create(file.path("MSEs/fitCheck",OM))
+
+    checkTablesSavePath <- file.path("MSEs/fitCheck",OM,"checkTables.Rdata")
+
+    save( checkTables, file = checkTablesSavePath )
+
+    for( i in 1:nSims )
     {
-      MPid <- MPs[[j]][1]
-      # Create a directory for the MP if it doesn't exist
-      if( !dir.exists(file.path("MSEs/fitCheck",OM,MPid)) )
-        dir.create(file.path("MSEs/fitCheck",OM,MPid))
+      for( j in 1:nMPs )
+      {
+        MPid <- MPs[[j]][1]
+        # Create a directory for the MP if it doesn't exist
+        if( !dir.exists(file.path("MSEs/fitCheck",OM,MPid)) )
+          dir.create(file.path("MSEs/fitCheck",OM,MPid))
+        
+        fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
+        png(  filename = file.path("MSEs/fitCheck",OM,MPid,fitCheckPlot),
+              width = 8.5, height = 11, units = "in", res = 300 )
+        plot_TACperformance(  simNum   = i,
+                              MSEobj   = MSEobj,
+                              tables   = checkTables,
+                              MPlist   = MPs,
+                              MPnum    = j,
+                              interval = assessInt )
+        dev.off()
+      }
       
-      fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
-      png(  filename = file.path("MSEs/fitCheck",OM,MPid,fitCheckPlot),
-            width = 8.5, height = 11, units = "in", res = 300 )
-      plot_TACperformance(  simNum   = i,
-                            MSEobj   = MSEobj,
-                            tables   = checkTables,
-                            MPlist   = MPs,
-                            MPnum    = j,
-                            interval = assessInt )
-      dev.off()
     }
-    # Remove checkTables for next run
-    system( paste("rm -r ", outTableFiles[i], sep = "") )
   }
+  # Remove outTableFiles
+  if( length(outTableFiles) > 0)
+    unlink(outTableFiles)
+
+  return(MSEobj)
 }
 
 # runCMP()
@@ -312,9 +347,9 @@ runCMPtest <- function( OM = "OM_1d",
 #   MPs = a list of character 2-ples of MP names (E/W)
 #   assessInt = integer of assessment intervals, required
 #               for plotting purposes
-runCMPs <- function(  OM = "OM_1",
-                      MPs = list( test = c("MP_loCap","MP_loCap") ),
-                      assessInt = 2 )
+runCMPsOld <- function( OM = "OM_1",
+                        MPs = list( test = c("MP_loCap","MP_loCap") ),
+                        assessInt = 2 )
 {
   library(ABTMSE)
   library(TMB)
@@ -341,7 +376,7 @@ runCMPs <- function(  OM = "OM_1",
           value = MSEobj )
 
   # Save that MSE
-  save( list = MSEsymbol, file = file.path("MSEs",paste(MSEsymbol,".Rdata",sep = "")) )  
+  save( list = MSEsymbol, file = file.path(projFolderPath,paste(MSEsymbol,".Rdata",sep = "")) )  
   # Create the report
   MSE_report( MSEobj, 
               dir=file.path(getwd(),"MSEs"), 
