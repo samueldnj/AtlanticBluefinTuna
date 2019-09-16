@@ -19,7 +19,7 @@ source("plots.R")
 sfInit(parallel=TRUE, cpus = detectCores()-1)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
-# sfClusterCall("loadABT")
+sfClusterCall("loadABT")
 sfSource("assessDDMP.R")
 sfSource("MPs.R")
 sfSource("calcEquilibriumDD.R")
@@ -46,6 +46,7 @@ msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
 
 
 OMvec <- paste( "OM_", 1:15,sep = "" )
+OMdvec <- paste( "OM_", 1:15,"d",sep = "" )
 
 ROMvec <- paste( "OM_", 1:31, sep = "" )
 
