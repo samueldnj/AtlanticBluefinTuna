@@ -150,7 +150,7 @@ empMP_hiCap.4B0 <- function( x, dset, AS )
 
   return(TAC)
 }
-class(empMP_loCap.4B0)<-"MSMP"
+class(empMP_hiCap.4B0)<-"MSMP"
 
 
 # runCMPtest()
@@ -202,9 +202,9 @@ runCMPs <- function(  OM = "OM_1d",
                   interval  = assessInt )
 
   # Assign MSE to a symbol that is descriptive
-  MSEsymbol <- paste("MSEtest_",OM,sep = "")
+  MSEsymbol <- paste("MSE_",OM,sep = "")
 
-  assign( x = paste("MSEtest_",OM,sep = ""),
+  assign( x = paste("MSE_",OM,sep = ""),
           value = MSEobj )
 
   if(!is.null(projFolderName))
@@ -223,40 +223,40 @@ runCMPs <- function(  OM = "OM_1d",
               introtext=paste("Multi-model delay difference assessment on", OM,sep =""), 
               filenam=paste(MSEsymbol,"_report",sep = ""))  
 
+  outTableFiles <- list.files("./outTables", full.names = TRUE)
+  nSims <- dim(MSEobj@SSB)[2]
+
+  westCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "West") ]
+  eastCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "East") ]
+
+  westCheckTables <- lapply(  X = westCheckTableFiles, FUN = read.csv,
+                              header = TRUE, stringsAsFactors = FALSE )
+
+  eastCheckTables <- lapply(  X = eastCheckTableFiles, FUN = read.csv,
+                              header = TRUE, stringsAsFactors = FALSE )
+
+  if(length(westCheckTables) != nSims | length(eastCheckTables) != nSims )
+    browser(cat("Wrong number of checkTables") )
+
+
+  # Save to output directory
+  fitCheckFolder <- file.path(projFolderPath,"fitCheck")
+  if(!dir.exists(fitCheckFolder))
+    dir.create(fitCheckFolder)
+
+  if(!dir.exists(file.path(fitCheckFolder,OM)))
+    dir.create(file.path(fitCheckFolder,OM))
+
+  checkTablesSavePath <- file.path(fitCheckFolder,OM,"checkTables.Rdata")
+
+  ewCheckTableList <- list( east = eastCheckTables, west = westCheckTables)
+
+  save( ewCheckTableList, 
+        file = checkTablesSavePath )
+
   # Collect the checkTables
   if( checkMPs )
   {
-    outTableFiles <- list.files("./outTables", full.names = TRUE)
-    nSims <- dim(MSEobj@SSB)[2]
-
-    westCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "West") ]
-    eastCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "East") ]
-
-    westCheckTables <- lapply(  X = westCheckTableFiles, FUN = read.csv,
-                                header = TRUE, stringsAsFactors = FALSE )
-
-    eastCheckTables <- lapply(  X = eastCheckTableFiles, FUN = read.csv,
-                                header = TRUE, stringsAsFactors = FALSE )
-
-    if(length(westCheckTables) != nSims | length(eastCheckTables) != nSims )
-      browser(cat("Wrong number of checkTables") )
-
-
-    # Save to output directory
-    fitCheckFolder <- file.path(projFolderPath,"fitCheck")
-    if(!dir.exists(fitCheckFolder))
-      dir.create(fitCheckFolder)
-
-    if(!dir.exists(file.path(fitCheckFolder,OM)))
-      dir.create(file.path(fitCheckFolder,OM))
-
-    checkTablesSavePath <- file.path(fitCheckFolder,OM,"checkTables.Rdata")
-
-    ewCheckTableList <- list( east = eastCheckTables, west = westCheckTables)
-
-    save( ewCheckTableList, 
-          file = checkTablesSavePath )
-
     for( i in 1:nSims )
     {
       for( j in 1:nMPs )
@@ -278,11 +278,76 @@ runCMPs <- function(  OM = "OM_1d",
                               interval    = assessInt )
         dev.off()
       }
-      # Remove checkTables for next run
-      system( paste("rm -r ", outTableFiles[i], sep = "") )
     }
   }
+
+  # Remove checkTables for next run
+  system( paste("rm -r ", outTableFiles[i], sep = "") )
+
   return(MSEobj)
+}
+
+loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
+                      OMid = "OM_1d",
+                      prefix = "test",
+                      folder = "./MSEs" )
+{ 
+
+  # Search the folder for MSE outputs
+  mseObjFileList  <- list.files(folder)
+  mseObjID        <- paste("MSE", prefix, "_", OMid, sep = "" )
+  mseFileName     <- paste(mseObjID, ".Rdata", sep = "")
+
+  load( file.path(folder,mseFileName) )
+  
+  return( get( mseObjID ) )
+}
+
+
+plotFitChecks <- function(  OM = "OM_1",
+                            projFolder = "./MSEs/hiLoCaps",
+                            prefix = "",
+                            assessInt = 2 )
+{
+  # Load OM object
+  MSEobj <- loadMSE(  OMid = OM,
+                      prefix = prefix,
+                      folder = projFolder )
+
+  # Load check tables
+  fitCheckFolder <- file.path(projFolder, "fitCheck")
+  checkTablePath <- file.path(fitCheckFolder, OM, "checkTables.Rdata")
+  load(checkTablePath)
+
+  # Get dimensions of objects
+  nSims <- dim(MSEobj@SSB)[2]
+  nMPs  <- length(MSEobj@MPs) - 1
+  MPs   <- MSEobj@MPs[-1]
+
+  for( i in 1:nSims )
+    {
+      for( j in 1:nMPs )
+      {
+        MPid <- names(MPs)[j]
+        browser()
+        # Create a directory for the MP if it doesn't exist
+        if( !dir.exists(file.path(fitCheckFolder,OM,MPid)) )
+          dir.create(file.path(fitCheckFolder,OM,MPid))
+        
+        fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
+        png(  filename = file.path(fitCheckFolder,OM,MPid,fitCheckPlot),
+              width = 8.5, height = 11, units = "in", res = 300 )
+        plot_TACperformance(  simIdx      = i,
+                              MSEobj      = MSEobj,
+                              westTables  = ewCheckTableList$west,
+                              eastTables  = ewCheckTableList$west,
+                              MPlist      = MPs,
+                              MPidx       = j,
+                              interval    = assessInt )
+        dev.off()
+      }
+    }
+
 }
 
 # runCMP()

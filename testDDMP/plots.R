@@ -142,35 +142,53 @@ plotHCR <- function(  Ftarg = 0.08,
 
 }
 
-plot_TACperformance <- function(  simNum      = 1,
+plot_TACperformance <- function(  simIdx      = 1,
                                   MSEobj      = MSEtest_ROM_1d,
-                                  tables      = checkTables,
+                                  eastTables  = checkTables[[1]],
+                                  westTables  = checkTables[[2]],
                                   MPlist      = testMPs,
-                                  MPnum       = 2,
+                                  MPidx       = 2,
                                   interval    = 2  )
 { 
   # First, pull SSB from the MSEobj
-  SSB <- MSEobj@SSB[MPnum + 1,simNum,,]/1e6
+  SSB <- MSEobj@SSB[MPidx + 1,simIdx,,]/1e6
 
   # Now get catch quantities
-  CWa <- MSEobj@CWa[MPnum + 1,simNum,,]/1e6
-  TAC <- MSEobj@TAC[simNum,MPnum+1,,]/1e6
+  CWa <- MSEobj@CWa[MPidx + 1,simIdx,,]/1e6
+  TAC <- MSEobj@TAC[simIdx,MPidx+1,,]/1e6
   # And reference points
-  Bmsy_s <- MSEobj@BMSY[simNum,]
-  Fmsy_s <- MSEobj@UMSY[simNum,]
+  Bmsy_s <- MSEobj@BMSY[simIdx,]
+  Fmsy_s <- MSEobj@UMSY[simIdx,]
 
   # Now we have a matrix of biomasses with
   # stock in the rows (E/W) and time in the columns
   # Pick out the correct MP
-  MPid <- MPlist[[MPnum]][1]
+  eastMPid <- MPlist[[MPidx]][1]
+  westMPid <- MPlist[[MPidx]][2]
 
-  # Now, get the right checkTable
-  checkTable <- tables[[simNum]] %>%
-                filter( mpName == MPid )
+  # Get the index for the check tables with the
+  # correct simIdx - OR: Rbind the tables and filter
 
+  # Now, get the right checkTables
+  westCheckTable <- do.call("rbind", westTables ) %>%
+                      filter( simNum == simIdx,
+                              mpName == MPlist[[MPidx]][2])
+
+  eastCheckTable <- do.call("rbind", eastTables ) %>%
+                      filter( simNum == simIdx,
+                              mpName == MPlist[[MPidx]][2])
+
+  if( any(westCheckTable$mpName != westMPid) | any(eastCheckTable$mpName != eastMPid) |
+      any(westCheckTable$simNum != simIdx) | any(eastCheckTable$simNum != simIdx) |
+      nrow(eastCheckTable) == 0 | nrow(westCheckTable) == 0 )
+  {
+
+    message("Error in table, either empty or MP/sim index don't match.\n")
+    browser()
+  }
 
   # Count AMs
-  AMs   <- unique(checkTable$AM)
+  AMs   <- unique(westCheckTable$AM)
   nAMs  <- length(AMs)
 
   # Count years
@@ -182,23 +200,28 @@ plot_TACperformance <- function(  simNum      = 1,
 
   yrCol <- rep( MPyrs, rep(5,length(MPyrs)) )
 
-  checkTable$yr   <- rep( MPyrs, rep(5,length(MPyrs)) )
+  eastCheckTable$yr   <- rep( MPyrs, rep(5,length(MPyrs)) )
+  westCheckTable$yr   <- rep( MPyrs, rep(5,length(MPyrs)) )
 
   AMcols <- RColorBrewer::brewer.pal(n = length(AMs), "Dark2")
-  checkTable$col  <- AMcols
+  westCheckTable$col  <- AMcols
+  eastCheckTable$col  <- AMcols
 
   AMlabels <- paste( "AM", as.character(AMs), sep = "_" )
 
-  catchCheckTable <- checkTable %>%
-                      group_by(yr) %>%
-                      summarise(  meanTAC_E = mean(TAC_E),
-                                  meanTAC_W = mean(TAC_W),
-                                  aicTAC_E  = sum( wtdTAC_E ),
-                                  aicTAC_W  = sum( wtdTAC_W ),
-                                  q.05TAC_E = quantile( TAC_E, probs = 0.05),
-                                  q.05TAC_W = quantile( TAC_W, probs = 0.05),
-                                  q.95TAC_E = quantile( TAC_E, probs = 0.95),
-                                  q.95TAC_W = quantile( TAC_W, probs = 0.95) )
+  westCatchCheckTable <-  westCheckTable %>%
+                          group_by(yr) %>%
+                          summarise(  meanTAC_W = mean(TAC_W),
+                                      aicTAC_W  = sum( wtdTAC ),
+                                      q.05TAC_W = quantile( TAC, probs = 0.05),
+                                      q.95TAC_W = quantile( TAC, probs = 0.95) )
+
+  eastCatchCheckTable <-  eastCheckTable %>%
+                          group_by(yr) %>%
+                          summarise(  meanTAC_E = mean(TAC_E),
+                                      aicTAC_E  = sum( wtdTAC ),
+                                      q.05TAC_E = quantile( TAC, probs = 0.05),
+                                      q.95TAC_E = quantile( TAC, probs = 0.95))                          
 
   layoutMat <- matrix( c( 1,1,1,1,
                           1,1,1,1,
@@ -213,16 +236,18 @@ plot_TACperformance <- function(  simNum      = 1,
   # Set up the E/W plot
   par( mar =c(0,1,2,1), oma = c(4,4.5,2,1) )
 
-  plot( x = range(yrs), y = c(0,max(SSB[1,],checkTable$Bnext_E,na.rm = T)),
+  plot( x = range(yrs), y = c(0,max(SSB[1,],eastCheckTable$Bnext_E,na.rm = T)),
         xlab = "", ylab = "", type = "n", las = 1, axes = F )
     axis( side = 2, las = 1)
     box()
     grid()
     abline( v = tMP, col = "black", lty = 2, lwd = .8 )
     lines( x = yrs, y = SSB[1,], col = "red", lwd = 3 )
-    points( x = checkTable$yr + 1, y = checkTable$Bnext_E,
-            pch = 16, col = checkTable$col )
+    points( x = eastCheckTable$yr + 1, y = eastCheckTable$Bnext_E,
+            pch = 16, col = eastCheckTable$col )
     mtext( side = 3, font = 2, text = "East Stock")
+    mtext(  side = 4, text = eastMPid, 
+            font = 2, cex =  1, line = 2 )
 
   par( mar =c(2,1,0,1) )
 
@@ -236,26 +261,28 @@ plot_TACperformance <- function(  simNum      = 1,
     # lines( x = yrs, y = TAC[1,], lty = 1 )
     lines( x = yrs, y = CWa[1,], lty = 1, lwd = 2,
             col = "grey40" )
-    segments( x0 = catchCheckTable$yr + 1, x1 = catchCheckTable$yr + 1,
-              y0 = catchCheckTable$q.05TAC_E, y1 = catchCheckTable$q.95TAC_E, lwd = 2,
+    segments( x0 = eastCatchCheckTable$yr + 1, x1 = eastCatchCheckTable$yr + 1,
+              y0 = eastCatchCheckTable$q.05TAC_E, y1 = eastCatchCheckTable$q.95TAC_E, lwd = 2,
               col = "grey60" )
-    points( x = catchCheckTable$yr + 1, y = catchCheckTable$meanTAC_E,
+    points( x = eastCatchCheckTable$yr + 1, y = eastCatchCheckTable$meanTAC_E,
             pch = 16, cex = .8 )
-    points( x = catchCheckTable$yr + 1, y = catchCheckTable$aicTAC_E,
+    points( x = eastCatchCheckTable$yr + 1, y = eastCatchCheckTable$aicTAC_E,
             pch = 17, cex = .8 )
 
   par( mar =c(0,1,2,1) )
 
-  plot( x = range(yrs), y = c(0,max(SSB[2,],checkTable$Bnext_W,na.rm = T)),
+  plot( x = range(yrs), y = c(0,max(SSB[2,],westCheckTable$Bnext_W,na.rm = T)),
         xlab = "", ylab = "", type = "n", las = 1, axes = F )
     axis( side = 2, las = 1)
     box()
     grid()
     abline( v = tMP, col = "black", lty = 2, lwd = .8 )
     lines( x = yrs, y = SSB[2,], col = "red", lwd = 3 )
-    points( x = checkTable$yr + 1, y = checkTable$Bnext_W,
-            pch = 16, col = checkTable$col )
+    points( x = westCheckTable$yr + 1, y = westCheckTable$Bnext_W,
+            pch = 16, col = westCheckTable$col )
     mtext( side = 3, font = 2, text = "West Stock")
+    mtext(  side = 4, text = westMPid, 
+            font = 2, cex =  1, line = 2 )
     legend( x = "topleft", legend = AMlabels,
             pch = 16, col = AMcols, bty = "n" )
 
@@ -270,20 +297,18 @@ plot_TACperformance <- function(  simNum      = 1,
     # lines( x = yrs, y = TAC[2,], lty = 1 )
     lines( x = yrs, y = CWa[2,], lty = 1, lwd = 2, 
             col = "grey40" )
-    segments( x0 = catchCheckTable$yr + 1, x1 = catchCheckTable$yr + 1,
-              y0 = catchCheckTable$q.05TAC_W, y1 = catchCheckTable$q.95TAC_W, lwd = 2,
+    segments( x0 = westCatchCheckTable$yr + 1, x1 = westCatchCheckTable$yr + 1,
+              y0 = westCatchCheckTable$q.05TAC_W, y1 = westCatchCheckTable$q.95TAC_W, lwd = 2,
               col = "grey60" )
-    points( x = catchCheckTable$yr + 1, y = catchCheckTable$meanTAC_W,
+    points( x = westCatchCheckTable$yr + 1, y = westCatchCheckTable$meanTAC_W,
             pch = 16, cex = .8 )
-    points( x = catchCheckTable$yr + 1, y = catchCheckTable$aicTAC_W,
+    points( x = westCatchCheckTable$yr + 1, y = westCatchCheckTable$aicTAC_W,
             pch = 17, cex = .8 )
 
   mtext(  side = 2, text = "Spawning Biomass and Catch (kt)", 
           outer = T, line = 2.5, cex = 1.5 )
   mtext( side = 1, text = "Year", outer = TRUE,
           cex = 2, line = 2)
-  mtext( side = 3, outer = TRUE, text = MPid, 
-          font = 2, cex =  2 )
 
 }
 

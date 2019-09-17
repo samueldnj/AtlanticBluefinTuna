@@ -77,7 +77,7 @@ MP_msyCap <- function( x, dset, AS )
                      TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
-                     mpName  = "MP_loCap"  )
+                     mpName  = "MP_msyCap"  )
   return(TAC)
 }
 class(MP_msyCap)<-"MSMP"
@@ -94,7 +94,7 @@ MP_msyCapF23M <- function( x, dset, AS )
                      TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
-                     mpName  = "MP_loCap"  )
+                     mpName  = "MP_msyCapF23M"  )
   return(TAC)
 }
 class(MP_msyCapF23M)<-"MSMP"
@@ -112,7 +112,7 @@ MP_msyCapF23M.4B0 <- function( x, dset, AS )
                      check   = checkMP,
                      AS      = AS,
                      UCP     = ".4B0",
-                     mpName  = "MP_loCap"  )
+                     mpName  = "MP_msyCapF23M.4B0"  )
   return(TAC)
 }
 class(MP_msyCapF23M.4B0)<-"MSMP"
@@ -213,6 +213,90 @@ MP_loCap23M.4B0 <- function( x, dset, AS )
 }
 class(MP_loCap23M.4B0)<-"MSMP"
 
+# MP_loCap23M - Same as hiCap, but
+# fixes Fmsy at 2/3 of the M value
+# used in the MP, rather than the
+# estimated value from the reference points
+# calc
+MP_hiCap23M.4B0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm(  x       = x,
+                      dset    = dset,
+                      AMs     = c(1,2,4,7,11),
+                      caps    = c(25,4),
+                      F23M    = TRUE,
+                      TACrule = "mean",
+                      check   = checkMP,
+                      AS      = AS,
+                      mpName  = "MP_hiCap23M.4B0" )
+  return(TAC)
+}
+class(MP_hiCap23M.4B0)<-"MSMP"
+
+
+loadMSE <- function(  OMid = "OM_1d",
+                      prefix = "test",
+                      folder = "./MSEs" )
+{ 
+
+  # Search the folder for MSE outputs
+  mseObjFileList  <- list.files(folder)
+  mseObjID        <- paste("MSE", prefix, "_", OMid, sep = "" )
+  mseFileName     <- paste(mseObjID, ".Rdata", sep = "")
+
+  load( file.path(folder,mseFileName) )
+  
+  return( get( mseObjID ) )
+}
+
+
+plotFitChecks <- function(  OM = "OM_1d",
+                            projFolder = "./MSEs/testMP",
+                            prefix = "",
+                            assessInt = 2 )
+{
+  # Load OM object
+  MSEobj <- loadMSE(  OMid = OM,
+                      prefix = prefix,
+                      folder = projFolder )
+
+  # Load check tables
+  fitCheckFolder <- file.path(projFolder, "fitCheck")
+  checkTablePath <- file.path(fitCheckFolder, OM, "checkTables.Rdata")
+  load(checkTablePath)
+
+  # Get dimensions of objects
+  nSims <- dim(MSEobj@SSB)[2]
+  nMPs  <- length(MSEobj@MPs) - 1
+  MPs   <- MSEobj@MPs[-1]
+
+  for( i in 1:nSims )
+    {
+      for( j in 1:nMPs )
+      {
+        MPid <- names(MPs)[j]
+        # Create a directory for the MP if it doesn't exist
+        if( !dir.exists(file.path(fitCheckFolder,OM,MPid)) )
+          dir.create(file.path(fitCheckFolder,OM,MPid))
+
+        browser()
+        
+        fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
+        png(  filename = file.path(fitCheckFolder,OM,MPid,fitCheckPlot),
+              width = 8.5, height = 11, units = "in", res = 300 )
+        plot_TACperformance(  simIdx      = i,
+                              MSEobj      = MSEobj,
+                              westTables  = ewCheckTableList$west,
+                              eastTables  = ewCheckTableList$west,
+                              MPlist      = MPs,
+                              MPidx       = j,
+                              interval    = assessInt )
+        dev.off()
+      }
+    }
+
+}
+
 
 # runCMPs()
 # Wrapper function for the new("MSE")
@@ -265,9 +349,9 @@ runCMPs <- function(  OM = "OM_1d",
                   interval  = assessInt )
 
   # Assign MSE to a symbol that is descriptive
-  MSEsymbol <- paste("MSEtest_",OM,sep = "")
+  MSEsymbol <- paste("MSE_",OM,sep = "")
 
-  assign( x = paste("MSEtest_",OM,sep = ""),
+  assign( x = MSEsymbol,
           value = MSEobj )
 
   if(!is.null(projFolderName))
@@ -288,24 +372,38 @@ runCMPs <- function(  OM = "OM_1d",
 
   # Collect the checkTables
   outTableFiles <- list.files("./outTables", full.names = TRUE)
+  nSims <- dim(MSEobj@SSB)[2]
+
+  westCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "West") ]
+  eastCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "East") ]
+
+  westCheckTables <- lapply(  X = westCheckTableFiles, FUN = read.csv,
+                              header = TRUE, stringsAsFactors = FALSE )
+
+  eastCheckTables <- lapply(  X = eastCheckTableFiles, FUN = read.csv,
+                              header = TRUE, stringsAsFactors = FALSE )
+
+  if(length(westCheckTables) != nSims | length(eastCheckTables) != nSims )
+    browser(cat("Wrong number of checkTables") )
+
+
+  # Save to output directory
+  fitCheckFolder <- file.path(projFolderPath,"fitCheck")
+  if(!dir.exists(fitCheckFolder))
+    dir.create(fitCheckFolder)
+
+  if(!dir.exists(file.path(fitCheckFolder,OM)))
+    dir.create(file.path(fitCheckFolder,OM))
+
+  checkTablesSavePath <- file.path(fitCheckFolder,OM,"checkTables.Rdata")
+
+  ewCheckTableList <- list( east = eastCheckTables, west = westCheckTables)
+
+  save( ewCheckTableList, 
+        file = checkTablesSavePath )
 
   if( checkMPs )
   {
-    nSims <- length(outTableFiles)
-    checkTables <- lapply(  X = outTableFiles, FUN = read.csv,
-                            header = TRUE, stringsAsFactors = FALSE )
-
-
-    # Save to output directory
-    if(!dir.exists("MSEs/fitCheck"))
-      dir.create("MSEs/fitCheck")
-
-    if(!dir.exists(file.path("MSEs/fitCheck",OM)))
-      dir.create(file.path("MSEs/fitCheck",OM))
-
-    checkTablesSavePath <- file.path("MSEs/fitCheck",OM,"checkTables.Rdata")
-
-    save( checkTables, file = checkTablesSavePath )
 
     for( i in 1:nSims )
     {
@@ -313,18 +411,19 @@ runCMPs <- function(  OM = "OM_1d",
       {
         MPid <- MPs[[j]][1]
         # Create a directory for the MP if it doesn't exist
-        if( !dir.exists(file.path("MSEs/fitCheck",OM,MPid)) )
-          dir.create(file.path("MSEs/fitCheck",OM,MPid))
+        if( !dir.exists(file.path(fitCheckFolder,OM,MPid)) )
+          dir.create(file.path(fitCheckFolder,OM,MPid))
         
         fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
-        png(  filename = file.path("MSEs/fitCheck",OM,MPid,fitCheckPlot),
+        png(  filename = file.path(fitCheckFolder,OM,MPid,fitCheckPlot),
               width = 8.5, height = 11, units = "in", res = 300 )
-        plot_TACperformance(  simNum   = i,
-                              MSEobj   = MSEobj,
-                              tables   = checkTables,
-                              MPlist   = MPs,
-                              MPnum    = j,
-                              interval = assessInt )
+        plot_TACperformance(  simIdx      = i,
+                              MSEobj      = MSEobj,
+                              westTables  = ewCheckTableList$west,
+                              eastTables  = ewCheckTableList$east,
+                              MPlist      = MPs,
+                              MPnum       = j,
+                              interval    = assessInt )
         dev.off()
       }
       

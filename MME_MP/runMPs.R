@@ -15,7 +15,7 @@ source("empiricalMP.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus = detectCores() - 1 )
+sfInit(parallel=TRUE, cpus = 3 )
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -30,12 +30,12 @@ options( warn = -1 )
 #                       hiCap23M = c("empMP_hiCap23M","empMP_hiCap23M"),
 #                       loCap23M.4B0 = c("empMP_loCap23M.4B0","empMP_loCap23M.4B0") )
 
-testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
-                    MPtest_AIC = c("MPtest_AIC","MPtest_AIC"),
-                    MPtest_loCap23M.4B0 = c("MPtest_loCap23M.4B0","MPtest_loCap23M.4B0"))
 
-msyCapMPs    <- list( empMP_msyCap = c("empMP_msyCap","empMP_msyCap"),
-                      empMP_msyCap.4B0 = c("empMP_msyCap.4B0","empMP_msyCap.4B0") )
+# msyCapMPs    <- list( empMP_msyCap = c("empMP_msyCap","empMP_msyCap"),
+#                       empMP_msyCap.4B0 = c("empMP_msyCap.4B0","empMP_msyCap.4B0") )
+
+otherCapMPs  <- list( empMP_loCap = c("empMP_loCap","empMP_loCap"),
+                      empMP_hiCap = c("empMP_hiCap","empMP_hiCap") )
 
 
 
@@ -47,17 +47,17 @@ ROMvec <- paste( "OM_", 1:31, sep = "" )
 
 OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-msyCapMSEs <- lapply( X = OMvec, 
-                      FUN = runCMPs,
-                      assessInt = 2,
-                      MPs = msyCapMPs,
-                      checkMPs = TRUE,
-                      projFolderName = "msyCaps" )
+# msyCapMSEs <- lapply( X = OMvec, 
+#                       FUN = runCMPs,
+#                       assessInt = 2,
+#                       MPs = msyCapMPs,
+#                       checkMPs = TRUE,
+#                       projFolderName = "msyCaps" )
 
-testMSEs <- lapply( X = OMvec, 
-                    FUN = runCMPs,
-                    assessInt = 2,
-                    MPs = msyCapMPs,
-                    checkMPs = TRUE,
-                    projFolderName = "testMPs" )
+otherCapMSEs <- lapply( X = OMvec, 
+                        FUN = runCMPs,
+                        assessInt = 2,
+                        MPs = otherCapMPs,
+                        checkMPs = TRUE,
+                        projFolderName = "hiLoCaps" )
 

@@ -16,7 +16,7 @@ source("calcEquilibriumDD.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus = detectCores()-1)
+sfInit(parallel=TRUE, cpus = 10)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -26,13 +26,19 @@ sfSource("calcEquilibriumDD.R")
 
 options( warn = -1 )
 
-shortListMPs <- list( loCap = c("MP_loCap","MP_loCap"),
-                      loCap23M = c("MP_loCap23M","MP_loCap23M"),
-                      hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
-                      loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
+hiCapMPs <- list( MP_hiCap = c("MP_hiCap","MP_hiCap"),
+                  MP_hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
+                  MP_hiCap23M.4B0 = c("MP_hiCap23M.4B0","MP_hiCap23M.4B0") )
+
+loCapMps <- list( MP_loCap = c("MP_loCap","MP_loCap"),
+                  MP_loCap23M = c("MP_loCap23M","MP_loCap23M"),
+                  MP_loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
+
 msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
                       MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
                       MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
+
+testMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap") )
 
 
 # testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
@@ -50,23 +56,34 @@ OMdvec <- paste( "OM_", 1:15,"d",sep = "" )
 
 ROMvec <- paste( "OM_", 1:31, sep = "" )
 
-OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
+# OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-msyMPs <- lapply( X = OMvec, 
+# testMSEs <- lapply( X = OMvec, 
+#                     FUN = runCMPs,
+#                     assessInt = 2,
+#                     MPs = testMPs,
+#                     checkMPs = TRUE,
+#                     projFolder = "testMP" )
+
+msyMSEs <- lapply( X = OMvec, 
                   FUN = runCMPs,
                   assessInt = 2,
                   MPs = msyCapMPs,
                   checkMPs = TRUE,
                   projFolder = "msyMPs" )
 
-save( msyMPs, file = "msyCapMSEs.RData")
+hiCapMSEs <- lapply(  X = OMvec, 
+                      FUN = runCMPs,
+                      assessInt = 2,
+                      MPs = hiCapMPs,
+                      checkMPs = TRUE,
+                      projFolder = "hiCaps" )
 
-slMPs <- lapply(  X = OMvec, 
-                  FUN = runCMPs,
-                  assessInt = 2,
-                  MPs = shortListMPs,
-                  checkMPs = TRUE,
-                  projFolder = "shortListMPs" )
+loCapMSEs <- lapply(  X = OMvec, 
+                      FUN = runCMPs,
+                      assessInt = 2,
+                      MPs = loCapMPs,
+                      checkMPs = TRUE,
+                      projFolder = "loCaps" )
 
-save( slMPs, file = "shortListCapMSEs.RData")
 

@@ -51,6 +51,24 @@ csasdown::csas_table(   ddModelTab,
 
 \newpage
 
+```{r, echo=FALSE, include=FALSE}
+hcrGrid <- tibble::tribble(
+  ~UpperControlPoint,  ~MaxHarvestRate,   ~Caps,
+    "$B_{MSY}$",         "$F_{MSY}$",     "$(MSY,MSY)$",
+    "$.4B_0$",           "$\\frac{2}{3}M$","$hi = (4,25)$",
+    NA,                   NA,             "$lo = (2.5,20)$"
+)
+names(hcrGrid) <- c("Upper Control Point", "Maximum harvest rate", "TAC Caps")
+
+hcrGridCaption <- "Harvest control rule settings that we tested. A harvest control rule is defined by taking one element from each column." 
+```
+
+```{r, results='asis'}
+csasdown::csas_table(hcrGrid, caption = hcrGridCaption)
+```
+
+\newpage
+
 ```{r ddAMHistFitTable, echo = FALSE, warning = FALSE}
 
 ddAMFitTableCap <- "Delay difference assessment model estimates of unfished biomass, natural mortality, and biological reference points, when fit to the tuning grid of operating models 1, 2, 4, 7, and 11."
@@ -91,19 +109,38 @@ csasdown::csas_table( amFitTable,
 
 ```
 
+\newpage
 # Figures
+```{r sourcePlots, echo = FALSE, include = FALSE, warning = FALSE}
+source("../MME_MP/plots.R")
+```
 
 
 ```{r OMbioCaption, echo = FALSE, include = FALSE, warning = FALSE}
 OMbioCap <- "Operating model spawning stock biomasses for the full reference grid for both the Mediterannean stock (East) and Gulf of Mexico stock (West). Each colour corresponds to a different OM from the reference grid."
 ```
 
-```{r heatMapPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=OMbioCap}
+```{r OMbioPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=OMbioCap}
 # Include the graphics
 knitr::include_graphics("data/OMbiomass.pdf")
 
 ```
 
+\newpage
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+hcrPlotCap <- "An example harvest control rule with maximum harvest rate $U_{max} =  0.08$, an upper control point of $B_{MSY} = 57$, and a TAC cap at 4 kt."
+```
+
+```{r, hcrPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=hcrPlotCap}
+plotHCR(  Ftarg = 0.08,
+          cap = 4,
+          LCP = .4,
+          UCP = 1.0,
+          Bmsy = 57 )
+```
+
+\newpage
 
 ```{r AMfitPlotsCaptions, echo = FALSE, include = FALSE, warning = FALSE}
 amBiomassCap <- "Spawning stock biomass estimates by stock (left hand column) and area (right hand column) from the delay difference stock assessment model fit to OM 1. Total area catch is shown split into East stock (red bars) and West stock (blue bars). Note that the catch scale is exaggerated with respect to the biomass, so that West stock catch is visible in the East area."
@@ -118,10 +155,52 @@ amRefPtsCap <- "Equlibrium biomass (black) and yield (grey) curves as a function
 knitr::include_graphics("data/AM/1/biomass.pdf")
 ```
 
+\newpage
+
 ```{r amIdxFitsPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=amIdxFitsCap}
 knitr::include_graphics("data/AM/1/indexFits.pdf")
 ```
 
+\newpage
+
 ```{r amRefPtsPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=amRefPtsCap}
 knitr::include_graphics("data/AM/1/BRP.pdf")
 ```
+
+\newpage
+
+```{r empPerfPlotsCaptions, echo = FALSE, include = FALSE, warning = FALSE}
+
+empPerfCap_MSY <- "Distributions of MP performance metrics $B_{30}$ and $AvC_{30}$ for empirical MPs with TAC caps set at maximum sustainable yield. Points show the median value of the performance metric, and segments show the central 90\\% of the distribution over all simulation replicates."
+
+empPerfCap_lohicaps <- "Distributions of MP performance metrics $B_{30} = B_{2046}/B_{MSY}$ and $AvC_{30} = \\frac{\\sum_{t = 2016}^{2046} C_t }{30}$ for empirical MPs with low and high TAC caps, which are defined in table XX. Points show the median value of the performance metric, and segments show the central 90\\% of the distribution over all simulation replicates."
+
+
+```
+
+
+```{r empMsyCapsPerfPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap = empPerfCap_MSY }
+# Figure out how to make landscape
+plotMSEperf(  OMvec = paste("OM_",1:15,sep = ""),
+              projFolder = "../MME_MP/MSEs/msyCaps", 
+              prefix = "test",
+              ptcex = 1, segwd = 1 )
+
+```
+
+\newpage
+
+
+```{r empLoHiCapsPerfPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap = empPerfCap_lohicaps }
+# Figure out how to make landscape
+plotMSEperf(  OMvec = paste("OM_",1:2,"d",sep = ""),
+              projFolder = "../MME_MP/MSEs/testMPs", 
+              prefix = "test",
+              ptcex = 1, segwd = 1 )
+
+```
+
+\newpage
+
+
+

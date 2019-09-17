@@ -199,7 +199,7 @@ mortality/maturity, and stock mixing), as well as the range of spawning
 stock biomass scales and dynamics (Figure 1).
 
 \hypertarget{empirical-estimation-procedure}{%
-\subsection{Empirical Estimation Procedure}\label{empirical-estimation-procedure}}
+\subsection{Empirical estimation procedure}\label{empirical-estimation-procedure}}
 
 The empirical estimation procedure used a simple moving average of
 the two spawning stock larvel survey indices. For each time step \(t\),
@@ -238,7 +238,7 @@ B_a = \sum_{s} p_{s,a} B_s,
 where \(s \in \{MED, GOM\}\), \(a \in \{E, W\}\).
 
 \hypertarget{delay-difference-model}{%
-\subsection{Delay Difference Model}\label{delay-difference-model}}
+\subsection{Delay difference model}\label{delay-difference-model}}
 
 For the model-based class of procedures, the simple index scaling
 method of the empirical procedure is replaced by a state-space
@@ -330,9 +330,7 @@ F_{MSY,a} & = \sum_{s} \frac{B_{s,a}}{B_a} F_{MSY,s},
 where \(B_{s,a} = p_{s,a} B_s\).
 
 \hypertarget{harvest-control-rules}{%
-\subsection{Harvest Control Rules}\label{harvest-control-rules}}
-
-SAM: make a table of HCR design dimensions (UCPs, Umax, Caps)
+\subsection{Harvest control rules}\label{harvest-control-rules}}
 
 For each of the five sub-procedures we defined a ramped harvest
 control rule with upper and lower control points and a maximum harvest
@@ -384,7 +382,7 @@ caused by the complexity mismatch between the AMs and the OMs. We tested
 three kinds of caps: a high cap of 25 kt in the East, and 4 kt in the West;
 a low cap of 20 kt in the East, and 2.5 kt in West; and a cap of the
 stock and area based MSY, which was derived from assessment model
-equilibria (Table 1).
+equilibria (Tables 1 and 3).
 
 \hypertarget{providing-catch-advice-by-area}{%
 \subsection{Providing catch advice by area}\label{providing-catch-advice-by-area}}
@@ -408,6 +406,17 @@ the assumptions of AIC.
 Final TACs were then smoothed with respect to the previous management
 interval's TAC. This smoothing allowed a maximum increase of 20\%, and
 a maximum decrease of 50\%, compared to the previous management interval.
+
+\hypertarget{simulation-experiments-and-performance-metrics}{%
+\subsection{Simulation experiments and performance metrics}\label{simulation-experiments-and-performance-metrics}}
+
+We calculated distributions of the performance metrics
+\begin{align}
+B_{30} &= \frac{B_{2046}}{B_{MSY}}, \\
+AvC_{30} &= \frac{\sum_{t = 2016}^{2046} C_t}{30}
+\end{align}
+for each stock to compare the performance of our candidate MPs across
+the reference grid of operating models, as well as 3 robustness OMs.
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
@@ -440,8 +449,21 @@ AM reference point estimates to set TACs, which we describe below.
 \hypertarget{empirical-mps}{%
 \subsubsection{Empirical MPs}\label{empirical-mps}}
 
+Empirical MPs that capped harvest for each sub-procedure at the
+associated tuning OM maximum sustainable yield had a wide variaion
+
 \hypertarget{delay-difference-model-based-mps}{%
 \subsubsection{Delay Difference Model-based MPs}\label{delay-difference-model-based-mps}}
+
+We found MPs that used proxy values for the upper control point
+and maximum target fishing mortality rate peformed better than those that
+relied on the delay difference model reference points. This was
+due to the bias in the delay difference reference points discussed
+above, where Fmsy was positively biased and Bmsy was negatively biased.
+Because of this, although there were AMs where estimated current and
+projected biomasses were often close to the OM biomass, the
+biomass relative to Bmsy was overly optimistic and overfishing
+occured. \textbf{\emph{{[}Probably show a figure??{]}}}
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
@@ -511,6 +533,24 @@ Yield & \(Y^{(f)} = \frac{f}{M + f} (1 - e^{-M-f}) B^{(f)}\)\tabularnewline
 
 \newpage
 
+\begin{longtable}[]{@{}lll@{}}
+\caption{\label{tab:unnamed-chunk-2}Harvest control rule settings that we tested. A harvest control rule is defined by taking one element from each column.}\tabularnewline
+\toprule
+Upper Control Point & Maximum harvest rate & TAC Caps\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Upper Control Point & Maximum harvest rate & TAC Caps\tabularnewline
+\midrule
+\endhead
+\(B_{MSY}\) & \(F_{MSY}\) & \((MSY,MSY)\)\tabularnewline
+\(.4B_0\) & \(\frac{2}{3}M\) & \(lo = (4,25)\)\tabularnewline
+& & \(hi = (2.5,20)\)\tabularnewline
+\bottomrule
+\end{longtable}
+
+\newpage
+
 \begin{landscape}
 \begin{longtable}{rrrrrrrrrrr}
 \caption{\label{tab:ddAMHistFitTable}Delay difference assessment model estimates of unfished biomass, natural mortality, and biological reference points, when fit to the tuning grid of operating models 1, 2, 4, 7, and 11.}\\
@@ -537,6 +577,8 @@ Yield & \(Y^{(f)} = \frac{f}{M + f} (1 - e^{-M-f}) B^{(f)}\)\tabularnewline
 \end{longtable}
 \end{landscape}
 
+\newpage
+
 \hypertarget{figures}{%
 \section{Figures}\label{figures}}
 
@@ -546,8 +588,21 @@ Yield & \(Y^{(f)} = \frac{f}{M + f} (1 - e^{-M-f}) B^{(f)}\)\tabularnewline
 
 }
 
-\caption{Operating model spawning stock biomasses for the full reference grid for both the Mediterannean stock (East) and Gulf of Mexico stock (West). Each colour corresponds to a different OM from the reference grid.}\label{fig:heatMapPlot}
+\caption{Operating model spawning stock biomasses for the full reference grid for both the Mediterannean stock (East) and Gulf of Mexico stock (West). Each colour corresponds to a different OM from the reference grid.}\label{fig:OMbioPlot}
 \end{figure}
+
+\newpage
+
+\begin{figure}[htb]
+
+{\centering \includegraphics[width=0.9\linewidth]{knitr-figs-pdfhcrPlot-1} 
+
+}
+
+\caption{An example harvest control rule with maximum harvest rate $U_{max} =  0.08$, an upper control point of $B_{MSY} = 57$, and a TAC cap at 4 kt.}\label{fig:hcrPlot}
+\end{figure}
+
+\newpage
 
 \begin{figure}[htb]
 
@@ -558,6 +613,8 @@ Yield & \(Y^{(f)} = \frac{f}{M + f} (1 - e^{-M-f}) B^{(f)}\)\tabularnewline
 \caption{Spawning stock biomass estimates by stock (left hand column) and area (right hand column) from the delay difference stock assessment model fit to OM 1. Total area catch is shown split into East stock (red bars) and West stock (blue bars). Note that the catch scale is exaggerated with respect to the biomass, so that West stock catch is visible in the East area.}\label{fig:amBiomassPlot}
 \end{figure}
 
+\newpage
+
 \begin{figure}[htb]
 
 {\centering \includegraphics[width=0.9\linewidth]{data/AM/1/indexFits} 
@@ -567,6 +624,8 @@ Yield & \(Y^{(f)} = \frac{f}{M + f} (1 - e^{-M-f}) B^{(f)}\)\tabularnewline
 \caption{Fits of the delay difference stock assessment model to stock and area management indices, with the associated catchability estimates. Data are shown as circles, while the lines indicate the model biomass scaled by catchability. East Stock and West Stock indices are the spawning stock biomass estimates from operating model 1.}\label{fig:amIdxFitsPlot}
 \end{figure}
 
+\newpage
+
 \begin{figure}[htb]
 
 {\centering \includegraphics[width=0.9\linewidth]{data/AM/1/BRP} 
@@ -575,6 +634,30 @@ Yield & \(Y^{(f)} = \frac{f}{M + f} (1 - e^{-M-f}) B^{(f)}\)\tabularnewline
 
 \caption{Equlibrium biomass (black) and yield (grey) curves as a function of fishing mortality estimated by the delay difference model fits to the management indices and operating model 1 spawning stock biomass.}\label{fig:amRefPtsPlot}
 \end{figure}
+
+\newpage
+
+\begin{figure}[htb]
+
+{\centering \includegraphics[width=0.9\linewidth]{knitr-figs-pdfempMsyCapsPerfPlot-1} 
+
+}
+
+\caption{Distributions of MP performance metrics $B_{30}$ and $AvC_{30}$ for empirical MPs with TAC caps set at maximum sustainable yield. Points show the median value of the performance metric, and segments show the central 90\% of the distribution over all simulation replicates.}\label{fig:empMsyCapsPerfPlot}
+\end{figure}
+
+\newpage
+
+\begin{figure}[htb]
+
+{\centering \includegraphics[width=0.9\linewidth]{knitr-figs-pdfempLoHiCapsPerfPlot-1} 
+
+}
+
+\caption{Distributions of MP performance metrics $B_{30} = B_{2046}/B_{MSY}$ and $AvC_{30} = \frac{\sum_{t = 2016}^{2046} C_t }{30}$ for empirical MPs with low and high TAC caps, which are defined in table XX. Points show the median value of the performance metric, and segments show the central 90\% of the distribution over all simulation replicates.}\label{fig:empLoHiCapsPerfPlot}
+\end{figure}
+
+\newpage
 
 % Add biblography
 \newpage

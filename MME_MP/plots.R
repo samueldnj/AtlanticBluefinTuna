@@ -118,7 +118,7 @@ plotHCR <- function(  Ftarg = 0.08,
         xlab = "", ylab = "", las = 1, col = "grey50" )
     grid()
     lines( x = Bseq, y = Fcap, lwd = 2 )
-    mtext( side = 2, text = "Exploitation Rate (/yr)",
+    mtext( side = 2, text = "Harvest Rate (/yr)",
             line = 3)
     abline( v = LCP * Bmsy, lty = 2, lwd = 2, col = "red")
     abline( v = UCP * Bmsy, lty = 2, lwd = 2, col = "orange")
@@ -131,7 +131,7 @@ plotHCR <- function(  Ftarg = 0.08,
     mtext( side = 2, text = "Catch (kt)", line = 3)
     abline( v = LCP * Bmsy, lty = 2, lwd = 2, col = "red")
     abline( v = UCP * Bmsy, lty = 2, lwd = 2, col = "orange")
-    legend( x = "topright", bty = "n",
+    legend( x = "topleft", bty = "n",
             legend = expression( 0.4*B[MSY], B[MSY], "Uncapped", "Capped" ),
             col = c("red","orange","grey50","black"),
             lty = c(2,2,1,1), lwd = 2,
@@ -181,10 +181,11 @@ plot_TACperformance <- function(  simIdx      = 1,
                               mpName == MPlist[[MPidx]][2])
 
   if( any(westCheckTable$mpName != westMPid) | any(eastCheckTable$mpName != eastMPid) |
-      any(westCheckTable$simNum != simIdx) | any(eastCheckTable$simNum != simIdx) )
+      any(westCheckTable$simNum != simIdx) | any(eastCheckTable$simNum != simIdx) |
+      nrow(eastCheckTable) == 0 | nrow(westCheckTable) == 0 )
   {
 
-    message("MPname or simNum doesn't match! Wrong table read in.\n")
+    message("Error in table, either empty or MP/sim index don't match.\n")
     browser()
   }
 
@@ -323,22 +324,6 @@ plot_TACperformance <- function(  simIdx      = 1,
 
 }
 
-loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
-                      OMid = "OM_1d",
-                      prefix = "test",
-                      folder = "./MSEs" )
-{ 
-
-  # Search the folder for MSE outputs
-  mseObjFileList  <- list.files(folder)
-  mseObjID        <- paste("MSE", prefix, "_", OMid, sep = "" )
-  mseFileName     <- paste(mseObjID, ".Rdata", sep = "")
-
-  load( file.path(folder,mseFileName) )
-  
-  return( get( mseObjID ) )
-}
-
 getBr30 <- function( MSEobj )
 {
   B_BMSY <- MSEobj@B_BMSY[,,,82]
@@ -381,7 +366,9 @@ getMPnames <- function( MSEobj )
 plotAllMSEs <- function(  OMvec = paste("OM_",1:15,"d",sep = ""), 
                           prefix = NULL )
 {
-  MSElist <- lapply( X = OMvec, FUN = loadMSE, prefix = prefix )
+  MSElist <- lapply(  X = OMvec, 
+                      FUN = loadMSE, 
+                      prefix = prefix )
   names(MSElist) <- OMvec
 
   nMSE <- length(MSElist)
@@ -412,12 +399,17 @@ plotAllMSEs <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
 # plotMSEperf()
 # Takes a vector of OM ids and plots the distributions
 # MSE performance metrics Br30 (B_2046/Bmsy) and
-# AvC30 (Average catch in 2046) for all MPs and OMs
-plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""), 
-                          prefix = NULL,
-                          ptcex = 1 )
+# AvC30 (Average catch over first 30 years) for all MPs and OMs
+plotMSEperf <- function(  OMvec = paste("OM",1:15,sep = "_"),
+                          projFolder = "./MSEs/msyCaps", 
+                          prefix = "test",
+                          ptcex = 1, segwd = 1 )
 {
-  MSElist <- lapply( X = OMvec, FUN = loadMSE, prefix = prefix )
+
+  MSElist <- lapply(  X = OMvec, 
+                      FUN = loadMSE, 
+                      prefix = prefix, 
+                      folder = projFolder )
   names(MSElist) <- OMvec
   # First do Br30 plots
 
@@ -427,6 +419,8 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
   C10quants <- sapply( X = MSElist, FUN = getCquants, simplify = "array", tIdx = 53:62 )
   C20quants <- sapply( X = MSElist, FUN = getCquants, simplify = "array", tIdx = 63:72 )
   C30quants <- sapply( X = MSElist, FUN = getCquants, simplify = "array", tIdx = 73:82 )
+  AvC30quants <- sapply( X = MSElist, FUN = getCquants, simplify = "array", tIdx = 53:82 )
+  
   MPnames <- lapply( X = MSElist, FUN = getMPnames )
 
   MPnameUnion <- MPnames[[1]]
@@ -439,7 +433,7 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
   MPnames <- MPnameUnion
   nMPs <- dim(B30quants)[2]
   
-  MPcols  <-  brewer.pal( nMPs,  "Dark2")
+  MPcols  <-  RColorBrewer::brewer.pal( nMPs,  "Dark2")
   MPpch   <-  rep(16, nMPs)
 
   par( mfrow = c(2,2), mar = c(.25,1.5,.25,1.5), oma = c(5,3,2,2) )
@@ -455,7 +449,7 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
             lwd = c(0.8,1.5,0.8,.8,.8,.8),
             col = "grey60" )
     abline( v = seq(from = 1.5, to = nMSE - .5, by = 1),
-            lty = 3, lwd = .3, col = "grey30" )
+            lty = 3, lwd = .5, col = "grey30" )
     mtext( side = 2, text = expression(B[2046]/B[MSY]), line = 2.5)
     # Loop over MSEs and MPs, plot performance
     for( j in 1:nMSE )
@@ -467,17 +461,14 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
         # Central 90%
         segments( x0 = splits[k] + j, 
                   y0 = B30quants[1,k,1,j],
-                  y1 = B30quants[3,k,1,j], col = "grey40",
-                  lwd = .8 )
+                  y1 = B30quants[3,k,1,j], col = MPcols[k],
+                  lwd = segwd )
         # Median
         points( x = splits[k] + j, y = B30quants[2,k,1,j],
                 pch = MPpch[k], col = MPcols[k], cex = ptcex )
 
       }
     }
-    legend( x = "bottomleft", legend = MPnames,
-            pch = 16, col = MPcols,
-            lwd = .8, cex = .8, bg = "white" )
     mtext( side = 3, text = "East Stock" )
 
   
@@ -491,7 +482,7 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
             lwd = c(0.8,1.5,0.8,.8,.8,.8),
             col = "grey60" )
     abline( v = seq(from = 1.5, to = nMSE - .5, by = 1),
-            lty = 3, lwd = .3, col = "grey30" )
+            lty = 3, lwd = .5, col = "grey30" )
     # Loop over MSEs and MPs, plot performance
     for( j in 1:nMSE )
     {
@@ -501,8 +492,8 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
         # Central 90%
         segments( x0 = splits[k] + j, 
                   y0 = B30quants[1,k,2,j],
-                  y1 = B30quants[3,k,2,j], col = "grey40",
-                  lwd = .8 )
+                  y1 = B30quants[3,k,2,j], col = MPcols[k],
+                  lwd = segwd )
         # Median
         points( x = splits[k] + j, y = B30quants[2,k,2,j],
                 pch = MPpch[k], col = MPcols[k], cex = ptcex )
@@ -513,7 +504,7 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
 
 
   ##### Plot ave catch over third 10 years ####
-  plot( x = c(1, length(MSElist)), y = range(C30quants[,,1,]),
+  plot( x = c(1, length(MSElist)), y = range(AvC30quants[,,1,]),
         axes = F, type = "n", xlab = "", ylab = "" )
     mfg <- par("mfg")
     axis( side = 1, at = 1:nMSE, labels = OMvec, las = 2 )
@@ -523,7 +514,7 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
     #         lwd = c(0.8,1.5,0.8,.8,.8,.8),
     #         col = "grey40" )
     abline( v = seq(from = 1.5, to = nMSE - .5, by = 1),
-            lty = 3, lwd = .3, col = "grey30" )
+            lty = 3, lwd = .5, col = "grey30" )
     mtext( side = 2, text = expression(paste(C[30], " (kt)",sep = "")), line = 2.5)
     # Loop over MSEs and MPs, plot performance
     for( j in 1:nMSE )
@@ -534,18 +525,22 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
       {
         # Central 90%
         segments( x0 = splits[k] + j, 
-                  y0 = C30quants[1,k,1,j],
-                  y1 = C30quants[3,k,1,j], col = "grey40",
-                  lwd = .8 )
+                  y0 = AvC30quants[1,k,1,j],
+                  y1 = AvC30quants[3,k,1,j], col = MPcols[k],
+                  lwd = segwd )
         # Median
-        points( x = splits[k] + j, y = C30quants[2,k,1,j],
+        points( x = splits[k] + j, y = AvC30quants[2,k,1,j],
                 pch = MPpch[k], col = MPcols[k], cex = ptcex )
 
       }
     }
+    legend( x = "bottomleft", legend = MPnames,
+            pch = 16, col = MPcols,
+            lwd = segwd, cex = .8, bg = "white" )
+    
 
 
-  plot( x = c(1, length(MSElist)), y = range(C30quants[,,2,]),
+  plot( x = c(1, length(MSElist)), y = range(AvC30quants[,,2,]),
         axes = F, type = "n", xlab = "", ylab = "" )
     axis( side = 1, at = 1:nMSE, labels = OMvec, las = 2 )
     axis( side = 2, las = 1 )
@@ -555,7 +550,7 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
     #         lwd = c(0.8,1.5,0.8,.8,.8,.8),
     #         col = "grey40" )
     abline( v = seq(from = 1.5, to = nMSE - .5, by = 1),
-            lty = 3, lwd = .3, col = "grey30" )
+            lty = 3, lwd = .5, col = "grey30" )
     # Loop over MSEs and MPs, plot performance
     for( j in 1:nMSE )
     {
@@ -564,11 +559,11 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
       {
         # Central 90%
         segments( x0 = splits[k] + j, 
-                  y0 = C30quants[1,k,2,j],
-                  y1 = C30quants[3,k,2,j], col = "grey40",
+                  y0 = AvC30quants[1,k,2,j],
+                  y1 = AvC30quants[3,k,2,j], col = MPcols[k],
                   lwd = .8 )
         # Median
-        points( x = splits[k] + j, y = C30quants[2,k,2,j],
+        points( x = splits[k] + j, y = AvC30quants[2,k,2,j],
                 pch = MPpch[k], col = MPcols[k], cex = ptcex )
 
       }

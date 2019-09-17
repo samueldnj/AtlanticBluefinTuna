@@ -180,7 +180,14 @@ assessDDmm <- function( x, dset,
   {
     # Combine fitTable and outTable
     outTable            <- left_join( fitTable, mmTACs, by = "nll" )
+    if( AS == 1 )
+      outTable$TAC_E <- outTable$TAC
+
+    if( AS == 2 )
+      outTable$TAC_W <- outTable$TAC
+
     outTable$mpName     <- mpName
+    outTable$simNum     <- x
     outTable$area       <- areaNames[AS]
     # Add new columns for biomass, and NLL
     outTable$MSY_Ea     <- numeric(length(AMs))

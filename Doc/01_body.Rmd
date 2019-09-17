@@ -213,6 +213,15 @@ grid of operating models, while under the model-based MPs,
 control points were taken as the delay difference model
 equilibria.
 
+We applied a TAC cap in each area to make the HCRs more precautionary. This
+extra precaution is required to guard against optimistic assessment errors 
+and biases in reference point calculations, both of which are  
+caused by the complexity mismatch between the AMs and the OMs. We tested
+three kinds of caps: a high cap of 25 kt in the East, and 4 kt in the West;
+a low cap of 20 kt in the East, and 2.5 kt in West; and a cap of the 
+stock and area based MSY, which was derived from assessment model 
+equilibria (Tables 1 and 3, Figure 2).
+
 Both home-stock- and area-based harvest control rules were applied for
 East and West area TACs. For example, in the East area, HCRs were applied
 based on East (MED) spawning stock biomass compared to the East stock
@@ -226,15 +235,6 @@ always be managed according to the Gulf of Mexico spawning stock harvest
 control rules, and the East TAC would almost always be managed according
 to the mixed East Area harvest control rule, as this includes the weaker
 stock.
-
-We applied a TAC cap in each area to make the HCRs more precautionary. This
-extra precaution is required to guard against optimistic assessment errors 
-and biases in reference point calculations, both of which are  
-caused by the complexity mismatch between the AMs and the OMs. We tested
-three kinds of caps: a high cap of 25 kt in the East, and 4 kt in the West;
-a low cap of 20 kt in the East, and 2.5 kt in West; and a cap of the 
-stock and area based MSY, which was derived from assessment model 
-equilibria (Table 1).
 
 
 ## Providing catch advice by area
@@ -262,7 +262,17 @@ a maximum decrease of 50%, compared to the previous management interval.
 
 ## Simulation experiments and performance metrics
 
-We
+All MPs were evaluated over the 12 reference grid operating
+models, labelled OM_1 through OM_12, as well as three 
+additional robustness operating models, OM_13 to OM_15. 
+To compare performance of each MP, we calculated distributions 
+of the performance metrics 
+\begin{align}
+B_{30} &= \frac{B_{2046}}{B_{MSY}}, \\
+AvC_{30} &= \frac{\sum_{t = 2016}^{2046} C_t}{30}
+\end{align}
+over the set of simulation replicates for each stock, MP and
+operating model combination. 
 
 
 # Results
@@ -289,23 +299,65 @@ These biases have implications for the performance of MPs that rely on the
 AM reference point estimates to set TACs, which we describe below.
 
 
-
-
 ## Performance in projections
+
 
 
 ### Empirical MPs
 
+We found that the proxy upper control point was not
+necessary for the empirical MPs. This was indicated
+by the almost identical performance metrics between
+those MPs that used OM $B_{MSY}$, and those that used 
+40\% of OM $B_0$, as the harvest control rule's upper
+control point (Figure 6).
 
+Empirical MP performance was more variable across
+reference grid operating models for the East stock 
+than in the West. For example, under MPs that 
+used the OM MSY as the TAC cap, $B_{30}$ ranged 
+between 0.5 and 1.5 in the East for all reference
+and robustness OMs, while in the west the same metric 
+was often between 1.5 and 2 on the reference grid, 
+with the exception of OMs 4 and 5.
+
+The high values of B30 in the west probably indicate that
+the empirical MPs are too conservative for that stock,
+and TACs could be set higher for fishing that catches
+the Gulf of Mexico stock.
+
+There was very little difference in the $AvC_{30}$ metric between
+operating models in the East, indicating that the MPs tended to 
+set TACs around the caps. In the west, there was more variability
+in the distributions of $AvC_{30}$, but the medians were similar
+across OMs.
 
 ### Delay Difference Model-based MPs
 
 We found MPs that used proxy values for the upper control point
-and maximum target fishing mortality rate peformed better than those that
-relied on the delay difference model reference points.
+and maximum target harvest rates peformed better than those that
+relied on the delay difference model reference points. This was
+due to the bias in the delay difference reference points discussed 
+above, where Fmsy was positively biased and Bmsy was negatively biased.
+Because of this, although there were AMs where estimated current and 
+projected biomasses were often close to the OM biomass, the 
+biomass relative to Bmsy was overly optimistic and overfishing
+occured. ***[Probably show a figure??]***
+
+Proxy UCP and max HR led to better biomass performance...
+
+Lower caps were too risk averse
+
+
+
 
 
 
 
 # Discussion
 
+
+expect other caps to be more risk averse, recommend
+raising cap in the West...
+
+F0.1 as another proxy? Will still be biased.
