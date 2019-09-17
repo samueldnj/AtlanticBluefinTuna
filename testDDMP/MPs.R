@@ -314,6 +314,7 @@ plotFitChecks <- function(  OM = "OM_1d",
                       folder = projFolder )
 
   # Load check tables
+
   fitCheckFolder <- file.path(projFolder, "fitCheck")
   checkTablePath <- file.path(fitCheckFolder, OM, "checkTables.Rdata")
   load(checkTablePath)
@@ -331,8 +332,6 @@ plotFitChecks <- function(  OM = "OM_1d",
         # Create a directory for the MP if it doesn't exist
         if( !dir.exists(file.path(fitCheckFolder,OM,MPid)) )
           dir.create(file.path(fitCheckFolder,OM,MPid))
-
-        browser()
         
         fitCheckPlot <- paste("fitCheck_sim",i,"_",OM,"_",MPid,".png",sep = "")
         png(  filename = file.path(fitCheckFolder,OM,MPid,fitCheckPlot),
@@ -340,7 +339,7 @@ plotFitChecks <- function(  OM = "OM_1d",
         plot_TACperformance(  simIdx      = i,
                               MSEobj      = MSEobj,
                               westTables  = ewCheckTableList$west,
-                              eastTables  = ewCheckTableList$west,
+                              eastTables  = ewCheckTableList$east,
                               MPlist      = MPs,
                               MPidx       = j,
                               interval    = assessInt )
@@ -475,7 +474,7 @@ runCMPs <- function(  OM = "OM_1d",
                               westTables  = ewCheckTableList$west,
                               eastTables  = ewCheckTableList$east,
                               MPlist      = MPs,
-                              MPnum       = j,
+                              MPidx       = j,
                               interval    = assessInt )
         dev.off()
       }
