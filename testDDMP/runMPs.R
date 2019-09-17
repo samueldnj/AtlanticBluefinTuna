@@ -38,7 +38,9 @@ msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
                       MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
                       MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
 
-testMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap") )
+aicMPs      <- list(  MP_aic_msyCap = c("MP_aic_msyCap","MP_aic_msyCap"),
+                      MP_aic_msyCapF23M = c("MP_aic_msyCapF23M","MP_aic_msyCapF23M"),
+                      MP_aic_msyCapF23M.4B0 = c("MP_aic_msyCapF23M.4B0","MP_aic_msyCapF23M.4B0") )
 
 
 # testMPs    <- list( MPtest_Mean = c("MPtest_Mean","MPtest_Mean"),
@@ -85,5 +87,12 @@ loCapMSEs <- lapply(  X = OMvec,
                       MPs = loCapMPs,
                       checkMPs = TRUE,
                       projFolder = "loCaps" )
+
+aicMSEs <- lapply(  X = OMvec, 
+                    FUN = runCMPs,
+                    assessInt = 2,
+                    MPs = aicMPs,
+                    checkMPs = TRUE,
+                    projFolder = "aicTACs" )
 
 

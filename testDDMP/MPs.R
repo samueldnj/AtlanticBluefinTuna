@@ -118,6 +118,59 @@ MP_msyCapF23M.4B0 <- function( x, dset, AS )
 class(MP_msyCapF23M.4B0)<-"MSMP"
 
 
+# MP_msyCap - a catch cap at estimated
+# MSY is applied
+MP_aic_msyCap <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = FALSE,
+                     TACrule = "AIC",
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_aic_msyCap"  )
+  return(TAC)
+}
+class(MP_aic_msyCap)<-"MSMP"
+
+# MP_aic_msyCap - a catch cap at estimated
+# MSY is applied
+MP_aic_msyCapF23M <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     TACrule = "AIC",
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_aic_msyCapF23M"  )
+  return(TAC)
+}
+class(MP_aic_msyCapF23M)<-"MSMP"
+
+# MP_aic_msyCap - a catch cap at estimated
+# MSY is applied
+MP_aic_msyCapF23M.4B0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     TACrule = "AIC",
+                     check   = checkMP,
+                     AS      = AS,
+                     UCP     = ".4B0",
+                     mpName  = "MP_aic_msyCapF23M.4B0"  )
+  return(TAC)
+}
+class(MP_aic_msyCapF23M.4B0)<-"MSMP"
+
+
 # MP_loCap - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West
 MP_loCap <- function( x, dset, AS )
