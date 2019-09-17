@@ -363,18 +363,20 @@ getMPnames <- function( MSEobj )
 }
 
 # plotAllMSEs
-plotAllMSEs <- function(  OMvec = paste("OM_",1:15,"d",sep = ""), 
-                          prefix = NULL )
+plotAllMSEs <- function(  OMvec = paste("OM_",1:15,sep = ""), 
+                          prefix = "",
+                          folder = "./MSEs/hiLoCaps" )
 {
   MSElist <- lapply(  X = OMvec, 
                       FUN = loadMSE, 
-                      prefix = prefix )
+                      prefix = prefix,
+                      folder = folder )
   names(MSElist) <- OMvec
 
   nMSE <- length(MSElist)
   graphics.off()
 
-  outFolder <- file.path("./MSEs","plots")
+  outFolder <- file.path(folder,"plots")
   if( !dir.exists(outFolder))
     dir.create(outFolder)
 
@@ -401,8 +403,8 @@ plotAllMSEs <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
 # MSE performance metrics Br30 (B_2046/Bmsy) and
 # AvC30 (Average catch over first 30 years) for all MPs and OMs
 plotMSEperf <- function(  OMvec = paste("OM",1:15,sep = "_"),
-                          projFolder = "./MSEs/msyCaps", 
-                          prefix = "test",
+                          projFolder = "./MSEs/hiLoCaps", 
+                          prefix = "",
                           ptcex = 1, segwd = 1 )
 {
 
