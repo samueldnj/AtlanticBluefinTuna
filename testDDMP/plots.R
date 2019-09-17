@@ -209,7 +209,6 @@ plot_TACperformance <- function(  simIdx      = 1,
 
   AMlabels <- paste( "AM", as.character(AMs), sep = "_" )
 
-  browser()
 
   westCatchCheckTable <-  westCheckTable %>%
                           group_by(yr) %>%
