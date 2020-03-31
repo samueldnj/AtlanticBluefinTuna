@@ -15,7 +15,7 @@ source("empiricalMP.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus = 3 )
+sfInit(parallel=TRUE, cpus = 2 )
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -38,6 +38,10 @@ otherCapMPs  <- list( empMP_loCap = c("empMP_loCap","empMP_loCap"),
                       empMP_hiCap = c("empMP_hiCap","empMP_hiCap") )
 
 
+noCapMPs <- list( empMP_noCap     = c("empMP_noCap","empMP_noCap"),
+                  empMP_noCapMin  = c("empMP_noCapMin","empMP_noCapMin"))
+
+
 
 
 OMdvec <- paste( "OM_", 1:15, "d",sep = "" )
@@ -54,10 +58,17 @@ OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 #                       checkMPs = TRUE,
 #                       projFolderName = "msyCaps" )
 
-otherCapMSEs <- lapply( X = OMvec, 
+
+noCapMSEs <- lapply(  X = OMdvec, 
+                      FUN = runCMPs,
+                      assessInt = 2,
+                      MPs = noCapMPs,
+                      checkMPs = TRUE,
+                      projFolderName = "noCapMPs" )
+
+otherCapMSEs <- lapply( X = OMvec[1], 
                         FUN = runCMPs,
                         assessInt = 2,
                         MPs = otherCapMPs,
                         checkMPs = TRUE,
                         projFolderName = "hiLoCaps" )
-

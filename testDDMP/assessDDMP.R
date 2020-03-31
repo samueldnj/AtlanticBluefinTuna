@@ -285,7 +285,10 @@ calcHCR <- function(  AM       = 1,
   # apply it as B*F
   TAC_s     <- B_s * Ftarg_s
   for( sIdx in 1:length(B_s) )
-    TAC_s[sIdx] <- min( TAC_s[sIdx], msy_s[sIdx] )
+  {
+    if(caps[sIdx] == "msy")
+      TAC_s[sIdx] <- min( TAC_s[sIdx], msy_s[sIdx] )
+  }
 
   # Now compute TAC by area
 
@@ -322,7 +325,10 @@ calcHCR <- function(  AM       = 1,
 
   TAC_a     <- B_a * Ftarg_a
   for( aIdx in 1:length(B_a) )
-    TAC_a[aIdx] <- min( TAC_a[aIdx], msy_a[aIdx] )
+  {
+    if( caps[aIdx] == "msy")
+      TAC_a[aIdx] <- min( TAC_a[aIdx], msy_a[aIdx] )
+  }
 
   # Take the minimum of TAC_s and TAC_a in
   # each area
@@ -331,7 +337,10 @@ calcHCR <- function(  AM       = 1,
 
   # Apply the cap
   for( aIdx in 1:ncol(B_sa) )
-    TAC_EW[aIdx]   <- min( TAC_EW[aIdx], caps[aIdx] )
+  {
+    if(is.numeric(caps[aIdx]))
+      TAC_EW[aIdx]   <- min( TAC_EW[aIdx], caps[aIdx] )
+  }
 
   return( data.frame( nll = fitTable$nll,
                       TAC = TAC_EW[AS]) )

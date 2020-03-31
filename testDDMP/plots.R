@@ -405,9 +405,13 @@ plotAllMSEs <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
 # AvC30 (Average catch in 2046) for all MPs and OMs
 plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""), 
                           prefix = NULL,
-                          ptcex = 1 )
+                          ptcex = 1, 
+                          projFolder = "./MSEs/aicTACs_d" )
 {
-  MSElist <- lapply( X = OMvec, FUN = loadMSE, prefix = prefix )
+  MSElist <- lapply(  X = OMvec, 
+                      FUN = loadMSE, 
+                      prefix = prefix,
+                      folder = projFolder )
   names(MSElist) <- OMvec
   # First do Br30 plots
 
@@ -465,7 +469,7 @@ plotMSEperf <- function(  OMvec = paste("OM_",1:15,"d",sep = ""),
 
       }
     }
-    legend( x = "bottomleft", legend = MPnames,
+    legend( x = "topleft", legend = MPnames, bty = "n",
             pch = 16, col = MPcols,
             lwd = .8, cex = .8, bg = "white" )
     mtext( side = 3, text = "East Stock" )

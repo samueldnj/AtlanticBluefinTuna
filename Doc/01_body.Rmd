@@ -42,7 +42,7 @@ scale larval indices by OM estimates of catchability, while the
 model-based MPs fit state space delay difference assessment model
 to management indices.
 
-## Choice of operating models
+## Tuning subset of operating models
 
 We chose a tuning subset of five reference grid operating models,
 namely OMs 1, 2, 4, 7, and 11, to tune our  estimation procedures. 
@@ -94,11 +94,11 @@ where $s \in \{MED, GOM\}$, $a \in \{E, W\}$.
 
 For the model-based class of procedures, the simple index scaling
 method of the empirical procedure is replaced by a state-space
-multi-stock delay difference assessment model. The two spawning
+multi-stock Schnute-Deriso delay difference assessment model 
+[@schnute1985general; @deriso1980harvesting]. The two spawning
 stocks are assumed to be distinct spawning stocks for the larval
 surveys, but are mixed using the distribution $P$ for 
 the other management indices and the observed catches. 
-
 
 ### Equilibiria
 
@@ -244,9 +244,7 @@ advice from the 5 sub-procedures for both the empirical and
 model-based MPs. For the model-based MP, we tested two weightings 
 for the averaging: equal weighting (standard mean), and weighting 
 by Akaike's Information Criterion (AIC). For the empirical MPs,
-we fully tested only a simple average weighting, but started 
-development on a stochastic approximation method to tune the
-weighting to specific biomass objectives.
+we fully tested only a simple average weighting.
 
 To calculate the AIC weighting across the tuning grid, we used only 
 the observation model likelihood components for the approved management 
@@ -261,6 +259,21 @@ a maximum decrease of 50%, compared to the previous management interval.
 
 
 ## Simulation experiments and performance metrics
+
+Rather than run the entire grid of management procedures
+defined by Table 3, we ran three batches of CMPs:
+
+1. Empirical MPs with MSY caps:
+    - **empMP_msyCap**, **empMP_msyCap.4B0**
+2. Equal weighted delay-difference MPs with MSY caps:
+    - **MP_msyCap**, **MP_msyCapF23M**, **MP_msyCapF23M.4B0**
+3. AIC weighted delay difference MPs with MSY caps:
+    - **MP_aic_msyCap**, **MP_aic_msyCapF23M**, **MP_aic_msyCapF23M.4B0**
+
+The suffix $.4B0$ indicates that the proxy UCP of $.4B_0$ is 
+applied, and F23M indicates that the maximum harvest rate
+is set at $\frac{2}{3}M$, where $M$ is fixed to the associated
+operating model in the tuning subset.
 
 All MPs were evaluated over the 12 reference grid operating
 models, labelled OM_1 through OM_12, as well as three 
@@ -290,11 +303,11 @@ and equilibria, and operating model estimates of the same quantities, were
 less consistently similar. While the log-normal prior on unfished biomass
 worked well to keep $B_{0,s}$ estimates close to the operating model values,
 the model equilibria were often biased. For example, in AMs 1, 4, and 7, the
-DD model Fmsy values for the Mediterannean spawning stock are at least 0.17, 
+DD model $F_{MSY}$ values for the Mediterannean spawning stock are at least 0.17, 
 in contrast with the operating model values, which were at most 0.13. Similarly,
-in the same assessment models, Bmsy values were around 50% of the corresponding
+in the same assessment models, $B_{MSY}$ values were around 50% of the corresponding
 operating model values. This led to similar values for maximum sustainable
-yield $MSY$, indicating that the biases in Fmsy and Bmsy were negatively correlated.
+yield $MSY$, indicating that the biases in $F_{MSY}$ and $B_{MSY}$ were negatively correlated.
 These biases have implications for the performance of MPs that rely on the
 AM reference point estimates to set TACs, which we describe below.
 
@@ -302,15 +315,21 @@ AM reference point estimates to set TACs, which we describe below.
 ## Performance in projections
 
 
-
 ### Empirical MPs
+
+As expected, emprirical CMPs did a decent job of 
+predicting future spawning stock biomass (Figure 6). 
+This is unsurprising, as empirical CMPs were tightly 
+tuned to the tuning subset of OMs, using catchability 
+from the two larval surveys, and OM reference points 
+for the harvest control rules in each sub-procedure.
 
 We found that the proxy upper control point was not
 necessary for the empirical MPs. This was indicated
 by the almost identical performance metrics between
 those MPs that used OM $B_{MSY}$, and those that used 
 40\% of OM $B_0$, as the harvest control rule's upper
-control point (Figure 6).
+control point (Figure 7).
 
 Empirical MP performance was more variable across
 reference grid operating models for the East stock 
@@ -334,30 +353,105 @@ across OMs.
 
 ### Delay Difference Model-based MPs
 
+Similar to the empirical MPs, we found the model based
+MPs to fit the spawning stock biomass in a tuning subset
+operating model reasonably well (Figure 8). Again, this is 
+unsurprising given the close tuning each AM has to its 
+associated tuning subset operating mode.
+
 We found MPs that used proxy values for the upper control point
-and maximum target harvest rates peformed better than those that
-relied on the delay difference model reference points. This was
-due to the bias in the delay difference reference points discussed 
-above, where Fmsy was positively biased and Bmsy was negatively biased.
-Because of this, although there were AMs where estimated current and 
-projected biomasses were often close to the OM biomass, the 
-biomass relative to Bmsy was overly optimistic and overfishing
-occured. ***[Probably show a figure??]***
+and maximum target harvest rates produced higher ratios
+of biomass to $B_{MSY}$ in 2046 than those that used the delay 
+difference model reference points (Figures 9 and 10, upper panels). 
+This was due to the bias in the delay difference reference 
+points discussed above, where $F_{MSY}$ was positively biased 
+and $B_{MSY}$ was negatively biased. Because of this, although some 
+AM estimates of current and projected biomasses were 
+often very close to the OM biomass, the biomass relative 
+to $B_{MSY}$ was above the upper control point, so 
+the positively biased maximum target harvest rate was 
+applied and overfishing occurred.
 
-Proxy UCP and max HR led to better biomass performance...
+The effects of the proxy harvest rate and upper control point
+were different in the east and the west. In the east, the two
+proxy MPs we tested for both mean and AIC weighted TACs produced
+very similar $B_{30}$ and $AvC_{30}$ distributions across all 
+OMs (Figures 9 and 10, left hand panels). In contrast, in the 
+West the $B_{30}$ metric was most affected by the **msyCapF23M.4B0** 
+MP with both proxies applied, while the **msyCapF23M** MP had 
+less of an effect. The difference was more evident in the average
+catch metric, with the **msyCapF23M.4B0** MP reducing average
+catch by about 500t, compared to an often negligible reduction for the
+**msyCapF23M** (Figures 9 and 10, right hand panels).
 
-Lower caps were too risk averse
+THe AIC weighted MPs (Figure 9) were a little less precautionary
+than the equal weighted MPs (Figure 10). Average catches
+were about 10% higher, and relative biomass a little lower. 
+In general, the relative ranking of MPs with the AIC and 
+equal weighting classes was the same, as discussed above; 
+however, the distance between the medians values of each 
+metric within an OM was a little greater for the AIC 
+weighted class. This is likely an indication of the 
+shifting TAC weighting at each time step, which allows
+the TAC to change more rapidly as new data becomes available. 
 
 
+### Performance of CMPs on OMs outside of the tuning subset
 
+Our CMPs had mixed performance on the reference grid OMs outside 
+of the tuning subset. These were OMs 3, 5, 6, 8, 9, 10 and 12.
 
+Overall, our MPs had low $B_{30}$ values on OMs 3, 6, 9, and 12
+in the East; however, these OMs have a recruitment regime shift that was 
+erroneously implemented (Carruthers, pers. comm., 2019), switching
+the recruitment regimes between spawning stocks and time periods,
+creating a larger reduction in steepness values between regimes 
+than was intended in the East, and a smaller reduction in the West.
 
+On the remaining OMs, that differ from the tuning subset
+by mortality/maturity and stock mixing, the AIC weighted model-based
+MPs performed the best on the $B_{30}$ metric. Out of those, the AIC 
+weighted MP **MP_aic_msyCapF23M** performed the best in the East, 
+coming the closest to $B_{30} = 1$ on OMs 5, 8, 9, and 10 and 12.
+The same MP was more precautionary in the West, often selecting
+lower TACs than necessary under the AIC weighting (Figure 11).
 
 
 # Discussion
 
+In this paper, we tested multiple empirical and model-based 
+candidate management procedures (CMPs) for Atlantic Bluefin Tuna. These
+CMPs were based on multi-model inference, where TACs from 
+5 procedures, each tuned to a specific reference grid OM, were
+combined in some way to produce TAC advice. For empirical CMPs, 
+we used an equal weighting, while for model based delay-difference
+CMPs, we tested an equal weighting as well as an AIC-like
+weighting based on data shared between the tuned AMs.
 
-expect other caps to be more risk averse, recommend
-raising cap in the West...
+We found tuning the CMPs to perform
+similarly across the OMs and stocks was a challenge. 
+Our MPs were on average too precautionary in the 
+West area/stock, and not precautionary enough on the East 
+area/stock. This could be avoided by using combinations 
+of MPs with different caps or harvest rates in the East and West, 
+allowing the West catch to increase while keeping the East stable.
 
-F0.1 as another proxy? Will still be biased.
+Similarly, choosing the correct weighting to combine
+the TAC advice was challenging. The equal weighting scheme
+is more robust to the issues of the AIC weighting (small differences
+in AIC values tend to downweight models disproportionately),
+but led to MPs that were often too precautionary. On the other
+hand, while the AIC weighting was often biased, it did allow
+the weights to shift between assessment periods, which created
+both over and under harvesting on occasion.
+
+Extending the empirical MP to use an unequal weighting is
+our next step. We conceived of a stochastic approximation
+algorithm to optimise TAC weightings [@spall2005introduction]. 
+This algorithm would apply gradient descent to an objective 
+function based on median $B_{30}$ and $\nabla B_{30}$ values 
+for a set of operating models to TAC weightings. Preliminary
+tests show promise, but this is still very much under development.
+
+
+

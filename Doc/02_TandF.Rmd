@@ -113,6 +113,7 @@ csasdown::csas_table( amFitTable,
 # Figures
 ```{r sourcePlots, echo = FALSE, include = FALSE, warning = FALSE}
 source("../MME_MP/plots.R")
+source("../MME_MP/MPs.R")
 ```
 
 
@@ -132,6 +133,8 @@ knitr::include_graphics("data/OMbiomass.pdf")
 hcrPlotCap <- "An example harvest control rule with maximum harvest rate $U_{max} =  0.08$, an upper control point of $B_{MSY} = 57$, and a TAC cap at 4 kt."
 ```
 
+\blandscape
+
 ```{r, hcrPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=hcrPlotCap}
 plotHCR(  Ftarg = 0.08,
           cap = 4,
@@ -139,6 +142,7 @@ plotHCR(  Ftarg = 0.08,
           UCP = 1.0,
           Bmsy = 57 )
 ```
+\elandscape
 
 \newpage
 
@@ -169,17 +173,35 @@ knitr::include_graphics("data/AM/1/BRP.pdf")
 
 \newpage
 
-```{r empPerfPlotsCaptions, echo = FALSE, include = FALSE, warning = FALSE}
+```{r, echo = FALSE, include = FALSE }
+empFitCheckCaption <- "A single simulation replicate from Operating Model 1, showing estimated and simulated spawning stock biomass (coloured dots and red lines), and the area catch (black lines) with mean and central $90\\%$ of the distributions of multi-model TAC advice (black points and grey vertical segments in the catch projection period). Each colour of a dot corresponds to the estimate of biomass when using parameters from the tuning subset operating model indicated in the legend."
+
+DDFitCheckCaption_OM1 <- "A single simulation replicate from Operating Model 1, showing estimated and simulated spawning stock biomass (coloured dots and red lines), and the area catch (black lines) under the MP\\_msyCapF23M.4B0 CMP. In the biomass panels, each colour of a dot corresponds to the estimate of biomass when using AMs tuned to the tuning subset OM indicated in the legend. In the catch panels, multi-model TAC advice is overlaid in the projection period with the mean (circular points), AIC weighted TAC (triangular points), and central $90\\%$ of the distributions of sub-procedure TAC (vertical segments) in the projection period."
+
+DDFitCheckCaption_OM8 <- "A single simulation replicate from Operating Model 8, which is outside of the tuning subset, showing estimated and simulated spawning stock biomass (coloured dots and red lines), and the area catch (black lines) under the MP\\_aic\\_msyCapF23 CMP. In the biomass panels, each colour of a dot corresponds to the estimate of biomass when using AMs tuned to the tuning subset OM indicated in the legend. In the catch panels, multi-model TAC advice is overlaid in the projection period with the mean (circular points), AIC weighted TAC (triangular points), and central $90\\%$ of the distributions of sub-procedure TAC (vertical segments) in the projection period."
+```
+
+
+```{r, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=empFitCheckCaption}
+knitr::include_graphics("data/fitCheck_sim3_OM_1_empMP_msyCap.pdf")
+```
+
+\newpage
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
 
 empPerfCap_MSY <- "Distributions of MP performance metrics $B_{30}$ and $AvC_{30}$ for empirical MPs with TAC caps set at maximum sustainable yield. Points show the median value of the performance metric, and segments show the central 90\\% of the distribution over all simulation replicates."
+empPerfCap_noCaps <- "Distributions of MP performance metrics $B_{30} = B_{2046}/B_{MSY}$ and $AvC_{30} = \\frac{\\sum_{t = 2016}^{2046} C_t }{30}$ for empirical MPs with no absolute TAC cap. Points show the median value of the performance metric, and segments show the central 90\\% of the distribution over all simulation replicates."
 
-empPerfCap_lohicaps <- "Distributions of MP performance metrics $B_{30} = B_{2046}/B_{MSY}$ and $AvC_{30} = \\frac{\\sum_{t = 2016}^{2046} C_t }{30}$ for empirical MPs with low and high TAC caps, which are defined in table XX. Points show the median value of the performance metric, and segments show the central 90\\% of the distribution over all simulation replicates."
+
+aicTACs_DDMP_caption <- "Distributions of MP performance metrics $B_{30} = B_{2046}/B_{MSY}$ and $AvC_{30} = \\frac{\\sum_{t = 2016}^{2046} C_t }{30}$ for Delay Difference MPs with TAC caps set at AM MSY estimates, and TACs weighted by AM AIC values, applied to deterministic operating models. Points show the median value of the performance metric, and segments show the central 90\\% of the distribution over all simulation replicates."
+msyMPs_DDMP_caption <- "Distributions of MP performance metrics $B_{30} = B_{2046}/B_{MSY}$ and $AvC_{30} = \\frac{\\sum_{t = 2016}^{2046} C_t }{30}$ for Delay Difference MPs with TAC caps set at AM MSY estimates, and TACs weighted equally, applied to operating models 1 through 15. Points show the median value of the performance metric, and segments show the central 90\\% of the distribution over all simulation replicates."
 
 
 ```
 
-
-```{r empMsyCapsPerfPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap = empPerfCap_MSY }
+\blandscape
+```{r, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap = empPerfCap_MSY }
 # Figure out how to make landscape
 plotMSEperf(  OMvec = paste("OM_",1:15,sep = ""),
               projFolder = "../MME_MP/MSEs/msyCaps", 
@@ -188,19 +210,48 @@ plotMSEperf(  OMvec = paste("OM_",1:15,sep = ""),
 
 ```
 
+\elandscape
+
 \newpage
 
 
-```{r empLoHiCapsPerfPlot, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap = empPerfCap_lohicaps }
+
+```{r, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=DDFitCheckCaption_OM1}
+knitr::include_graphics("data/fitCheck_sim5_OM_1_MP_msyCapF23M_4B0.png")
+```
+
+\newpage
+
+\blandscape
+
+```{r, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap = aicTACs_DDMP_caption }
 # Figure out how to make landscape
-plotMSEperf(  OMvec = paste("OM_",1:2,"d",sep = ""),
-              projFolder = "../MME_MP/MSEs/testMPs", 
-              prefix = "test",
+plotMSEperf(  OMvec = paste("OM_",1:15,"d",sep = ""),
+              projFolder = "../testDDMP/MSEs/aicTACs_d", 
+              prefix = "",
               ptcex = 1, segwd = 1 )
 
 ```
 
 \newpage
+
+```{r, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap = msyMPs_DDMP_caption }
+# Figure out how to make landscape
+plotMSEperf(  OMvec = paste("OM_",1:15,sep = ""),
+              projFolder = "../testDDMP/MSEs/msyMPs", 
+              prefix = "",
+              ptcex = 1, segwd = 1 )
+
+```
+\elandscape
+
+\newpage
+
+
+
+```{r, echo = FALSE, warning = FALSE, out.width = "90%", fig.align = "center", fig.cap=DDFitCheckCaption_OM8}
+knitr::include_graphics("data/fitCheck_sim2_OM_8d_MP_aic_msyCapF23M.png")
+```
 
 
 

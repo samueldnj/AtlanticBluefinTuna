@@ -72,7 +72,7 @@ MP_msyCap <- function( x, dset, AS )
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
                      AMs     = c(1,2,4,7,11),
-                     caps    = c(Inf,Inf),
+                     caps    = c("msy","msy"),
                      F23M    = FALSE,
                      TACrule = "mean",
                      check   = checkMP,
@@ -89,7 +89,7 @@ MP_msyCapF23M <- function( x, dset, AS )
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
                      AMs     = c(1,2,4,7,11),
-                     caps    = c(Inf,Inf),
+                     caps    = c("msy","msy"),
                      F23M    = TRUE,
                      TACrule = "mean",
                      check   = checkMP,
@@ -106,7 +106,7 @@ MP_msyCapF23M.4B0 <- function( x, dset, AS )
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
                      AMs     = c(1,2,4,7,11),
-                     caps    = c(Inf,Inf),
+                     caps    = c("msy","msy"),
                      F23M    = TRUE,
                      TACrule = "mean",
                      check   = checkMP,
@@ -125,7 +125,7 @@ MP_aic_msyCap <- function( x, dset, AS )
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
                      AMs     = c(1,2,4,7,11),
-                     caps    = c(Inf,Inf),
+                     caps    = c("msy","msy"),
                      F23M    = FALSE,
                      TACrule = "AIC",
                      check   = checkMP,
@@ -142,7 +142,7 @@ MP_aic_msyCapF23M <- function( x, dset, AS )
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
                      AMs     = c(1,2,4,7,11),
-                     caps    = c(Inf,Inf),
+                     caps    = c("msy","msy"),
                      F23M    = TRUE,
                      TACrule = "AIC",
                      check   = checkMP,
@@ -152,9 +152,96 @@ MP_aic_msyCapF23M <- function( x, dset, AS )
 }
 class(MP_aic_msyCapF23M)<-"MSMP"
 
-# MP_aic_msyCap - a catch cap at estimated
+# MP_msyCap - a catch cap at estimated
 # MSY is applied
-MP_aic_msyCapF23M.4B0 <- function( x, dset, AS )
+MP_noCap <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = FALSE,
+                     TACrule = "mean",
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCap"  )
+  return(TAC)
+}
+class(MP_noCap)<-"MSMP"
+
+# MP_noCap - a catch cap at estimated
+# MSY is applied
+MP_noCapF23M <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     TACrule = "mean",
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapF23M"  )
+  return(TAC)
+}
+class(MP_noCapF23M)<-"MSMP"
+
+# MP_noCap - a catch cap at estimated
+# MSY is applied
+MP_noCapF23M.4B0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     TACrule = "mean",
+                     check   = checkMP,
+                     AS      = AS,
+                     UCP     = ".4B0",
+                     mpName  = "MP_noCapF23M.4B0"  )
+  return(TAC)
+}
+class(MP_noCapF23M.4B0)<-"MSMP"
+
+
+# MP_noCap - a catch cap at estimated
+# MSY is applied
+MP_aic_noCap <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = FALSE,
+                     TACrule = "AIC",
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_aic_noCap"  )
+  return(TAC)
+}
+class(MP_aic_noCap)<-"MSMP"
+
+# MP_aic_noCap - a catch cap at estimated
+# MSY is applied
+MP_aic_noCapF23M <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     AMs     = c(1,2,4,7,11),
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     TACrule = "AIC",
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_aic_noCapF23M"  )
+  return(TAC)
+}
+class(MP_aic_noCapF23M)<-"MSMP"
+
+# MP_aic_noCap - a catch cap at estimated
+# MSY is applied
+MP_aic_noCapF23M.4B0 <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
@@ -165,10 +252,10 @@ MP_aic_msyCapF23M.4B0 <- function( x, dset, AS )
                      check   = checkMP,
                      AS      = AS,
                      UCP     = ".4B0",
-                     mpName  = "MP_aic_msyCapF23M.4B0"  )
+                     mpName  = "MP_aic_noCapF23M.4B0"  )
   return(TAC)
 }
-class(MP_aic_msyCapF23M.4B0)<-"MSMP"
+class(MP_aic_noCapF23M.4B0)<-"MSMP"
 
 
 # MP_loCap - a low catch cap is applied,

@@ -51,7 +51,7 @@ empMP_msyCap <- function( x, dset, AS )
   TAC <- empMMMP( x       = x,
                   dset    = dset,
                   OMs     = c(1,2,4,7,11),
-                  caps    = c(Inf,Inf),
+                  caps    = c("msy","msy"),
                   TACrule = "mean",
                   check   = checkMP,
                   AS      = AS,
@@ -68,7 +68,7 @@ empMP_msyCap.4B0 <- function( x, dset, AS )
   TAC <- empMMMP( x       = x,
                   dset    = dset,
                   OMs     = c(1,2,4,7,11),
-                  caps    = c(Inf,Inf),
+                  caps    = c("msy","msy"),
                   TACrule = "mean",
                   AS      = AS,
                   check   = checkMP,
@@ -151,6 +151,45 @@ empMP_hiCap.4B0 <- function( x, dset, AS )
   return(TAC)
 }
 class(empMP_hiCap.4B0)<-"MSMP"
+
+
+# MP_noCap - No cap on removals, straight
+# F x B rule
+empMP_noCap <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  OMs     = c(1,2,4,7,11),
+                  caps    = c(Inf,Inf),
+                  TACrule = "mean",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = "Bmsy",
+                  mpName  = "empMP_noCap" )
+
+  return(TAC)
+}
+class(empMP_noCap)<-"MSMP"
+
+
+# MP_noCap - No cap on removals, straight
+# F x B rule, uses min catch from
+# 5 tuned MPs
+empMP_noCapMin <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  OMs     = c(1,2,4,7,11),
+                  caps    = c(Inf,Inf),
+                  TACrule = "min",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = "Bmsy",
+                  mpName  = "empMP_noCapMin" )
+
+  return(TAC)
+}
+class(empMP_noCapMin)<-"MSMP"
 
 
 # runCMPtest()

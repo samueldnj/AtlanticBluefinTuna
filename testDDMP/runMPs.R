@@ -16,7 +16,7 @@ source("calcEquilibriumDD.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus = 12)
+sfInit(parallel=TRUE, cpus = 2)
 sfLibrary( ABTMSE )
 sfLibrary( TMB )
 sfClusterCall("loadABT")
@@ -42,7 +42,15 @@ aicMPs      <- list(  MP_aic_msyCap = c("MP_aic_msyCap","MP_aic_msyCap"),
                       MP_aic_msyCapF23M = c("MP_aic_msyCapF23M","MP_aic_msyCapF23M"),
                       MP_aic_msyCapF23M.4B0 = c("MP_aic_msyCapF23M.4B0","MP_aic_msyCapF23M.4B0") )
 
-testMP      <- list(  MP_aic_msyCap = c("MP_aic_msyCap","MP_aic_msyCap") )
+noCapMPs    <- list( MP_noCap = c("MP_noCap","MP_noCap"),
+                      MP_noCapF23M = c("MP_noCapF23M","MP_noCapF23M"),
+                      MP_noCapF23M.4B0 = c("MP_noCapF23M.4B0","MP_noCapF23M.4B0"))
+
+aicNoCapMPs      <- list( MP_aic_noCap = c("MP_aic_noCap","MP_aic_noCap"),
+                          MP_aic_noCapF23M = c("MP_aic_noCapF23M","MP_aic_noCapF23M"),
+                          MP_aic_noCapF23M.4B0 = c("MP_aic_noCapF23M.4B0","MP_aic_noCapF23M.4B0") )
+
+
 
 
 
@@ -53,19 +61,26 @@ ROMvec <- paste( "OM_", 1:31, sep = "" )
 
 # OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
 
-testMSEs <- lapply( X = OMdvec, 
+# testMSEs <- lapply( X = OMdvec, 
+#                     FUN = runCMPs,
+#                     assessInt = 2,
+#                     MPs = testMP,
+#                     checkMPs = TRUE,
+#                     projFolder = "testMP" )
+
+msyMSEs <- lapply(  X = OMdvec, 
                     FUN = runCMPs,
                     assessInt = 2,
-                    MPs = testMP,
+                    MPs = noCapMPs,
                     checkMPs = TRUE,
-                    projFolder = "testMP" )
+                    projFolder = "noCapMPs_d" )
 
-# msyMSEs <- lapply( X = OMvec, 
-#                   FUN = runCMPs,
-#                   assessInt = 2,
-#                   MPs = msyCapMPs,
-#                   checkMPs = TRUE,
-#                   projFolder = "msyMPs" )
+aicMSEs <- lapply(  X = OMdvec, 
+                    FUN = runCMPs,
+                    assessInt = 2,
+                    MPs = aicNoCapMPs,
+                    checkMPs = TRUE,
+                    projFolder = "aicNoCapMPs_d" )
 
 # hiCapMSEs <- lapply(  X = OMvec, 
 #                       FUN = runCMPs,
@@ -81,11 +96,6 @@ testMSEs <- lapply( X = OMdvec,
 #                       checkMPs = TRUE,
 #                       projFolder = "loCaps" )
 
-# aicMSEs <- lapply(  X = OMvec, 
-#                     FUN = runCMPs,
-#                     assessInt = 2,
-#                     MPs = aicMPs,
-#                     checkMPs = TRUE,
-#                     projFolder = "aicTACs" )
+
 
 
