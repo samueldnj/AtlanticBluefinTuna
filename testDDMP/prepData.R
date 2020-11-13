@@ -6,12 +6,14 @@
 # Author: Samuel D N Johnson
 # Date: May 30, 2019
 #
+# Updated Apr 7 by Steven Rossi
 # --------------------------------------------------------------------------
 
 
-getIndicesOM <- function(i,nT=52)
+getIndicesOM <- function(i,nT=75)
 {
-  z <- read.admb(paste("../abft-mse/Objects/OMs/",i,"/M3",sep=""))
+  #  z <- read.admb(paste("../abft-mse/Objects/OMs/",i,"/M3",sep=""))
+  z <- read.rep(paste("OMs/",i,"/M3.rep",sep=""))
   T <- z$"ny,"
   hT <- z$"nHy,"
   omSSB_st <- array( data=NA, dim=c(2,hT+T) )
@@ -26,8 +28,7 @@ getIndicesOM <- function(i,nT=52)
   I_gt*1e-6
 }
 
+indicesOM <- lapply( X = 1:96, FUN = getIndicesOM )
 
-indicesOM <- lapply( X = 1:36, FUN = getIndicesOM )
-
-save(indicesOM, file = "indicesOM.RData")
+save(indicesOM, file = "OMs/indicesOM.RData")
 

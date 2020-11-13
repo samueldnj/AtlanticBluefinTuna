@@ -25,50 +25,21 @@ sfSource("plots.R")
 
 options( warn = -1 )
 
-# shortListMPs <- list( loCap = c("empMP_loCap","empMP_loCap"),
-#                       loCap23M = c("empMP_loCap23M","empMP_loCap23M"),
-#                       hiCap23M = c("empMP_hiCap23M","empMP_hiCap23M"),
-#                       loCap23M.4B0 = c("empMP_loCap23M.4B0","empMP_loCap23M.4B0") )
+noCapMPs <- list( #emp_msyCap   = c("emp_msyCap","emp_msyCap"),
+                  #emp_msyCapB0 = c("emp_msyCapB0","emp_msyCapB0"),
+                  #emp_msyCapFM = c("emp_msyCapFM","emp_msyCapFM")
+                  #emp_msyCapFMB0 = c("emp_msyCapFMB0","emp_msyCapFMB0")
+                  emp_noCapFMB0 = c("emp_noCapFMB0","emp_noCapFMB0")
+                )
+                  
 
+OMdvec <- paste( "OM_", (1:96),"d",sep = "" )
 
-# msyCapMPs    <- list( empMP_msyCap = c("empMP_msyCap","empMP_msyCap"),
-#                       empMP_msyCap.4B0 = c("empMP_msyCap.4B0","empMP_msyCap.4B0") )
+fmMSEs <- lapply( X = OMdvec, 
+                  FUN = runCMPs,
+                  assessInt = 2,
+                  MPs = noCapMPs,
+                  checkMPs = TRUE,
+                  projFolderName = "sep17" )
 
-otherCapMPs  <- list( empMP_loCap = c("empMP_loCap","empMP_loCap"),
-                      empMP_hiCap = c("empMP_hiCap","empMP_hiCap") )
-
-
-noCapMPs <- list( empMP_noCap     = c("empMP_noCap","empMP_noCap"),
-                  empMP_noCapMin  = c("empMP_noCapMin","empMP_noCapMin"))
-
-
-
-
-OMdvec <- paste( "OM_", 1:15, "d",sep = "" )
-OMvec <- paste( "OM_", 1:15, sep = "" )
-
-ROMvec <- paste( "OM_", 1:31, sep = "" )
-
-OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
-
-# msyCapMSEs <- lapply( X = OMvec, 
-#                       FUN = runCMPs,
-#                       assessInt = 2,
-#                       MPs = msyCapMPs,
-#                       checkMPs = TRUE,
-#                       projFolderName = "msyCaps" )
-
-
-noCapMSEs <- lapply(  X = OMdvec, 
-                      FUN = runCMPs,
-                      assessInt = 2,
-                      MPs = noCapMPs,
-                      checkMPs = TRUE,
-                      projFolderName = "noCapMPs" )
-
-otherCapMSEs <- lapply( X = OMvec[1], 
-                        FUN = runCMPs,
-                        assessInt = 2,
-                        MPs = otherCapMPs,
-                        checkMPs = TRUE,
-                        projFolderName = "hiLoCaps" )
+#z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")

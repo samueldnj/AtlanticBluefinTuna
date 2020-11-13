@@ -12,11 +12,10 @@ dyn.load(dynlib('tunaDelay'))
 #' @param x a simulation number.
 #' @param dset a list with two positions (1:East  2:West) of simulated data for use by management procedures.
 #' @param AS the management area for which advice is being provided (1:East 2:West)
-#' @param AMs a numeric vector of AM indicator numbers, selecting specific AMs tuned to different OMs
+#' @param k a numeric vector of AM indicator numbers, selecting specific AMs tuned to different OMs
 #' @param caps a 2-numeric defining precautionary caps for each area. Inf implies that AM MSY is used.
 #' @param F23M a boolean indicating whether 2/3 M is used in place of Fmsy for HCRs
 #' @param UCP a char vector for the upper control point on the HCR, with either "Bmsy" or ".4B0"
-#' @param TACrule the method for combining TACs, either "mean" or "AIC"
 #' @param check A boolean indicating whether check tables of TAC and projected biomass are saved to ./outTables/
 #' @maxDeltaTACup max proportional increase in TAC
 #' @maxDeltaTACdn max proportional decrease in TAC
@@ -26,70 +25,90 @@ dyn.load(dynlib('tunaDelay'))
 #' @examples
 #' assessDDmm(1,dset = dset_EW,AS = 1, AMs = 1)
 #' sapply(1:10,assessDDmm,dset = dset_EW, AS = 1, AMs = 1 )
-assessDDmm <- function( x, dset, 
+assessDDmm <- function( x,
+                        dset, 
                         AS            = 1,
-                        AMs           = c(1,2,4,7,11),
+                        k             = 5,
                         caps          = c(Inf,Inf),
                         F23M          = FALSE,
                         UCP           = "Bmsy",
-                        TACrule       = c("mean"),
                         check         = TRUE,
                         maxDeltaTACup = 0.2,
                         maxDeltaTACdn = 0.5,
-                        mpName        = "assessDDmm" )
+                        mpName        = "assessDDmm",
+                        fitOnly       = FALSE,
+                        nllWt         = NULL )
 {
+  source("tools.R")
+
+  # Area names for saving stuff
   areaNames <- c("East","West")
+
+  # Number of time steps
+  X <- dim(dset[[1]]$Iobs)[3]
+
+  # Read-in clustered OMs and weights
+  load("../OMs/clust.Rdata")
+  # OMs and weights associated with k clusters
+  clustk <- clust[[as.character(k)]]
+
   if( AS == 1 )
   {
-    # Load the indicesOM list
-    load("OMfits/ssbOM.Rdata")
-    AMinits <- read.csv("OMfits/AMinits.csv")
-    # Area names for saving stuff
-    
+    # Load the initial conditions and SSB for all OMs
+    AMinits <- read.csv("../OMs/AMinits.csv")
+    load("../OMs/SSB.Rdata")
 
-    omSSB     <- ssb$OM_mst[as.character(AMs),,]
-    omBioPars <- AMinits %>% filter( OM %in% AMs )
-
-    omInfo         <- vector(mode = "list", length = length(AMs) )
-    names(omInfo)  <- AMs
+    omInfo         <- vector(mode = "list", length = k )
+    names(omInfo)  <- clustk$OMs
 
     # Put OM info into a list for applying AMs to
-    for( aIdx in 1:length(AMs) )
+    for( aIdx in 1:k )
     {
-      omInfo[[aIdx]]$indices <- omSSB[aIdx,,]
-      omInfo[[aIdx]]$bioPars <- omBioPars[aIdx,]
+      # OM id (1-96)
+      OM <- clustk$OMs[aIdx]
+
+      # Build
+      xtmp <- matrix( data=-1, nrow=2, ncol=X )
+      xtmp[ ,1:dim(SSB)[3]] <- SSB[OM, , ]
+      omInfo[[aIdx]]$i <- aIdx
+      omInfo[[aIdx]]$OM <- OM
+      omInfo[[aIdx]]$indices <- SSB[OM, , ]
+      omInfo[[aIdx]]$bioPars <- AMinits[OM, ]
     }
 
     mmFits <- lapply( X = omInfo,
                       FUN = fitDD,
                       dset = dset,
-                      simNum = x )
+                      simNum = x,
+                      plotFit=FALSE,
+                      nllWt=nllWt )
 
     # Make a table of fit info to save to WD
-    fitTable <- matrix(NA, nrow = length(AMs), ncol = 16)
-    colnames(fitTable) <- c(  "AM", 
-                              "Bnext_E", 
-                              "Bnext_W",
-                              "MSY_Es", 
-                              "MSY_Ws", 
-                              "Bmsy_Es",
-                              "Bmsy_Ws",
-                              "Fmsy_Es",
-                              "Fmsy_Ws",
-                              "propW_Es",
-                              "propW_Ws",
-                              "M_Es",
-                              "M_Ws",
-                              "B0_Es",
-                              "B0_Ws",
-                              'nll' )
-
+    cnames <- c( "AM", 
+                 "Bnext_E", 
+                 "Bnext_W",
+                 "MSY_Es", 
+                 "MSY_Ws", 
+                 "Bmsy_Es",
+                 "Bmsy_Ws",
+                 "Fmsy_Es",
+                 "Fmsy_Ws",
+                 "propW_Es",
+                 "propW_Ws",
+                 "M_Es",
+                 "M_Ws",
+                 "B0_Es",
+                 "B0_Ws",
+                 'nll',
+                 "nT" )
+    fitTable <- matrix( data=NA, nrow=k, ncol=length(cnames) )
+    colnames(fitTable) <- cnames
 
 
     fitTable <- as.data.frame(fitTable)
-    fitTable$AM <- AMs
+    fitTable$AM <- 1:k
 
-    for( amIdx in 1:length(AMs) )
+    for( amIdx in 1:k )
     {
       # Biomass, MSY and Fmsy
       fitTable$Bnext_E[amIdx]   <- mmFits[[amIdx]]$B_s[1]
@@ -107,6 +126,7 @@ assessDDmm <- function( x, dset,
       fitTable$B0_Es[amIdx]     <- mmFits[[amIdx]]$B0_s[1]
       fitTable$B0_Ws[amIdx]     <- mmFits[[amIdx]]$B0_s[2]
       fitTable$nll[amIdx]       <- mmFits[[amIdx]]$nll
+      fitTable$nT[amIdx]        <- X
     }
 
     # Write fitTable out
@@ -117,6 +137,14 @@ assessDDmm <- function( x, dset,
 
     write.csv( fitTable, file = file.path("fitTables",fitTableFileName) )
 
+  }
+
+  if( fitOnly )
+  {
+    print("Finished fit only.")
+    AMfits <- mmFits
+    save(AMfits,file="AMfits/AMfits.Rdata")
+    return()
   }
 
   # if AS == 2, read in TACtables for this
@@ -130,29 +158,31 @@ assessDDmm <- function( x, dset,
   
   # Apply the HCR, compute area and stock
   # TAC
-  mmTACs <- lapply( X         = AMs,
+  mmTACs <- lapply( X         = 1:k,
                     FUN       = calcHCR,
                     fitTable  = fitTable,
                     F23M      = F23M,
                     caps      = caps,
                     UCP       = UCP,
                     AS        = AS )
+  
+
   # Apply weighting
   mmTACs <- do.call( rbind, mmTACs ) %>%
             mutate( zeroMeanNLL = nll - mean(nll),
                     deltaNLL    = (zeroMeanNLL - min(zeroMeanNLL)),
                     amWts       = exp(-deltaNLL/2)/sum(exp(-deltaNLL/2)),
-                    wtdTAC      = amWts * TAC )
+                    wtdTAC      =  amWts * TAC )
+                    #wtdTAC      =  clustk$wts * TAC )
 
-  if( TACrule == "mean" )
-  {
-    TAC <- mean(mmTACs$TAC)
-  }
-
-  if( TACrule == "AIC" )
-  {
+#  if( AS == 1 )
+#  {
     TAC <- sum(mmTACs$wtdTAC)
-  }
+#  }
+#  else
+#  {
+#    TAC <- median(mmTACs$TAC)
+#  }
 
   # Scale to kg
   TAC <- TAC * 1e6
@@ -179,7 +209,8 @@ assessDDmm <- function( x, dset,
   if( check )
   {
     # Combine fitTable and outTable
-    outTable            <- left_join( fitTable, mmTACs, by = "nll" )
+    outTable            <- cbind( fitTable, mmTACs[ ,-1] )
+    #outTable            <- left_join( fitTable, mmTACs, by = "nll" )
     if( AS == 1 )
       outTable$TAC_E <- outTable$TAC
 
@@ -190,18 +221,18 @@ assessDDmm <- function( x, dset,
     outTable$simNum     <- x
     outTable$area       <- areaNames[AS]
     # Add new columns for biomass, and NLL
-    outTable$MSY_Ea     <- numeric(length(AMs))
-    outTable$MSY_Wa     <- numeric(length(AMs))
+    outTable$MSY_Ea     <- numeric(k)
+    outTable$MSY_Wa     <- numeric(k)
     
     
-    outTable$Bmsy_Ea    <- numeric(length(AMs))
-    outTable$Bmsy_Wa    <- numeric(length(AMs))
+    outTable$Bmsy_Ea    <- numeric(k)
+    outTable$Bmsy_Wa    <- numeric(k)
     
-    outTable$Fmsy_Ea    <- numeric(length(AMs))
-    outTable$Fmsy_Wa    <- numeric(length(AMs))
+    outTable$Fmsy_Ea    <- numeric(k)
+    outTable$Fmsy_Wa    <- numeric(k)
   
 
-    for( amIdx in 1:length(AMs) )
+    for( amIdx in 1:k )
     {
       # Biomass, MSY and Fmsy
       B_s       <- c(fitTable[amIdx,]$Bnext_E, fitTable[amIdx,]$Bnext_W)
@@ -255,7 +286,7 @@ calcHCR <- function(  AM       = 1,
                       fitTable = fitTable,
                       F23M     = FALSE,
                       caps     = c(Inf,Inf),
-                      UCP      = "Bmsy",
+                      UCP    = "Bmsy",
                       AS       = 1 )
 {
   
@@ -266,11 +297,16 @@ calcHCR <- function(  AM       = 1,
   B_s       <- c(fitTable$Bnext_E, fitTable$Bnext_W)
   msy_s     <- c(fitTable$MSY_E, fitTable$MSY_W)
   if( F23M )
-    Fmsy_s  <- c(fitTable$M_E, fitTable$M_W)*2/3
+  {
+    #if( AS == 1 )
+    #  Fmsy_s  <- c(fitTable$M_E, fitTable$M_W)#*2/3
+    #else
+      Fmsy_s  <- c(fitTable$M_E, fitTable$M_W*2/3)
+  }
   else
     Fmsy_s  <- c(fitTable$Fmsy_E, fitTable$Fmsy_W)
 
-  # Get Upper control point
+  # Biomass at upper control point
   if( UCP == "Bmsy" )
     Bmsy_s    <- c(fitTable$Bmsy_E, fitTable$Bmsy_W)
   if( UCP == ".4B0") 
@@ -347,11 +383,11 @@ calcHCR <- function(  AM       = 1,
 }
 
 # Calculate ramped HCR similar to Albacore
-rampHCR <- function(  B_s, 
-                      Fmsy_s, 
-                      Bmsy_s,
-                      LCP = 0.4,
-                      UCP = 1.0 )
+rampHCR <- function( B_s, 
+                     Fmsy_s, 
+                     Bmsy_s,
+                     LCP = 0.4,
+                     UCP = 1.0 )
 {
   nS <- length(B_s)
 
@@ -369,7 +405,7 @@ rampHCR <- function(  B_s,
     if( D_s[sIdx] <= LCP )
       Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx]
     if( D_s[sIdx] >= LCP & D_s[sIdx] <= UCP )
-      Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx] + 0.9 * Fmsy_s[sIdx] * (D_s[sIdx] - LCP) * m_s
+      Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx] + Fmsy_s[sIdx] * (D_s[sIdx] - LCP) * m_s
     if( D_s[sIdx] >= UCP )
       Ftarg_s[sIdx] <- Fmsy_s[sIdx]
   } 
@@ -383,11 +419,12 @@ rampHCR <- function(  B_s,
 fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                     dset      = dset,
                     simNum    = x,
-                    bioPars   = omBioPars )
+                    bioPars   = omBioPars,
+                    plotFit   = FALSE,
+                    nllWt    = NULL )
 {
   # Get model dimensions
   nT <- dim(dset[[1]]$Cobs)[2]
-  nG <- dim(dset[[1]]$Iobs)[2] - 1
   nA <- 2
   nS <- 2
 
@@ -406,10 +443,6 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                         Name = as.character(Name) )
   idxAreaKey[idxAreaKey$Name == "MED_LAR_SUV","idxType"] <- 1
   idxAreaKey[idxAreaKey$Name == "GOM_LAR_SUV","idxType"] <- 2
-  
-  # Remove RR idx
-  RRidx <- which(idxAreaKey$Name == "US_RR_66_114")
-  idxAreaKey <- idxAreaKey %>% filter( Name != "US_RR_66_114")
 
   # Reorder the idxAreaKey, save the order so we
   # can reorder I_gt
@@ -420,6 +453,8 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                     "MED_LAR_SUV",
                     "JPN_LL_NEAtl2",
                     "JPN_LL_West2" )
+
+  nG <- length(newIdxOrder) + 2
 
   # conver to numeric order
   numIdxOrder <- c()
@@ -445,21 +480,15 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
   # Append OM indices
   I_gt <- appendOMIndices(  omIndices, 
                             dset = dset, 
-                            simNum = simNum )
-
-  I_gt <- I_gt[-(2 + RRidx),]
-
-  # Reorder
-  I_gt[3:9,] <- I_gt[(3:9)[numIdxOrder], ]
+                            simNum = simNum,
+                            i = numIdxOrder )
 
   # Append new model switch codes and dim names for omIndices
   idxType_g <- c(1:2,idxType_g)
   area_g    <- c(0,1,area_g)
   grs       <- c("East stock","West stock",grs)
-  lntau_g   <- c(rep(log(0.01),2),lntau_g)
-  initq_g   <- c(1,1,initq_g)
-  nG        <- nG + 2
-
+  lntau_g   <- c(rep(log(0.01),2),lntau_g)[1:nG]
+  initq_g   <- c(1,1,initq_g)[1:nG]
 
   # Reformat survey indices and age-composition into one vector
   lnObs_k  <- numeric(0)
@@ -541,7 +570,9 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
   # for brood year
   nT_brood  <- nT + diff(range(kage_s)) 
 
+  M_s <- c(omBioPars$M_E,omBioPars$M_W)
   B0_s <- c(omBioPars$B0_E,omBioPars$B0_W)
+  steep_s <- c(omBioPars$steep_E,omBioPars$steep_W)
 
   # Prior on proportion of each stock in W area:
   # Update later to be a prior based
@@ -573,9 +604,9 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 idxType_g     = idxType_g,
                 rType         = 1 )
 
-  pars <- list( logith_s      = c(logit(omBioPars$steepE),logit(omBioPars$steepW)),
+  pars <- list( logith_s      = logit(steep_s),
                 lnB0_s        = log(B0_s),
-                lnM_s         = rep(log(omBioPars$M),2),
+                lnM_s         = log(M_s),
                 lntau_g       = lntau_g,
                 tauW_a        = rep(0.1,nA),
                 rDev_st       = array(0, dim = c(nS,(nT-1))),
@@ -588,8 +619,8 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 sig2Prior     = c(1,2),
                 lnqbar_g      = rep(log(0.5),nG),
                 lntauq_g      = rep(log(0.05),nG),
-                h_alpha       = 20*c(omBioPars$steepE,omBioPars$steepE),
-                h_beta        = 20 - 20*c(omBioPars$steepE,omBioPars$steepE),
+                h_alpha       = 20*steep_s,
+                h_beta        = 20 - 20*steep_s,
                 tau2IGa_g     = rep(10,nG),
                 tau2IGb_g     = rep(0.01 * 11, nG ),
                 mB0_s         = B0_s )
@@ -638,6 +669,22 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
   B_sa[,2] <- propW_s * B_s
   B_sa[,1] <- (1 - propW_s) * B_s
 
+  if( plotFit )
+    plotIndexFit( i=omInfo$OM, repObj=repOpt, plotPDF=TRUE )
+
+  nll_gt <- repOpt$nllI_gt[-(1:2), ]
+  if( !is.null(nllWt) )
+  {
+    expScal <- rep(1,ncol(nll_gt))
+    if( nllWt=="last10" ) 
+      expScal[1:(ncol(nll_gt)-10)] <- 0
+    else if( is.numeric(nllWt) )
+    {
+      etmp <- 1 - exp( -nllWt*(1:ncol(nll_gt)) )
+      expScal <- etmp / max(etmp)
+    }
+    nll_gt <- t( t(nll_gt)*expScal )
+  }
 
   mpOutput <- list( q_g     = repOpt$q_g,
                     h_s     = repOpt$h_s,
@@ -653,7 +700,10 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                     msy     = msyList$msy_s,
                     Bmsy    = msyList$Bmsy_s,
                     Fmsy    = msyList$Fmsy_s,
-                    nll     = sum(repOpt$nllI_gt[-(1:2),]) )
+                    cnvrg   = phaseList$optOutput$convergence,
+                    nll     = sum(nll_gt),
+                    Iobs    = I_gt*1e-6,
+                    B_st    = repOpt$B_st )
 
 
   return( mpOutput )
@@ -663,20 +713,19 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
 
 # Append the OM indices to the dset object
 # Called within fitDD()
-appendOMIndices <- function( indicesOM, dset, simNum = x )
+appendOMIndices <- function( indicesOM, dset, simNum=x,
+                             i=c(3,1,5,4,2,7,11) )
 {
   nT <- dim(dset[[1]]$Cobs)[2]
-  nG <- dim(dset[[1]]$Iobs)[2]
+  nG <- length(i)
   nA <- 2
 
   # Now let's make arrays of data
   # Indices
-  I_gt <- array( NA,  dim = c(nG,nT),
-                      dimnames = list(  gear = NULL,
-                                        year = NULL) )
-
-  I_gt[1:nG,1:nT] <- dset[[1]]$Iobs[simNum,1:nG,1:nT]
-
+  I_gt <- array( data=dset[[1]]$Iobs[simNum,i, ],
+                 dim = c(nG,nT),
+                 dimnames = list( gear = NULL,
+                                  year = NULL) )
   I_gt[is.na(I_gt)] <- -1
 
   # Pad the OM indices if nT > ncol indicesOM
@@ -870,8 +919,8 @@ logit <- function(p)
     if(fitOmSSB)
     {
       nG <- length(data$area_g)
-      qMap <- 1:nG
-      sdMap <- 1:nG
+      qMap <- 1:length(parameters$lnq_g)
+      sdMap <- 1:length(parameters$lnq_g)
       qMap[1:2] <- NA
       sdMap[1:2] <- NA
       map_use$lnq_g <- as.factor(qMap)
@@ -1128,3 +1177,21 @@ logit <- function(p)
   x <- any(is.nan(listEntry))
   x
 }
+
+
+fitAMs <- function( k=5 )
+{
+  load("dset.Rdata")
+  assessDDmm( x=1, dset=dset, AS=1, k=k, fitOnly=TRUE )
+}
+
+
+
+
+
+
+
+
+
+
+

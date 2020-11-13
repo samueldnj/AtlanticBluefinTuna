@@ -9,6 +9,7 @@
 #' @param AS the management area for which advice is being provided (1:East 2:West)
 #' @param OMs a numeric vector of AM indicator numbers, selecting specific AMs tune to different OMs
 #' @param caps a numeric vector of TAC caps to apply
+#' @param FM a boolean indicating whether 2/3 M is used in place of Fmsy for HCRs
 #' @param UCP a character vector indicating whether to use Bmsy or .4B0 as UCP
 #' @param TACrule a character vector indicating how to combine multiple TACs
 #' @param check logical indicating whether to save MP information
@@ -23,25 +24,34 @@
 #' sapply(1:10,empMMMP,dset = dset_EW, AS = 1, AMs = 1 )
 empMMMP <- function(  x, dset, 
                       AS            = 1,
-                      OMs           = c(1,2,4,7,11),
+                      k             = 5,
                       caps          = c(Inf,Inf),
+                      FM            = FALSE,
                       UCP           = "Bmsy",
-                      TACrule       = c("mean"),
+                      TACrule       = "weighted",
                       wts           = rep(0,5),
                       check         = TRUE,
                       maxDeltaTACup = 0.2,
                       maxDeltaTACdn = 0.5,
                       propW         = c(.102,.9),
-                      mpName        = "baseEmpMP" )
+                      mpName        = "baseEmpMP",
+                      plotTAC       = FALSE )
 {
+
   # Area names for saving stuff
   areaNames <- c("East","West")
 
+  # Read-in clustered OMs and weights
+  load("../OMs/clust.Rdata")
+  # OMs and weights associated with k clusters
+  clustk <- clust[[as.character(k)]]
+
   # Load OM parameters
-  OMpars <- read.csv("OMfits/OMpars.csv") %>%
-            filter(OM %in% OMs ) %>%
+  OMpars <- read.csv("../OMs/empPars.csv") %>%
+            filter(OM %in% clustk$OMs ) %>%
             mutate( q_GOM = exp(lnq_GOM) * 1e6,
                     q_MED = exp(lnq_MED) * 1e6 )
+  OMpars <- OMpars[match(clustk$OMs,OMpars$OM), ]
 
   MEDidxNo <- Indices[Indices$Name == "MED_LAR_SUV",]$No
   GOMidxNo <- Indices[Indices$Name == "GOM_LAR_SUV",]$No
@@ -61,7 +71,6 @@ empMMMP <- function(  x, dset,
   fitTable$propW_GOM <- propW[2]
   fitTable$propW_MED <- propW[1]
 
-
   # Transform larval idx to biomass estimate using
   # catchability parameter
   fitTable <- fitTable %>%
@@ -80,42 +89,71 @@ empMMMP <- function(  x, dset,
                       Bmsy_E = (B_ME * Bmsy_MED + B_GE * Bmsy_GOM) / B_E,
                       Bmsy_W = (B_MW * Bmsy_MED + B_GW * Bmsy_GOM) / B_W )  
 
-
-
   # Now we have a biomass estimate
   # and some control points to feed to
   # a simple modification of the model
   # based MP's HCR.
 
+  maxB <- c( max(fitTable[,c("Bmsy_MED","B0_MED","B_MED")]),
+             max(fitTable[,c("Bmsy_GOM","B0_GOM","B_GOM")]) )
+
   # Apply the HCR, compute area and stock
   # TAC
-  mmTACs <- lapply( X         = OMs,
+  TACout <- lapply( X         = clustk$OMs,
                     FUN       = calcHCR,
                     fitTable  = fitTable,
+                    FM        = FM,
                     caps      = caps,
-                    UCP       = UCP )
-  mmTACs <- do.call( rbind, mmTACs )
+                    UCP       = UCP,
+                    maxB      = maxB )
+  #mmTACs <- do.call( rbind, mmTACs$TAC )
 
+  nCol <- ncol(TACout[[1]]$hcrSeqs[[1]])
+  mmTACs <- data.frame( OM=rep(NA,k), TAC_E=rep(NA,k), TAC_W=rep(NA,k) )
+  Be <- matrix( data=NA, nrow=k, ncol=nCol )
+  Fes <- matrix( data=NA, nrow=k, ncol=nCol )
+  Fea <- matrix( data=NA, nrow=k, ncol=nCol )
+  Bw <- matrix( data=NA, nrow=k, ncol=nCol )
+  Fws <- matrix( data=NA, nrow=k, ncol=nCol )
+  Fwa <- matrix( data=NA, nrow=k, ncol=nCol )
+  ptse <- list()
+  ptsw <- list()
+
+  for( i in 1:k )
+  {
+    mmTACs[i, ] <- as.numeric(TACout[[i]]$TAC)
+    Be[i, ]  <- TACout[[i]]$hcrSeqs[[1]]["B", ]
+    Fes[i, ] <- TACout[[i]]$hcrSeqs[[1]]["Fs", ]
+    Fea[i, ] <- TACout[[i]]$hcrSeqs[[1]]["Fa", ]
+    Bw[i, ]  <- TACout[[i]]$hcrSeqs[[2]]["B", ]
+    Fws[i, ] <- TACout[[i]]$hcrSeqs[[2]]["Fs", ]
+    Fwa[i, ] <- TACout[[i]]$hcrSeqs[[2]]["Fa", ]
+    ptse[[i]] <- TACout[[i]]$hcrPts[[1]]
+    ptsw[[i]] <- TACout[[i]]$hcrPts[[2]]
+  }
   if( AS == 1 )
     TACvec <- mmTACs$TAC_E
-
-  if( AS == 2 )
+  else
     TACvec <- mmTACs$TAC_W
 
-
-  # Whittle down to a single TAC per
-  # area
-  if( TACrule == "mean" )
+  if( TACrule == "weighted" )
+    TAC    <- sum( clustk$wts * TACvec )
+  else if( TACrule == "mean" )
     TAC <- mean(TACvec)
-
-  if( TACrule == "min" )
+  else if( TACrule == "min" )
     TAC <- min(TACvec)
 
-  if( TACrule == "weighted" )
-  {
-    TACwts <- exp(wts) / sum(exp(wts))
-    TAC    <- sum( (TACwts * TACvec) )
-  }
+  hcrList <- list( Be=Be, Fes=Fes, Fea=Fea, ptse=ptse,
+                   Bw=Bw, Fws=Fws, Fwa=Fwa, ptsw=ptsw )
+
+  save( hcrList, file=paste("HCRs/hcrList",x,"-",ncol(dset[[1]]$Cobs),".Rdata",sep="") )
+
+  #if( AS == 2 )
+  #{
+  #  TACvec <- mmTACs$TAC_W
+  #  TAC <- min(TACvec)
+  #}
+
   
   # Scale to kg
   TAC <- TAC * 1e6
@@ -182,8 +220,11 @@ class(empMMMP)<-"MSMP"
 # from the mpOutput, then
 calcHCR <- function(  OM       = 1,
                       fitTable = fitTable,
+                      FM       = 1/3,
                       caps     = c(Inf,Inf),
-                      UCP      = "Bmsy" )
+                      UCP      = "Bmsy",
+                      plotHCRs = 0,
+                      maxB     = c(1500,150) )
 {
   
   # First, calculate TAC by stock
@@ -192,13 +233,17 @@ calcHCR <- function(  OM       = 1,
 
   B_s       <- c(fitTable$B_MED, fitTable$B_GOM)
   msy_s     <- c(fitTable$MSY_MED, fitTable$MSY_GOM)
-  Fmsy_s  <- c(fitTable$Fmsy_MED, fitTable$Fmsy_GOM)
+
+  if( FM )
+    Fmsy_s  <- c(fitTable$M_E*2/3, fitTable$M_W*2/3)
+  else
+    Fmsy_s  <- c(fitTable$Fmsy_MED, fitTable$Fmsy_GOM)
 
   # Get Upper control point
   if( UCP == "Bmsy" )
     Bmsy_s    <- c(fitTable$Bmsy_MED, fitTable$Bmsy_GOM)
   if( UCP == ".4B0") 
-    Bmsy_s <- 0.4 * c(fitTable$B0_MED, fitTable$B0_GOM)
+    Bmsy_s <- c(0.4*fitTable$B0_MED, 0.4*fitTable$B0_GOM)
 
   # change fmsy_s to ftarget
   Ftarg_s <- rampHCR( B_s = B_s,
@@ -226,11 +271,13 @@ calcHCR <- function(  OM       = 1,
                       Bmsy_s = Bmsy_a )
 
   TAC_a     <- B_a * (1 - exp( - Ftarg_a ))
+  
   for( aIdx in 1:length(B_a) )
   {
     if(caps[aIdx] == "msy")
       TAC_a[aIdx] <- min( TAC_a[aIdx], msy_a[aIdx] )
   }
+
 
   # Take the minimum of TAC_s and TAC_a in
   # each area
@@ -242,9 +289,68 @@ calcHCR <- function(  OM       = 1,
     if(is.numeric(caps[aIdx]))
       TAC_EW[aIdx]   <- min( TAC_EW[aIdx], caps[aIdx] )
 
-  return( data.frame( OM      = OM,
+
+  if( plotHCRs )
+  {
+    par( mfcol=c(2,2), mar=c(2,2,1,1), oma=c(2,2,0,0) )
+    labs <- c("East","West")
+  }
+
+  hcrSeqs <- list()
+  hcrPts  <- list()
+  nI <- 100
+
+  for( j in 1:2 )
+  {
+    #Bmax <- 1.1*max( Bmsy_s[j], Bmsy_a[j], B_s, B_a )
+    Bmax <- maxB[j]
+    Bseq <- seq( from=0, to=1.1*Bmax, length.out=nI )
+    Fs <- rampHCR( B_s = Bseq,
+                   Fmsy_s = rep(Fmsy_s[j],nI),
+                   Bmsy_s = rep(Bmsy_s[j],nI) )
+    Fa <- rampHCR( B_s = Bseq,
+                   Fmsy_s = rep(Fmsy_a[j],nI),
+                   Bmsy_s = rep(Bmsy_a[j],nI) )
+
+    Cs <- Bseq*(1-exp(-Fs))
+    Ca <- Bseq*(1-exp(-Fa))
+
+    if( plotHCRs )
+    {
+      plot( x=range(Bseq), y=c(0,1.1*max(Fa,Fs)), type="n", las=1,
+            main=labs[j] )
+      plotbg()
+      lines( x=Bseq, y=Fs, lwd=1.5 )
+      lines( x=Bseq, y=Fa, lwd=1.5, lty=2, col="red" )
+      points( x=B_s[j], y=Ftarg_s[j], pch=16, col="white" )
+      points( x=B_a[j], y=Ftarg_a[j], pch=16, col="white" )
+      points( x=B_s[j], y=Ftarg_s[j], lwd=1.5 )
+      points( x=B_a[j], y=Ftarg_a[j], lwd=1.5, col="red" )
+      legend( x="bottomright", lty=1:2, legend=c("By stock","By area"), bty="n" )
+  
+      plot( x=range(Bseq), y=c(0,1.1*max(Ca,Cs)), type="n", las=1 )
+      plotbg()
+      lines( x=Bseq, y=Cs, lwd=1.5 )
+      lines( x=Bseq, y=Ca, lwd=1.5, lty=2, col="red" )
+      points( x=B_s[j], y=TAC_s[j], pch=16, col="white" )
+      points( x=B_a[j], y=TAC_a[j], pch=16, col="white" )
+      points( x=B_s[j], y=TAC_s[j], lwd=1.5 )
+      points( x=B_a[j], y=TAC_a[j], lwd=1.5, col="red" )
+    }
+
+    hcrSeqs[[j]] <- matrix( data=c(Bseq,Fs,Fa), nrow=3, ncol=nI,
+                            dimnames=list(c("B","Fs","Fa")),
+                            byrow=1 )
+    pts <- c(B_s[j],B_a[j],Ftarg_s[j],Ftarg_a[j])
+    names(pts) <- c("Bs","Ba","Fs","Fa")
+    hcrPts[[j]] <- pts
+  }
+
+  return( list( TAC = data.frame( OM      = OM,
                       TAC_E   = TAC_EW[1],
-                      TAC_W   = TAC_EW[2]) )
+                      TAC_W   = TAC_EW[2] ),
+                hcrSeqs = hcrSeqs,
+                hcrPts = hcrPts ) )
 }
 
 # Calculate ramped HCR similar to Albacore
@@ -270,7 +376,7 @@ rampHCR <- function(  B_s,
     if( D_s[sIdx] <= LCP )
       Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx]
     if( D_s[sIdx] >= LCP & D_s[sIdx] <= UCP )
-      Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx] + 0.9 * Fmsy_s[sIdx] * (D_s[sIdx] - LCP) * m_s
+      Ftarg_s[sIdx] <- 0.1 * Fmsy_s[sIdx] + Fmsy_s[sIdx] * (D_s[sIdx] - LCP) * m_s
     if( D_s[sIdx] >= UCP )
       Ftarg_s[sIdx] <- Fmsy_s[sIdx]
   } 
@@ -299,3 +405,40 @@ rampHCR <- function(  B_s,
   x <- any(is.nan(listEntry))
   x
 }
+
+distMid <- function(x)
+  abs(x-48.5)
+
+getCentralOM <- function( mod=4 )
+{
+  load("mseStatsEmp.Rdata")
+  e30 <- mseStats[["east"]][ ,mod,"Br30"]
+  w30 <- mseStats[["west"]][ ,mod,"Br30"]
+
+  par(mfrow=c(1,2))
+  plot( 1:96, sort(e30) )
+  abline( h=1 )
+  plot( 1:96, sort(w30) )
+  abline( h=1 )
+
+  df <- data.frame( OM=1:96, e=order(e30), w=order(w30) ) %>%
+        mutate( z=distMid(e)+distMid(w) ) %>%
+        filter( z==min(z) )
+  return(df)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

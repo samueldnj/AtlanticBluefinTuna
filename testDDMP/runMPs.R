@@ -24,78 +24,46 @@ sfSource("assessDDMP.R")
 sfSource("MPs.R")
 sfSource("calcEquilibriumDD.R")
 
-options( warn = -1 )
-
-hiCapMPs <- list( MP_hiCap = c("MP_hiCap","MP_hiCap"),
-                  MP_hiCap23M = c("MP_hiCap23M","MP_hiCap23M"),
-                  MP_hiCap23M.4B0 = c("MP_hiCap23M.4B0","MP_hiCap23M.4B0") )
-
-loCapMps <- list( MP_loCap = c("MP_loCap","MP_loCap"),
-                  MP_loCap23M = c("MP_loCap23M","MP_loCap23M"),
-                  MP_loCap23M.4B0 = c("MP_loCap23M.4B0","MP_loCap23M.4B0") )
-
-msyCapMPs    <- list( MP_msyCap = c("MP_msyCap","MP_msyCap"),
-                      MP_msyCapF23M = c("MP_msyCapF23M","MP_msyCapF23M"),
-                      MP_msyCapF23M.4B0 = c("MP_msyCapF23M.4B0","MP_msyCapF23M.4B0"))
-
-aicMPs      <- list(  MP_aic_msyCap = c("MP_aic_msyCap","MP_aic_msyCap"),
-                      MP_aic_msyCapF23M = c("MP_aic_msyCapF23M","MP_aic_msyCapF23M"),
-                      MP_aic_msyCapF23M.4B0 = c("MP_aic_msyCapF23M.4B0","MP_aic_msyCapF23M.4B0") )
-
-noCapMPs    <- list( MP_noCap = c("MP_noCap","MP_noCap"),
-                      MP_noCapF23M = c("MP_noCapF23M","MP_noCapF23M"),
-                      MP_noCapF23M.4B0 = c("MP_noCapF23M.4B0","MP_noCapF23M.4B0"))
-
-aicNoCapMPs      <- list( MP_aic_noCap = c("MP_aic_noCap","MP_aic_noCap"),
-                          MP_aic_noCapF23M = c("MP_aic_noCapF23M","MP_aic_noCapF23M"),
-                          MP_aic_noCapF23M.4B0 = c("MP_aic_noCapF23M.4B0","MP_aic_noCapF23M.4B0") )
+#for( i in 1:96 )
+#{
+#i <- 1
+#  tempMSE <- new('MSE',OM=get(paste0('OM_',i,'d')),MPs=list(MP_mix = c("MP_noCapF23M","MP_msyCapF23M")),
+#                 Obs=Perfect_Obs, Deterministic=TRUE)
+#  saveRDS(tempMSE,file=paste0("MSEs/LFR-DelayDiff/MSE_R_",i,".rda"))
+#}
+#
+#for( i in 1:12 )
+#{
+#  tempMSE <- new('MSE',OM=get(paste0('ROM_',i,'d')),MPs=list(MP_mix = c("MP_noCapF23M","MP_msyCapF23M")),
+#                 Obs=Perfect_Obs, Deterministic=TRUE)
+#  saveRDS(tempMSE,file=paste0("MSEs/LFR-DelayDiff/MSE_R_",i,".rda"))
+#}
 
 
+#######options( warn = -1 )
+#######
+testMPs    <- list( MP_0.1 = c("MP_noCapFM1","MP_msyCapF23M"),
+                    #MP_0.025 = c("MP_noCapFM025","MP_msyCapF23M"),
+                    MP_0.01 = c("MP_noCapFM01","MP_msyCapF23M"),
+                    MP_last10 = c("MP_noCapFMlast10","MP_msyCapF23M")
+                   )
+#######
+OMdvec <- 1:7
+library(parallel)
+omClust <- makeCluster(floor(detectCores()/2) )
 
-
-
-OMvec <- paste( "OM_", 1:15,sep = "" )
-OMdvec <- paste( "OM_", 1:15,"d",sep = "" )
-
-ROMvec <- paste( "OM_", 1:31, sep = "" )
-
-# OMvec <- c( OMvec, "ROM_1d", "ROM_2d", "ROM_3d" )
-
-# testMSEs <- lapply( X = OMdvec, 
-#                     FUN = runCMPs,
-#                     assessInt = 2,
-#                     MPs = testMP,
-#                     checkMPs = TRUE,
-#                     projFolder = "testMP" )
-
-msyMSEs <- lapply(  X = OMdvec, 
-                    FUN = runCMPs,
-                    assessInt = 2,
-                    MPs = noCapMPs,
-                    checkMPs = TRUE,
-                    projFolder = "noCapMPs_d" )
-
-aicMSEs <- lapply(  X = OMdvec, 
-                    FUN = runCMPs,
-                    assessInt = 2,
-                    MPs = aicNoCapMPs,
-                    checkMPs = TRUE,
-                    projFolder = "aicNoCapMPs_d" )
-
-# hiCapMSEs <- lapply(  X = OMvec, 
+# mixCapMSE <- lapply(  X = OMdvec, 
 #                       FUN = runCMPs,
 #                       assessInt = 2,
-#                       MPs = hiCapMPs,
+#                       MPs = testMPs,
 #                       checkMPs = TRUE,
-#                       projFolder = "hiCaps" )
+#                       projFolder = "oct22" )
 
-# loCapMSEs <- lapply(  X = OMvec, 
-#                       FUN = runCMPs,
-#                       assessInt = 2,
-#                       MPs = loCapMPs,
-#                       checkMPs = TRUE,
-#                       projFolder = "loCaps" )
-
-
+testMSE <- lapply(  X = OMdvec, 
+                    FUN = runCMPs,
+                    assessInt = 2,
+                    MPs = testMPs,
+                    checkMPs = TRUE,
+                    projFolder = "samTest" )
 
 

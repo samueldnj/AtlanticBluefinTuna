@@ -14,29 +14,28 @@ cranPackages <- c("coda",
                   "tidyverse",
                   "TMB",
                   "RColorBrewer",
-                  "parallel",
                   "stringr",
                   "wesanderson",
                   "scales",
+                  "shiny",
+                  "snowfall",
+                  "maps",
+                  "mapdata",
+                  "wordcloud",
+                  "abind",
+                  "geoR",
+                  "shinyBS",
+                  "shinyWidgets",
+                  "fmsb",
                   "beepr",
                   "bookdown",
-                  "kableExtra" ,
-                  "here")
+                  "kableExtra",
+                  "here",
+                  "dtwclust")
 
 for( pkg in cranPackages )
   while(!require(pkg, character.only = TRUE) )
     install.packages( pkg, repos = "https://mirror.its.sfu.ca/mirror/CRAN/" )
-
-
-githubPackages <- c(  ggsidekick  = "seananderson/ggsidekick" )
-
-for( pkgIdx in 1:length(githubPackages) )
-  while(!require(names(githubPackages)[pkgIdx], character.only = TRUE))
-    devtools::install_github(githubPackages[pkgIdx])
-
-
-# Re-install local version of ABTMSE
-devtools::install_local("../ABTMSE/", type = "source" )
 
 library("ABTMSE")
 loadABT()

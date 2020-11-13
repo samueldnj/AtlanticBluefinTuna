@@ -11,8 +11,8 @@
 # ToDo: 1. Complete list of tools
 #       2. Write headers for saveSim()
 #
-#	List of tools:
-#		lisread()			Function that reads ADMB style files as a list object (JS)
+# List of tools:
+#   lisread()     Function that reads ADMB style files as a list object (JS)
 #   writeADMB()   Function that writes ADMB dat/pin files from list objects
 #   saveSim()     Function that saves the output from a simulation run
 #   read.admb()   Function that reads ADMB output (SJDM)
@@ -70,10 +70,73 @@ getIndices <- function( minT=1952, maxT=2018, useGear=NULL )
 
 }
 
-getIndicesOM <- function(i,nT=52)
+#clusterOMSSB <- function( k=3 )
+#{
+#  load("../OMs/SSB.Rdata")
+#  library(dtwclust)
+#
+#  # Cluster
+#  ec <- tsclust( SSB$e, k=k, type="fuzzy" )
+#  wc <- tsclust( SSB$w, k=k, type="fuzzy" )
+#
+#  # Weights
+#  ew <- colSums(ec@fcluster)/sum(ec@fcluster)
+#  ww <- colSums(wc@fcluster)/sum(wc@fcluster)
+#
+#  # Centroids
+#  eCent <- ec@centroids
+#  wCent <- wc@centroids
+#
+#  # Reorder by weight
+#  eord <- order(-ew)
+#  word <- order(-ww)
+#  ew <- ew[eord]
+#  ww <- ww[word]
+#  eCent <- eCent[eord]
+#  wCent <- wCent[word]
+#
+#  out <- list()
+#  for( i in 1:k )
+#    out[[i]] <- rbind( eCent[[i]], wCent[[i]] )
+#
+#  out[["wts"]] <- rbind( ew, ww )
+#
+#  out
+#
+#}
+
+createDset <- function()
 {
-  z <- read.admb(paste("~/abft-mse/Objects/OMs/",i,"/M3",sep=""))
-  browser()
+  deast <- dset_example_East
+  dwest <- dset_example_West
+
+  I <- read.csv("../OMs/FI_indices_OM2020.csv")[ ,c("Year","Index","Name")]
+  C <- read.csv("../OMs/CPUE_indices_OM2020.csv")[ ,c("Year","Index","Name")]
+  I <- rbind(I,C)
+  I$t <- I$Year - max(I$Year) + dim(dset_example_East$Iobs)[3]
+
+  Iobs <- NA*deast$Iobs[1, , ]
+
+  inds <- as.character(Indices$Name)
+  for( i in 1:length(inds) )
+  {
+    inds[i] <- gsub(" ","_",inds[i])
+    Ii <- filter(I,Name==inds[i])
+    Iobs[i,Ii$t] <- Ii$Index
+  }
+  for( j in 1:dim(deast$Iobs)[1] )
+  {
+    deast$Iobs[j, , ] <- Iobs
+    dwest$Iobs[j, , ] <- Iobs
+  }
+  dset <- list( E = deast,
+                W = dwest )
+}
+
+getIndicesOM <- function(i,nT=75)
+{
+  #  z <- read.admb(paste("../abft-mse/Objects/OMs/",i,"/M3",sep=""))
+  z <- read.rep(paste("../OMs/",i,"/M3.rep",sep=""))
   T <- z$"ny,"
   hT <- z$"nHy,"
   omSSB_st <- array( data=NA, dim=c(2,hT+T) )
@@ -88,6 +151,7 @@ getIndicesOM <- function(i,nT=52)
   I_gt*1e-6
 }
 
+exp1 <- function(x) exp(x)/max(exp(x))
 
 # makeBatch()
 # Takes a batch control file and produces all the necessary structure
@@ -993,8 +1057,7 @@ function(ifile)
   return(ret)
 }
 
-read.rep <- 
-function(fn)
+read.rep <- function(fn)
 {
   # The following reads a report file
   # Then the 'A' object contains a list structure
@@ -1006,7 +1069,6 @@ function(fn)
   # The part in quotations becomes the list name.
   # Created By Steven Martell
   options(warn=-1)  #Suppress the NA message in the coercion to double
-  
   
   ifile=scan(fn,what="character",flush=TRUE,blank.lines.skip=FALSE,quiet=TRUE)
   idx=sapply(as.double(ifile),is.na)

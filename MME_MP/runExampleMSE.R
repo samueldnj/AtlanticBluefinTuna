@@ -26,8 +26,8 @@ checkTAC <- empMMMP(  x = 1,
 
 
 # Now define an MP list and run the MSE on OM_1
-testMPs <- list(  baseEmpMP    = c("empMMMP","empMMMP") )
-                  # loCap     = c("MP_loCap","MP_loCap"),
+testMPs <- list(  baseEmpMP    = c("empMMMP","empMMMP"),
+                   loCap     = c("MP_loCap","MP_loCap"))
 #                   hiCap     = c("MP_hiCap","MP_hiCap"),
 #                   loCap23M  = c("MP_loCap23M","MP_loCap23M"),
 #                   hiCap23M  = c("MP_hiCap23M","MP_hiCap23M") )

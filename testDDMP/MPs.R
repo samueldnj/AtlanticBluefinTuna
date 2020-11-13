@@ -8,6 +8,92 @@
 
 checkMP <<- TRUE
 
+
+
+
+# NO CAPS FOR EAST
+
+MP_noCapFM1 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapFM1",
+                     nllWt   = 0.1 )
+  return(TAC)
+}
+class(MP_noCapFM1)<-"MSMP"
+
+MP_noCapFM025 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapFM025",
+                     nllWt   = 0.025 )
+  return(TAC)
+}
+class(MP_noCapFM025)<-"MSMP"
+
+MP_noCapFM01 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapFM01",
+                     nllWt   = 0.01 )
+  return(TAC)
+}
+class(MP_noCapFM01)<-"MSMP"
+
+MP_noCapFMlast10 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapFMlast10",
+                     nllWt   = "last10"  )
+  return(TAC)
+}
+class(MP_noCapFMlast10)<-"MSMP"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # MP_testMean - a low catch cap is applied,
 # of 20 kt in the East, and 2.5 kt in the West,
 # TACs are averaged over 5 AMs with even weighting,
@@ -16,10 +102,8 @@ MPtest_Mean <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(20,2.5),
                      F23M    = FALSE,
-                     TACrule = "mean",
                      AS      = AS,
                      check   = checkMP,
                      mpName  = "MPtest_Mean"  )
@@ -35,10 +119,8 @@ MPtest_AIC <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(20,2.5),
                      F23M    = FALSE,
-                     TACrule = "AIC",
                      AS      = AS,
                      check   = checkMP,
                      mpName  = "MPtest_AIC"  )
@@ -52,10 +134,8 @@ MPtest_loCap23M.4B0 <- function( x, dset, AS )
 {
   TAC <- assessDDmm(  x       = x,
                       dset    = dset,
-                      AMs     = c(1,2,4,7,11),
                       caps    = c(20,2.5),
                       F23M    = TRUE,
-                      TACrule = "mean",
                       check   = checkMP,
                       AS      = AS,
                       UCP     = ".4B0",
@@ -71,10 +151,8 @@ MP_msyCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c("msy","msy"),
                      F23M    = FALSE,
-                     TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_msyCap"  )
@@ -88,10 +166,8 @@ MP_msyCapF23M <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c("msy","msy"),
                      F23M    = TRUE,
-                     TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_msyCapF23M"  )
@@ -105,10 +181,8 @@ MP_msyCapF23M.4B0 <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c("msy","msy"),
                      F23M    = TRUE,
-                     TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
                      UCP     = ".4B0",
@@ -124,10 +198,8 @@ MP_aic_msyCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c("msy","msy"),
                      F23M    = FALSE,
-                     TACrule = "AIC",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_aic_msyCap"  )
@@ -141,10 +213,8 @@ MP_aic_msyCapF23M <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c("msy","msy"),
                      F23M    = TRUE,
-                     TACrule = "AIC",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_aic_msyCapF23M"  )
@@ -158,10 +228,8 @@ MP_noCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(Inf,Inf),
                      F23M    = FALSE,
-                     TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_noCap"  )
@@ -171,20 +239,18 @@ class(MP_noCap)<-"MSMP"
 
 # MP_noCap - a catch cap at estimated
 # MSY is applied
-MP_noCapF23M <- function( x, dset, AS )
+MP_noCapFM <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(Inf,Inf),
                      F23M    = TRUE,
-                     TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
-                     mpName  = "MP_noCapF23M"  )
+                     mpName  = "MP_noCapFM"  )
   return(TAC)
 }
-class(MP_noCapF23M)<-"MSMP"
+class(MP_noCapFM)<-"MSMP"
 
 # MP_noCap - a catch cap at estimated
 # MSY is applied
@@ -192,10 +258,8 @@ MP_noCapF23M.4B0 <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(Inf,Inf),
                      F23M    = TRUE,
-                     TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
                      UCP     = ".4B0",
@@ -211,10 +275,8 @@ MP_aic_noCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(Inf,Inf),
                      F23M    = FALSE,
-                     TACrule = "AIC",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_aic_noCap"  )
@@ -228,10 +290,8 @@ MP_aic_noCapF23M <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(Inf,Inf),
                      F23M    = TRUE,
-                     TACrule = "AIC",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_aic_noCapF23M"  )
@@ -245,10 +305,8 @@ MP_aic_noCapF23M.4B0 <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(Inf,Inf),
                      F23M    = TRUE,
-                     TACrule = "AIC",
                      check   = checkMP,
                      AS      = AS,
                      UCP     = ".4B0",
@@ -264,10 +322,8 @@ MP_loCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                      dset    = dset,
-                     AMs     = c(1,2,4,7,11),
                      caps    = c(20,2.5),
                      F23M    = FALSE,
-                     TACrule = "mean",
                      check   = checkMP,
                      AS      = AS,
                      mpName  = "MP_loCap"  )
@@ -281,10 +337,8 @@ MP_hiCap <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                        dset    = dset,
-                       AMs     = c(1,2,4,7,11),
                        caps    = c(25,4),
                        F23M    = FALSE,
-                       TACrule = "mean",
                        check   = checkMP,
                        AS      = AS,
                        mpName  = "MP_hiCap" )
@@ -301,10 +355,8 @@ MP_loCap23M <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                        dset    = dset,
-                       AMs     = c(1,2,4,7,11),
                        caps    = c(20,2.5),
                        F23M    = TRUE,
-                       TACrule = "mean",
                        check   = checkMP,
                        AS      = AS,
                        mpName  = "MP_loCap23M" )
@@ -321,10 +373,8 @@ MP_hiCap23M <- function( x, dset, AS )
 {
   TAC <- assessDDmm( x       = x,
                        dset    = dset,
-                       AMs     = c(1,2,4,7,11),
                        caps    = c(25,4),
                        F23M    = TRUE,
-                       TACrule = "mean",
                        check   = checkMP,
                        AS      = AS,
                        mpName  = "MP_hiCap23M" )
@@ -340,10 +390,8 @@ MP_loCap23M.4B0 <- function( x, dset, AS )
 {
   TAC <- assessDDmm(  x       = x,
                       dset    = dset,
-                      AMs     = c(1,2,4,7,11),
                       caps    = c(20,2.5),
                       F23M    = TRUE,
-                      TACrule = "mean",
                       check   = checkMP,
                       AS      = AS,
                       UCP     = ".4B0",
@@ -362,10 +410,8 @@ MP_hiCap23M.4B0 <- function( x, dset, AS )
 {
   TAC <- assessDDmm(  x       = x,
                       dset    = dset,
-                      AMs     = c(1,2,4,7,11),
                       caps    = c(25,4),
                       F23M    = TRUE,
-                      TACrule = "mean",
                       check   = checkMP,
                       AS      = AS,
                       mpName  = "MP_hiCap23M.4B0" )
@@ -436,6 +482,41 @@ plotFitChecks <- function(  OM = "OM_1d",
 
 }
 
+# Wrapper for runCMPs to run OMs in parallel, best for
+# deterministic OMs. Experimenting with running a
+# 2 core snowfall inside a parallel package cluster.
+parRunCMPs <- function( iOM = 1,
+                        MPs = list( test = c("MP_testMean","MP_testMean") ),
+                        assessInt = 2,
+                        checkMPs = FALSE,
+                        projFolderName = NULL,
+                        isRob = FALSE )
+{
+  # Load a bunch of shit
+  source("initTest.R")
+  source("assessDDMP.R")
+  source("calcEquilibriumDD.R")
+  source("MPs.R")
+  source("plots.R")
+  # Export to snowfall cluster
+  sfInit(parallel=TRUE, cpus = 2)
+  sfLibrary( ABTMSE )
+  sfLibrary( TMB )
+  sfClusterCall("loadABT")
+  sfSource("assessDDMP.R")
+  sfSource("MPs.R")
+  sfSource("calcEquilibriumDD.R")
+
+  MSEobj <- runCMPs(  iOM = iOM,
+                      MPs = MPs,
+                      assessInt = assessInt,
+                      checkMPs = checkMPs,
+                      projFolderName = projFolderName,
+                      isRob = isRob)
+
+  return(MSEobj)
+}
+
 
 # runCMPs()
 # Wrapper function for the new("MSE")
@@ -448,11 +529,12 @@ plotFitChecks <- function(  OM = "OM_1d",
 #   MPs = a list of character 2-ples of MP names (E/W)
 #   assessInt = integer of assessment intervals, required
 #               for plotting purposes
-runCMPs <- function(  OM = "OM_1d",
+runCMPs <- function(  iOM = 1,
                       MPs = list( test = c("MP_testMean","MP_testMean") ),
                       assessInt = 2,
                       checkMPs = FALSE,
-                      projFolderName = NULL )
+                      projFolderName = NULL,
+                      isRob = FALSE )
 {
   library(ABTMSE)
   library(TMB)
@@ -462,6 +544,8 @@ runCMPs <- function(  OM = "OM_1d",
   source("MPs.R")
   # Load ABT objects in this environment
   loadABT()
+
+  OM <- paste0("OM_",iOM,"d")
 
   # Set Check switch
   checkMP <<- checkMPs
@@ -482,10 +566,12 @@ runCMPs <- function(  OM = "OM_1d",
   nMPs  <- length(MPs)
 
   # Run MSE
-  MSEobj <- new(  Class     = "MSE",
-                  OM        = OMobj,
-                  MPs       = MPs,
-                  interval  = assessInt )
+  MSEobj <- new(  Class         = "MSE",
+                  OM            = OMobj,
+                  MPs           = MPs,
+                  interval      = assessInt,
+                  Obs           = Perfect_Obs,
+                  Deterministic = TRUE )
 
   # Assign MSE to a symbol that is descriptive
   MSEsymbol <- paste("MSE_",OM,sep = "")
@@ -493,18 +579,25 @@ runCMPs <- function(  OM = "OM_1d",
   assign( x = MSEsymbol,
           value = MSEobj )
 
+  suppressWarnings(dir.create("MSEs"))
   if(!is.null(projFolderName))
   {
     projFolderPath <- file.path("MSEs",projFolderName)
     dir.create(file.path("MSEs",projFolderName))
+    dir.create(file.path("MSEs",projFolderName,"rdas"))
+    dir.create(file.path("MSEs",projFolderName,"reports"))
   }
   else projFolderPath <- "MSEs"
 
+  robStr <- ifelse( isRob, "R_", "" )
+  rdsName <- paste0("MSE_",robStr,iOM,".rda")
+  saveRDS( MSEobj, file=file.path("MSEs",projFolderName,"rdas",rdsName) )
+
   # Save that MSE
-  save( list = MSEsymbol, file = file.path(projFolderPath,paste(MSEsymbol,".Rdata",sep = "")) )  
+  #save( list = MSEsymbol, file = file.path(projFolderPath,paste(MSEsymbol,".Rdata",sep = "")) )  
   # Create the report
   MSE_report( MSEobj, 
-              dir=file.path(getwd(),projFolderPath), 
+              dir=file.path(getwd(),projFolderPath,"reports"), 
               Author='Landmark Fisheries Research', 
               introtext=paste("Multi-model delay difference assessment on", OM,sep =""), 
               filenam=paste(MSEsymbol,"_report",sep = ""))  

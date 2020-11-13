@@ -8,189 +8,191 @@
 
 checkMP <<- TRUE
 
-# MP_testMean - a low catch cap is applied,
-# of 20 kt in the East, and 2.5 kt in the West,
-# TACs are averaged over 5 OMs with even weighting,
-# and checktables are produced for MP development
-empMPtest_Mean <- function( x, dset, AS )
+emp_noCap <- function( x, dset, AS )
 {
   TAC <- empMMMP( x       = x,
                   dset    = dset,
-                  OMs     = c(1,2,4,7,11),
                   caps    = c(Inf,Inf),
-                  TACrule = "mean",
-                  AS      = AS,
-                  check   = checkMP,
-                  mpName  = "empMPtest_Mean"  )
-  return(TAC)
-}
-class(empMPtest_Mean)<-"MSMP"
-
-# MP_testAIC - a low catch cap is applied,
-# of 20 kt in the East, and 2.5 kt in the West
-# TACs are averaged over 5 OMs with AIC weighting,
-# and checktables are produced for MP development
-empMPtest_min <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c(Inf,Inf),
-                  TACrule = "min",
-                  AS      = AS,
-                  check   = checkMP,
-                  mpName  = "empMPtest_min"  )
-  return(TAC)
-}
-class(empMPtest_min)<-"MSMP"
-
-# MP_msyCap - a catch cap at estimated
-# MSY is applied
-empMP_msyCap <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c("msy","msy"),
-                  TACrule = "mean",
-                  check   = checkMP,
-                  AS      = AS,
-                  mpName  = "empMP_msyCap"  )
-  return(TAC)
-}
-class(empMP_msyCap)<-"MSMP"
-
-
-# MP_msyCap - a catch cap at estimated
-# MSY is applied
-empMP_msyCap.4B0 <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c("msy","msy"),
-                  TACrule = "mean",
-                  AS      = AS,
-                  check   = checkMP,
-                  UCP     = ".4B0",
-                  mpName  = "empMP_msyCap.4B0"  )
-  return(TAC)
-}
-class(empMP_msyCap.4B0)<-"MSMP"
-
-
-# MP_loCap - a low catch cap is applied,
-# of 20 kt in the East, and 2.5 kt in the West
-empMP_loCap <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c(20,2.5),
-                  TACrule = "mean",
-                  AS      = AS,
-                  check   = checkMP,
-                  mpName  = "empMP_loCap"  )
-  return(TAC)
-}
-class(empMP_loCap)<-"MSMP"
-
-# MP_hiCap - a higher catch cap is applied,
-# of 25 kt in the East, and 4.0 kt in the West
-empMP_hiCap <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c(25,4),
-                  TACrule = "mean",
-                  AS      = AS,
-                  check   = checkMP,
-                  mpName  = "empMP_hiCap" )
-  return(TAC)
-}
-class(empMP_hiCap)<-"MSMP"
-
-
-# MP_loCap.4B0 - Same as loCap_, but
-# uses a proxy of .4B0 for Bmsy in the MP, rather 
-# than the estimated value from the reference points
-# calc
-empMP_loCap.4B0 <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c(20,2.5),
-                  TACrule = "mean",
-                  AS      = AS,
-                  check   = checkMP,
-                  UCP     = ".4B0",
-                  mpName  = "empMP_loCap.4B0" )
-
-  return(TAC)
-}
-class(empMP_loCap.4B0)<-"MSMP"
-
-# MP_hiCap.4B0 - Same as hiCap, but
-# uses a proxy of .4B0 for Bmsy in the MP, rather 
-# than the estimated value from the reference points
-# calc
-empMP_hiCap.4B0 <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c(25,4),
-                  TACrule = "mean",
-                  AS      = AS,
-                  check   = checkMP,
-                  UCP     = ".4B0",
-                  mpName  = "empMP_hiCap.4B0" )
-
-  return(TAC)
-}
-class(empMP_hiCap.4B0)<-"MSMP"
-
-
-# MP_noCap - No cap on removals, straight
-# F x B rule
-empMP_noCap <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x       = x,
-                  dset    = dset,
-                  OMs     = c(1,2,4,7,11),
-                  caps    = c(Inf,Inf),
-                  TACrule = "mean",
+                  TACrule = "weighted",
                   AS      = AS,
                   check   = checkMP,
                   UCP     = "Bmsy",
-                  mpName  = "empMP_noCap" )
+                  mpName  = "emp_noCap" )
 
   return(TAC)
 }
-class(empMP_noCap)<-"MSMP"
+class(emp_noCap)<-"MSMP"
 
-
-# MP_noCap - No cap on removals, straight
-# F x B rule, uses min catch from
-# 5 tuned MPs
-empMP_noCapMin <- function( x, dset, AS )
+emp_noCapFM <- function( x, dset, AS )
 {
   TAC <- empMMMP( x       = x,
                   dset    = dset,
-                  OMs     = c(1,2,4,7,11),
                   caps    = c(Inf,Inf),
-                  TACrule = "min",
+                  TACrule = "weighted",
+                  FM      = 1,
                   AS      = AS,
                   check   = checkMP,
                   UCP     = "Bmsy",
-                  mpName  = "empMP_noCapMin" )
+                  mpName  = "emp_noCapFM" )
 
   return(TAC)
 }
-class(empMP_noCapMin)<-"MSMP"
+class(emp_noCapFM)<-"MSMP"
 
+emp_noCapB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c(Inf,Inf),
+                  TACrule = "weighted",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_noCapB0" )
+
+  return(TAC)
+}
+class(emp_noCapB0)<-"MSMP"
+
+emp_noCapFMB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c(Inf,Inf),
+                  TACrule = "weighted",
+                  FM      = 1,
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_noCapFMB0" )
+
+  return(TAC)
+}
+class(emp_noCapFMB0)<-"MSMP"
+
+emp_msyCap <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c("msy","msy"),
+                  TACrule = "weighted",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = "Bmsy",
+                  mpName  = "emp_msyCap" )
+
+  return(TAC)
+}
+class(emp_msyCap)<-"MSMP"
+
+emp_msyCapFM <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c("msy","msy"),
+                  TACrule = "weighted",
+                  FM      = 1,
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = "Bmsy",
+                  mpName  = "emp_msyCapFM" )
+
+  return(TAC)
+}
+class(emp_msyCapFM)<-"MSMP"
+
+emp_msyCapB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c("msy","msy"),
+                  TACrule = "weighted",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_msyCapB0" )
+
+  return(TAC)
+}
+class(emp_msyCapB0)<-"MSMP"
+
+emp_msyCapFMB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c("msy","msy"),
+                  TACrule = "weighted",
+                  FM      = 1,
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_msyCapFMB0" )
+
+  return(TAC)
+}
+class(emp_msyCapFMB0)<-"MSMP"
+
+emp_conCap <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c(40,0.5),
+                  TACrule = "weighted",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = "Bmsy",
+                  mpName  = "emp_conCap" )
+
+  return(TAC)
+}
+class(emp_conCap)<-"MSMP"
+
+emp_conCapFM <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c(40,0.5),
+                  TACrule = "weighted",
+                  FM      = 2/3,
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = "Bmsy",
+                  mpName  = "emp_conCapFM" )
+
+  return(TAC)
+}
+class(emp_conCapFM)<-"MSMP"
+
+emp_conCapB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c(40,0.5),
+                  TACrule = "weighted",
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_conCapB0" )
+
+  return(TAC)
+}
+class(emp_conCapB0)<-"MSMP"
+
+emp_conCapFMB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c(40,0.5),
+                  TACrule = "weighted",
+                  FM      = 2/3,
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_conCapFMB0" )
+
+  return(TAC)
+}
+class(emp_conCapFMB0)<-"MSMP"
 
 # runCMPtest()
 # Wrapper function for the new("MSE")
@@ -277,7 +279,6 @@ runCMPs <- function(  OM = "OM_1d",
   if(length(westCheckTables) != nSims | length(eastCheckTables) != nSims )
     browser(cat("Wrong number of checkTables") )
 
-
   # Save to output directory
   fitCheckFolder <- file.path(projFolderPath,"fitCheck")
   if(!dir.exists(fitCheckFolder))
@@ -316,6 +317,21 @@ runCMPs <- function(  OM = "OM_1d",
                               MPidx       = j,
                               interval    = assessInt )
         dev.off()
+
+        hcrPlot <- paste("HCR_sim",i,"_",OM,"_",MPid,".pdf",sep = "")
+        pdf( file=file.path(fitCheckFolder,OM,MPid,hcrPlot),
+             width=6, height=5 )
+        par( mfcol=c(2,2), mar=c(2,2,1,1), oma=c(2,5,1,1) )
+        fls <- list.files("HCRs")
+        for( l in fls )
+        {
+          load(paste("HCRs",l,sep="/"))
+          plotHCRs( hcrList$Be, hcrList$Fes, hcrList$Fea, hcrList$ptse,
+                    hcrList$Bw, hcrList$Fws, hcrList$Fwa, hcrList$ptsw )
+        }
+        dev.off()
+        unlink("HCRs")
+        dir.create("HCRs")
       }
     }
   }
@@ -365,10 +381,12 @@ plotFitChecks <- function(  OM = "OM_1",
 
   for( i in 1:nSims )
     {
+      print("--------")
+      print(i)
       for( j in 1:nMPs )
       {
         MPid <- names(MPs)[j]
-        browser()
+        print(j)
         # Create a directory for the MP if it doesn't exist
         if( !dir.exists(file.path(fitCheckFolder,OM,MPid)) )
           dir.create(file.path(fitCheckFolder,OM,MPid))

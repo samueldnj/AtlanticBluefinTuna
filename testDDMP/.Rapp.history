@@ -1,340 +1,268 @@
-??PBSmodelling
-packageStatus()
-library(rstan)
-a <- dunif(seq(0,1,by=0.01))
-plot(a)
-integrate(exp,0,1)
-exp
-exp(1)-1
-library(MCMCpack)
-source("")
-ricker <- function( x,r,k )
-{
-x*exp(r*(1-x/k))
-}
-ricker(500,0.2,1000)
-S <- 1:1000
-R <- ricker(S,0.2,1000)
-plot(S,R)
-R <- ricker(S,0.5,1000)
-plot(S,R)
-R <- ricker(S,0.7,1000)
-plot(S,R)
-plot(S,R/S)
-??registerDoParallel
-??stopCluster
-library(parallel)
-detectCores()
-exp(-6)
-exp(-0.8)
-?seq
-?MCMCmetrop1R
-??MCMCmetrop1R
-require(parallel)
-?parallel
-?foreach
-library(foreach)
-?foreach
-??foreach
-library(dplyr)
-?dplyr
-?parallel
-?foreach
-source("/Users/rossi/mooseModTMB/mooseMod.R")
-install.packages("stringr")
-library(stringr)
-library(TMB)
-run_mcmc()
-library(TMB)
-sessionInfo()
-install.packages("TMB")
-library(TMB)
-run_mcmc()
-library(TMB)
-sessionInfo()
-install.packages("TMB")
-?install.packages("TMB")
-install.packages("~/adcomp/TMB_1.7.1.tar.gz",repos=NULL)
-install.packages("~/adcomp/TMB_1.7.1.tar.gz",repos=NULL,type="source")
-library(TMB)
-sessionInfo()
-run_mcmc()
-source("/Users/rossi/codTMB/codTMB.R")
-library(dplyr)#
-library(TMB)#
-source("mseRtools.r")#
-source("codTools.R")#
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+ar(x_t,order.max=3,aic=0)
+ar(x_t,order.max=3)
+?ar(x_t,order.max=3)
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+ar(x_t,order.max=3)
+ar(x_t,order.max=1)
+ar(x_t,order.max=3,aic=0)
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+acb <- mean(tsb$t[ ,nT+i])
+acb-ac
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+ac_l
+plot(ac_l)
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+plot(ac_l)
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+plot(ac_l)
+plot(ac_l,ylim=c(-0.4,0))
+ac_l
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+plot(ac_l)
+plot(ac_l,ylab="")
+plot(ac_l,ylab="delta lag-1 (boot-hist)")
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylab=c(-0.6,0))
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.6,0))
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.4,0))
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.4,0),yaxs="i")
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.4,0),yaxs="i",las=1)
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.4,0),yaxs="i",las=1);grid()
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.4,0),yaxs="i",las=1);grid();box()
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.4,0),yaxs="i",las=1,xlab="Block length");grid();box()
+source("/Users/rossi/tunaMBB/tunaMBB.R")
+plot(ac_l,ylab="delta lag-1 (boot-hist)",ylim=c(-0.4,0),yaxs="i",las=1,xlab="Block length");grid();box()
+??tsclust
+library(dtwclust)
+a <- rep(5,10)
+a[4] <- 7
+b <- a-5
+d <- a-4
+f <- a-3
+z <- rbind( a,a,a,a,b,b,b,b,a,a,a,d,d,d,d,d,d,f,f,f,f,f,a,a,a,a,a,f )
+zz <- tsclust( z )
+plot(zz)
+z <- rbind( a,a,a,a,b,b,b,b,a,a,a,a,b,b,b,b,a,a,a,a,b,b,b,b )
+zz <- tsclust( z )
+plot(zz)
+zz <- tsclust( z, k=3 )
+library(dtwclust)
+a <- rep(5,10)
+a[4] <- 7
+b <- a-5
+d <- a-4
+f <- a-3
+z <- rbind( a,a,a,a,b,b,b,b,a,a,a,a,b,b,b,b,a,a,a,a,b,b,b,b )
+zz <- tsclust( z )
+setwd("mrm3")
+source("fitMod.R")
+source("/Users/rossi/mrm3/predSeal.R")
+getPredSeal(plotSG=1)
+source("/Users/rossi/mrm3/predSeal.R")
+getPredSeal(plotFig=1)
+source("/Users/rossi/mrm3/predSeal.R")
+getPredSeal(plotFig=1)
+source("/Users/rossi/mrm3/predSeal.R")
+getPredSeal(plotFig=1)
+# Proportion of prey in grey seal diet by month (by weight)#
+  pHerr_sm <- array( data=0, dim=c(2,12) )#
+  pCod_sm  <- array( data=0, dim=c(2,12) )#
+  # Late spring to August, sampled coastal areas of the sGSL (Hammill et al., 2007)#
+  pHerr_sm[ ,4:8] <- 0.11#
+  pCod_sm[ ,6:9]  <- 0.08#
 #
-## Build data objects from datasets ---------------------------------------- ###
-catchDat <- lisread("sGSL/scaCatch.dat") %>%#
-            .[[1]] %>%#
-            .[,c(1,3)] %>%#
-            as.data.frame()#
-colnames(catchDat) <- c("year","tonnes")#
+  # Rest of year, samples taken off western Cape Breton and at St. Paul’s Island (Hammill et al. 2014)#
+  # Mean of stomach and intestine comps#
 #
-# Observed annual catches#
-obsC_t <- catchDat$tonnes#
+  # "Winter" samples from Cabot Strait#
+  pHerr_sm[1,c(1:3,12)] <- 0.023#
+  pHerr_sm[2,c(1:3,12)] <- 0.258#
+  pCod_sm[1,c(1:5,10:12)]  <- 1e-2*mean(c(68.4,46.5))#
+  pCod_sm[2,c(1:5,10:12)]  <- 1e-2*mean(c(14.3,9.4))#
 #
-# Survey indices#
-indexDat <- lisread("sGSL/scaIndex.dat")#
-indexDat$comFish <- -1 + 0*indexDat$DFO_RV#
-obsI_it <- rbind( indexDat$comFish, indexDat$DFO_RV, indexDat$MS, indexDat$LL )#
-obsIfrac_i <- c(0,indexDat$fracYearSurvey)#
-#
-# Age data#
-ageDat <- lisread("sGSL/scaAges.dat")#
-#
-# Weight-at-age#
-wtAge_at <- ageDat$"wtAge (1,plusGroupAge,1,nT)"#
-wtAge_at <-wtAge_at / 1000#
-#
-year <- catchDat$year   # Model years#
-nT   <- length(year)    # Number of time steps (years)#
-nA   <- 12              # Number of age classes#
-nI   <- 4               # Number of surveys#
-#
-# Observed proportions at age#
-obsP_ait <- array( data=-1, dim=c(nA,nI,nT) )#
-obsP_ait[ ,1, ] <- ageDat$paaComFish#
-obsP_ait[ ,2, ] <- ageDat$paaRV#
-obsP_ait[ ,3, ] <- ageDat$paaMS#
-obsP_ait[ ,4, ] <- ageDat$paaLL#
-#
-minAge_i <- ageDat$minAge#
-maxAge_i <- ageDat$maxAge#
-initT_i  <- ageDat$ageFirstYear#
-lastT_i  <- ageDat$ageLastYear#
-#
-# Assign age block to each age class#
-mIdx_a       <- rep(0,nA)#
-mIdx_a[5:8]  <- 1#
-mIdx_a[9:nA] <- 2#
-#
-# Base natural mortality by age block#
-initM <- c(0.2,0.2,0.2)#
-#
-# Number of process error age blocks#
-# All ages > nK will be share an M value with age nK#
-nK <- 8#
-# Index of age blocks for process errors#
-eIdx_a        <- 0:(nA-1)#
-eIdx_a[nK:nA] <- nK-1#
-#
-scaRep <- lisread("scacod.rep")#
-#
-## Build objective function ------------------------------------------------ ###
-data <- list( mIdx_a     = mIdx_a,#
-              initM      = initM,#
-              eIdx_a     = eIdx_a,#
-              minAge_i   = minAge_i,#
-              maxAge_i   = maxAge_i,#
-              initT_i    = initT_i,#
-              lastT_i    = lastT_i,#
-              obsC_t     = obsC_t,#
-              obsI_it    = obsI_it,#
-              obsIfrac_i = obsIfrac_i,#
-              wtAge_at   = wtAge_at,#
-              obsP_ait   = obsP_ait )#
-#
-pars   <- buildList("init")    # Initial parameter values#
-lb     <- buildList("lb")      # Lower parameter bounds#
-ub     <- buildList("ub")      # Upper parameter bounds#
-map    <- buildList("est")     # Fixed parameters#
-random <- buildList("random")  # Random effects#
-#
-pars$logInitN_a <- log( scaRep$Nta[1,-1] )#
-pars$logR_t     <- log( scaRep$Nta[ ,1] )#
-#
-# Remove fixed parameters from bounds#
-member <- function(x,y) !is.na(match(x,y))#
-lb <- unlist(lb[!member(names(lb),names(map))])#
-ub <- unlist(ub[!member(names(ub),names(map))])#
-#
-# Compile#
-dyn.load( dynlib("codTMB") )#
-obj <- MakeADFun( data       = data,#
-                  parameters = pars,#
-                  map        = map,#
-                  random     = random )
-exp(-0.41)
-1-exp(-0.41)
-pbeta
-library(TMB)
-n = 100#
- x = rnorm(n=n,mean=0,sd=1)
-f_integrated = MakeADFun(data=list(x=x),parameters=list(mu=0,sigma=1),random="mu")
-# Georges Bank Yellowtail Flounder#
-#
-rm(list=ls())#
-source("codDefault.R")#
-#
-fitModel <- function( scen, all )#
-{#
-#
-  ctl         <- list()#
-  ctl$recType <- all[scen,"recType"]#
-  ctl$qType   <- all[scen,"qType"]#
-  ctl$mType   <- all[scen,"mType"]#
-  ctl$sType   <- all[scen,"sType"]#
-  ctl$dome    <- all[scen,"dome"]#
-  ctl$jType   <- all[scen,"jType"]#
-  ctl        <<- ctl#
-#
-  source("codDefault.R")#
-  source("gbCod.R")#
-  source("codRun.R")#
-#
-  fit <- ifelse( is.character(opt), 0, 1 )#
-#
-  name <- paste("model",scen,sep="")#
-  osa <- getOSA()#
-#
-  gbCod <- list( rpt   = rpt,#
-                 est   = est,#
-                 retro = retro,#
-                 osa   = osa )#
-  save( gbCod,#
-        file=paste(name,".Rdata",sep="") )#
-#
-  result <- as.numeric(c(scen,fit,aic,nll,nPar,all[scen, ]))#
-  names(result) <- c("model","fit","aic","nll","nPar",names(all[scen,]))#
-#
-  return(result)#
-}#
-#
-folder <- "Jul8"#
-system(paste("mkdir",folder))#
-#
-all <- getScenarios()#
-nModels <- nrow(all)
-N0 <- 1000
-M <- 0.2
-N <- numeric(100)
-N[1] <- N0
-for(t in 2:100)
-N[t] <- N[t-1]*exp(-M)
-N
-plot(N)
-M <- 0.02
-for(t in 2:100)
-N[t] <- N[t-1]*exp(-M)
-N
-barplot(N)
-M <- 0.02
-N <- numeric(100)
-N[1] <- 100
-for( i in 2:100 )
-N[i] <- N[i-1]*M
-NM
-N
-for( i in 2:100 )
-N[i] <- N[i-1]*exp(-M)
-N
-barplot(N)
-M
-M <- 2*M
-for( i in 2:100 )
-N[i] <- N[i-1]*exp(-M)
-barplot(N)
-abline(v=22)
-# Georges Bank Yellowtail Flounder#
-#
-rm(list=ls())#
-source("codDefault.R")#
-#
-#       deltaAIC model#
-#  1    0.000000    32#
-#  2    1.985708    64#
-#  3   14.288220    62#
-#
-fitModel <- function( scen, all )#
-{#
-#
-  ctl         <- list()#
-  ctl$recType <- all[scen,"recType"]#
-  ctl$qType   <- all[scen,"qType"]#
-  ctl$mType   <- all[scen,"mType"]#
-  ctl$sType   <- all[scen,"sType"]#
-  ctl$dome    <- all[scen,"dome"]#
-  ctl$jType   <- all[scen,"jType"]#
-  ctl        <<- ctl#
-#
-  source("codDefault.R")#
-  source("gbCod.R")#
-  source("codRun.R")#
-#
-  fit <- ifelse( is.character(opt), 0, 1 )#
-#
-  name <- paste("model",scen,sep="")#
-  #osa <- getOSA()#
-  osa <- NULL#
-#
-  gbCod <- list( rpt   = rpt,#
-                 est   = est,#
-                 retro = retro,#
-                 osa   = osa )#
-  save( gbCod,#
-        file=paste(name,".Rdata",sep="") )#
-#
-  result <- as.numeric(c(scen,fit,aic,nll,nPar,all[scen, ]))#
-  names(result) <- c("model","fit","aic","nll","nPar",names(all[scen,]))#
-#
-  return(result)#
-}#
-#
-folder <- "Sep2018"#
-system(paste("mkdir",folder))#
-#
-all <- getScenarios()#
-nModels <- nrow(all)
-install.packages("logitnorm")
+  # "Fall" samples from Cape Breton#
+  pHerr_sm[1,9:11] <- 0.158#
+  pHerr_sm[2,9:11] <- 0.058
+pCod_sm
+plotSelFit("SG")
+source("/Users/rossi/mrm3/projMod.R")
+source("/Users/rossi/mrm3/projMod.R")
+source("/Users/rossi/mrm3/projMod.R")
+projMod(1e5,pPup=0.5,nsamp=10)
+source("/Users/rossi/mrm3/projMod.R")
+projMod(1e5,pPup=0.5,nsamp=10)
+pars$lnddPar_h
+rpt$lnPhiSD
+rpt$lnddPar_h
+Q
+source("fitMod.R")
+fitMod()
+fitMod()
+load("/Users/rossi/mrm3/sealData/rptRM.Rdata")
+rpt$pupM
+rpt$pupM_h
+source("/Users/rossi/mrm3/initSeal.R")
+fitMod()
+source("/Users/rossi/mrm3/initSeal.R")
+fitMod()
+source("/Users/rossi/mrm3/initSeal.R")
+fitMod()
+M_ax
+source("/Users/rossi/mrm3/initSeal.R")
+Q
+fitMod()
+source("/Users/rossi/mrm3/fitMod.R")
+fitMod()
+source("/Users/rossi/mrm3/fitMod.R")
+fitMod()
+source("/Users/rossi/mrm3/fitMod.R")
+fitMod()
+sink()
+sink()
+rpt       <- obj$report()
+rpt$N_th
+rpt$weanI_th
+rpt$M_ax
+rpt$years
+rpt$M_as
+Q
+source("/Users/rossi/mrm3/initSeal.R")
+fitMod()
+rpt       <- obj$report()
+rpt$N_th
+rpt$M_ax
+rpt$weanI_th
+rpt$R_th
+rpt$ddPar_h
+rpt$ddShape_h
+Q
+source("fitMod.R")
+fitMod()
+r <- obj$report()
+r$N_th
+rpt$M_ax
+rpt$pupM
+r$pupM
+r$M_ax
+r$N_atxh[,1,,1]
+r$N_atxh[,2,,1]
+r$Z_atxh[,1,,1]
+z$F_th
+r$F_th
+r$sPupC_t
+r$pupC_t
+r$adultC_t
+r$M_ax
+r$age1_th
+r$N_atxh[,2,,1]
+r$N_atxh[,2,,2]
+r$N_atxh[,1,,2]
+r$N_atxh[,3,,2]
+r$N_atxh[,6,,2]
+r$N_atxh[,2,,2]
+r$N_atxh[,1,,2]
+r$N_atxh[,1,,]
+r$F_th
+r$adultC_th
+r$N_th
+source("/Users/rossi/mrm3/fitMod.R")
+Q
+source("/Users/rossi/mrm3/fitMod.R")
+fitMod()
+source("/Users/rossi/mrm3/initSeal.R")
+z <- fitMod()
+source("/Users/rossi/mrm3/fitMod.R")
+z <- fitMod()
+sink()
+rpt <- obj$report()
+rpt$B_th
+rpt$N_th
+Q
+source("fitMod.R")
+z <- fitMod()
+rpt <- obj$report()
+rpt$N_th
+Q
+source("/Users/rossi/mrm3/initSeal.R")
+source("fitMod.R")
+z <- fitMod()
+rpt <- obj$report()
+rpt$N_th
+Q
+source("/Users/rossi/mrm3/initSeal.R")
+z <- fitMod()
+rpt <- obj$report()
+rpt$N_th
+source("/Users/rossi/mrm3/initSeal.R")
+Q
+z <- fitMod()
+rpt <- obj$report()
+rpt$N_th
+source("/Users/rossi/mrm3/initSeal.R")
+Q
+z <- fitMod()
+rpt <- obj$report()
+rpt$N_th
+source("/Users/rossi/mrm3/initSeal.R")
+Q
+source("/Users/rossi/mrm3/initSeal.R")
+z <- fitMod()
+rpt <- obj$report()
+rpt$N_th
+rpt$M_ax
+Q
+source("/Users/rossi/mrm3/initSeal.R")
+fitMod()
+M_ax
+rptRM$M_as
+exp(-rptRM$M_as)
+exp(-0.1)
+rptRM$M_ax
+source("/Users/rossi/mrm3/initSeal.R")
+Q
+source("/Users/rossi/mrm3/initSeal.R")
+z <- fitMod()
+c
+z <- fitMod()
+sink()
+rpt <- obj$report()
+rpt$N_th
+rpt$M_ax
+source("/Users/rossi/mrm3/initSeal.R")
+Q
+fitMod()
+rpt$M_ax
+M_ax <- rpt$M_ax
+M_ax[1, ] <- rpt$pupM_h[1]
+M_ax
+Q
+source("/Users/rossi/mrm3/initSeal.R")
+z <- fitMod()
+c
+load("/Users/rossi/mrm3/rpt.Rdata")
+N_th<- rpt$N_th
+N_th
+load("sealData/rptRM.Rdata")
+rpt$N_th
+rpt$N_th[12:20]
+rpt$N_th[12:20,]
+N_th[1:20,]
+load("/Users/rossi/mrm3/results/SG/fit.Rdata")
+fit
+plotFR("results/RM")
+plotFR("RM")
+codFR("RM")
+c
+fitCodFR("RM")
+fitSealFR("RM")
+setwd("~/ABT/testDDMP")
 source("initTest.R")
-dsetComb <- list( E = dset_example_East,
-W = dset_example_West )
-checkTAC <- assessDDmm( x = 1, dset = dsetComb, AMs = c(1,4,7) )
-Fmsy_s
-F23M
-mpOutput$M_s*2/3
-mpOutput$M_s
-Q
-checkTAC <- assessDDmm( x = 1, dset = dsetComb, AMs = c(1,4,7), F23M=1 )
-Fmsy_s
-Fmsy_s1 <- mpOutput$Fmsy
-Fmsy_s1
-TAC_s     <- B_s * Fmsy_s
-TAC_s
-TAC_s1     <- B_s * Fmsy_s1
-TAC_s1
-msy_s
-B_sa      <- mpOutput$B_sa
-Bprop     <- B_sa
-for( a in 1:ncol(Bprop))
-Bprop[,a] <- Bprop[,a] / sum(B_sa[,a])
-msy_a     <- msy_s
-Fmsy_a    <- Fmsy_s
-B_a       <- colSums(B_sa)
-TAC_a     <- TAC_s
-Q
-checkTAC <- assessDDmm( x = 1, dset = dsetComb, AMs = c(1,4,7), F23M=1 )
-c
-c
-c
-checkTAC0 <- assessDDmm( x = 1, dset = dsetComb, AMs = c(1,4,7), F23M=0 )
-c
-c
-c
-checkTAC
-checkTAC0
-load("/Users/rossi/AtlanticBluefinTuna/testDDMP/MSEs/MSE_hiCap.Rdata")
-load("/Users/rossi/AtlanticBluefinTuna/testDDMP/MSEs/MSE_hiCap23M.Rdata")
-load("/Users/rossi/AtlanticBluefinTuna/testDDMP/MSEs/MSE_loCap.Rdata")
-load("/Users/rossi/AtlanticBluefinTuna/testDDMP/MSEs/MSE_loCap23M.Rdata")
-MSE_loCap
-str(MSE_loCap)
-MSE_loCap@SSB
-str(MSE_loCap@SSB)
-MSE_loCap@SSB[,1,,87]
-MSE_loCap@SSB[,1,,87]*1e-6
-MSE_hiCap@SSB[,1,,87]*1e-6
-MSE_hiCap23M@SSB[,1,,87]*1e-6
-MSE_loCap23M@SSB[,1,,87]*1e-6
+source("plots.r")
+plotViolin()
+source("/Users/rossi/ABT/testDDMP/plotExpNLL.R")
+plotExpNLL()
+plotViolin()
+quartz()
+plotExpNLL()
+plotExpNLL()
+plotExpNLL()

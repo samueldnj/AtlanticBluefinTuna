@@ -8,6 +8,174 @@
 #
 # --------------------------------------------------------------------------
 
+loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
+                      OMid = "OM_1d",
+                      prefix = "test",
+                      folder = "./MSEs" )
+{ 
+
+  # Search the folder for MSE outputs
+  mseObjFileList  <- list.files(folder)
+  mseObjID        <- paste("MSE", prefix, "_", OMid, sep = "" )
+  mseFileName     <- paste(mseObjID, ".Rdata", sep = "")
+
+  load( file.path(folder,mseFileName) )
+  
+  return( get( mseObjID ) )
+}
+
+plotViolin <- function( OMvec = paste("OM_",1:96,"d",sep = ""), 
+                        prefix = NULL,
+                        ptcex = 1,
+                        saveStats = FALSE )
+{
+  library(vioplot)
+
+  noCap <- lapply( X = OMvec, 
+                   FUN = loadMSE, 
+                   prefix = prefix,
+                   folder = "./MSEs/sep5" )
+  names(noCap) <- OMvec
+
+
+  I <- length(noCap)
+  
+  J <- noCap[[1]]@nMPs
+  #J[2] <- noCap2[[1]]@nMPs-1
+  #J[3] <- noCap3[[1]]@nMPs-1
+
+  allMSE <- list( noCap=noCap)
+                  #noCap2=noCap2,
+                  #noCap3=noCap3 )
+
+  j <- character(sum(J))
+  k <- 1
+  nudge <- 0
+  for( iMSE in 1:length(J) )
+  {
+    if( iMSE > 1 )
+      nudge <- 1
+    for( iMP in (1:J[iMSE]+nudge) )
+    {
+      j[k] <- allMSE[[iMSE]][[iMSE]]@MPs[[iMP]][1]
+      k <- k+1
+    }
+  }
+  j2 <- character(length(j))
+
+  MPcols  <-  brewer.pal( 3,  "Set1")
+
+  cols <- rep("grey",length(k))
+  #cols[2:5] <- MPcols[1]
+  #cols[6:7] <- MPcols[2]
+  #cols[8] <- MPcols[3]
+  
+#  x <- c("AvC30","C10","C20","C30","D10","D20","D30","LD","DNC",
+#         "LDNC","POF","POS","PGK","AAVC","Br30")
+  x <- c("C10","C20","C30","D30","LD","Br30")
+  X <- length(x)
+
+  j <- c("No Catch",
+         #"emp_noCap", 
+         # "emp_noCapB0",
+         # "emp_noCapFM",
+         # "emp_noCapFMB0" )
+          "emp_msyCap",
+          "emp_msyCapB0",
+          "emp_msyCapFM",
+          "emp_msyCapFMB0" )
+
+  east <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,j,x) )
+  west <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,j,x) )
+
+  j0 <- 1
+  for( iMSE in 1:length(J) )
+  {
+    j1 <- j0 + J[iMSE] - 1
+    keepRow <- 1:J[iMSE]
+
+    if( iMSE>1 )
+    {
+      keepRow <- keepRow + 1
+    }
+
+    for( i in 1:I )
+    {
+      perf <- getperf(allMSE[[iMSE]][[i]])
+      east[i,j0:j1, ] <- as.matrix(perf[[1]][keepRow,x])
+      west[i,j0:j1, ] <- as.matrix(perf[[2]][keepRow,x])
+    }
+    j0 <- j1 + 1
+  }
+
+  if( saveStats )
+  {
+    mseStats <- list(east=east,west=west)
+    save( mseStats, file="mseStats.Rdata" )
+  }
+
+  par( mfrow=c(X+1,2), mar=c(0.4,4,0,1), oma=c(0,0,2,0) )
+  for( k in 1:X )
+  {
+    if( k<=3 )
+      ymax <- c( max(west[ , ,k]), max(east[ , ,k]) )
+    else if( k==4 )
+      ymax <- c(1,1)
+    else if( k==5 )
+      ymax <- c(0.75,0.75)
+    else if( k==6 )
+      ymax <- c(4.1,4.1)
+
+    par( mar=c(0.4,4,0,0.5) )
+    vioplot( west[ ,1,k], west[ ,2,k], west[ ,3,k], west[ ,4,k],
+             west[ ,5,k], #west[ ,6,k], west[ ,7,k], west[ ,8,k],
+             ylim=c(0,ymax[1]),
+             ylab=paste("",x[k]), las=1, names=j2 )
+    u <- par("usr")
+    rect(u[1], u[3], u[2], u[4], col="white", border=NA )
+    grid()
+    vioplot( west[ ,1,k], west[ ,2,k], west[ ,3,k], west[ ,4,k],
+             west[ ,5,k], #west[ ,6,k], west[ ,7,k], west[ ,8,k],
+             ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
+
+    if( k==X )
+      abline( h=1, lty=2 )
+
+    par( mar=c(0.4,2,0,0.5) )
+    vioplot( east[ ,1,k], east[ ,2,k], east[ ,3,k], east[ ,4,k],
+             east[ ,5,k], #east[ ,6,k], east[ ,7,k], east[ ,8,k],
+             ylim=c(0,ymax[2]),
+             ylab=paste("",x[k]), las=1, names=j2 )
+    u <- par("usr")
+    rect(u[1], u[3], u[2], u[4], col="white", border=NA )
+    grid()
+    vioplot( east[ ,1,k], east[ ,2,k], east[ ,3,k], east[ ,4,k],
+             east[ ,5,k], #east[ ,6,k], east[ ,7,k], east[ ,8,k],
+             ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
+
+    if( k==X )
+      abline( h=1, lty=2 )
+  }
+
+  parr <- par("usr")
+  par( mar=c(0,4,0,0.5) )
+  for( h in 1:2 )
+  {
+    if( h==2 )
+      par( mar=c(0,2,0,0.5) )
+    plot( x=c(parr[1],parr[2]), y=c(0,1), type="n", yaxs="i",
+          axes=FALSE, xlab="", ylab="" )
+    text( seq(0.9,sum(J)+0.3,length.out=sum(J)), par("usr")[4]-0.04, labels=j,
+          srt=45, adj=c(1.1,1.1), xpd=TRUE, cex=.9 )
+  }
+# triangles at max, horiz line at 1, symbols for axes,
+# vertical line at last ten yrs avg C
+  par( font=2 )
+  mtext( side=3, text="         West                                                    East", outer=TRUE )
+  par( font=1 )
+
+}
+
 
 plot_MPfits <- function(  simNum      = 1,
                           MSEobj      = MSEtest_OM2d,
@@ -142,6 +310,82 @@ plotHCR <- function(  Ftarg = 0.08,
 
 }
 
+plotbg <- function(col=rgb(235,235,235,maxColorValue=255))
+{
+  rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],col=col)
+  grid( col="white", lty=1 )
+}
+
+plotHCRs <- function( Be, Fes, Fea, ptse, Bw, Fws, Fwa, ptsw )
+{
+  k <- nrow(Be)
+
+  tcols <- brewer.pal(k,"Set1")
+
+  # EAST
+
+  plot( x=range(Be), y=c(0,1.1*max(Fes,Fea)), type="n", las=1, main="East" )
+  plotbg()
+  # Fishing mortality
+  for( i in 1:k )
+  {
+    lines( x=Be[i, ], y=Fes[i, ], lwd=1.5, col=tcols[i] )
+    lines( x=Be[i, ], y=Fea[i, ], lwd=1.5, lty=2, col=tcols[i] )
+    points( x=ptse[[i]]["Bs"], y=ptse[[i]]["Fs"], pch=16, col=tcols[i] )
+    points( x=ptse[[i]]["Ba"], y=ptse[[i]]["Fa"], pch=16, col=tcols[i] )
+    abline( v=min(ptse[[i]]["Ba"],ptse[[i]]["Bs"]), col=tcols[i] )
+  }
+
+  # Catch
+  plot( x=range(Be), y=c(0,1.1*max(Be*Fes,Be*Fea)), type="n", las=1 )
+  plotbg()
+  for( i in 1:k )
+  {
+    lines( x=Be[i, ], y=(Be*(1-exp(-Fes)))[i, ], lwd=1.5, col=tcols[i] )
+    lines( x=Be[i, ], y=(Be*(1-exp(-Fea)))[i, ], lwd=1.5, lty=2, col=tcols[i] )
+    Cs <- ptse[[i]]["Bs"]*(1-exp(-ptse[[i]]["Fs"]))
+    Ca <- ptse[[i]]["Ba"]*(1-exp(-ptse[[i]]["Fa"]))
+    points( x=ptse[[i]]["Bs"], y=Cs, pch=16, col=tcols[i] )
+    points( x=ptse[[i]]["Ba"], y=Ca, pch=16, col=tcols[i] )
+    abline( v=min(ptse[[i]]["Ba"],ptse[[i]]["Bs"]), col=tcols[i] )
+  }
+
+  # WEST
+
+  plot( x=range(Bw), y=c(0,1.1*max(Fws,Fwa)), type="n", las=1, main="West" )
+  plotbg()
+  # Fishing mortality
+  for( i in 1:k )
+  {
+    lines( x=Bw[i, ], y=Fws[i, ], lwd=1.5, col=tcols[i] )
+    lines( x=Bw[i, ], y=Fwa[i, ], lwd=1.5, lty=2, col=tcols[i] )
+    points( x=ptsw[[i]]["Bs"], y=ptsw[[i]]["Fs"], pch=16, col=tcols[i] )
+    points( x=ptsw[[i]]["Ba"], y=ptsw[[i]]["Fa"], pch=16, col=tcols[i] )
+    abline( v=min(ptsw[[i]]["Ba"],ptsw[[i]]["Bs"]), col=tcols[i] )
+  }
+  legend( x="bottomright", lty=1:2, legend=c("By stock","By area"), bty="n",
+          lwd=1.5, cex=0.8 )
+
+  # Catch
+  plot( x=range(Bw), y=c(0,1.1*max(Bw*Fws,Bw*Fwa)), type="n", las=1 )
+  plotbg()
+  for( i in 1:k )
+  {
+    lines( x=Bw[i, ], y=(Bw*(1-exp(-Fws)))[i, ], lwd=1.5, col=tcols[i] )
+    lines( x=Bw[i, ], y=(Bw*(1-exp(-Fwa)))[i, ], lwd=1.5, lty=2, col=tcols[i] )
+    Cs <- ptsw[[i]]["Bs"]*(1-exp(-ptsw[[i]]["Fs"]))
+    Ca <- ptsw[[i]]["Ba"]*(1-exp(-ptsw[[i]]["Fa"]))
+    points( x=ptsw[[i]]["Bs"], y=Cs, pch=16, col=tcols[i] )
+    points( x=ptsw[[i]]["Ba"], y=Ca, pch=16, col=tcols[i] )
+    abline( v=min(ptsw[[i]]["Ba"],ptsw[[i]]["Bs"]), col=tcols[i] )
+  }
+
+  mtext( side=1, text="Biomass (kt)", outer=TRUE )
+  mtext( side=2, text="         TAC (kt)                      Fishing mortality (/yr)",
+         outer=TRUE, line=1 )
+
+}
+
 plot_TACperformance <- function(  simIdx      = 1,
                                   MSEobj      = MSEtest_ROM_1d,
                                   westTables  = westCheckTables,
@@ -198,13 +442,12 @@ plot_TACperformance <- function(  simIdx      = 1,
   MPyrs <- seq( from  = tMP-1, to = max(yrs),
                 by = interval )
 
-  yrCol <- rep( MPyrs, rep(5,length(MPyrs)) )
+  yrCol <- rep( MPyrs, rep(nOMs,length(MPyrs)) )
 
+  eastCheckTable$yr   <- rep( MPyrs[-length(MPyrs)], rep(nOMs,length(MPyrs)-1) )
+  westCheckTable$yr   <- rep( MPyrs[-length(MPyrs)], rep(nOMs,length(MPyrs)-1) )
 
-  eastCheckTable$yr   <- rep( MPyrs, rep(5,length(MPyrs)) )
-  westCheckTable$yr   <- rep( MPyrs, rep(5,length(MPyrs)) )
-
-  OMcols <- RColorBrewer::brewer.pal(n = length(OMs), "Dark2")
+  OMcols <- RColorBrewer::brewer.pal( n=nOMs, "Dark2" )
   westCheckTable$col  <- OMcols
   eastCheckTable$col  <- OMcols
 

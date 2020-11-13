@@ -10,6 +10,7 @@
 # --------------------------------------------------------------------------
 
 # Load the ABTMSE package
+source("tools.R")
 source("initTest.R")
 source("assessDDMP.R")
 source("calcEquilibriumDD.R")
@@ -21,7 +22,7 @@ dsetComb <- list( E = dset_example_East,
 
 # First, run the assessment on the
 # dset for 3 OMs
-checkTAC <- assessDDmm( x = 1, dset = dsetComb, AMs = c(1,4,7), F23M=1 )
+checkTAC <- assessDDmm( x = 1, dset = dsetComb, k = 3, F23M=1 )
 
 
 # Now define an MP list and run the MSE on OM_1
