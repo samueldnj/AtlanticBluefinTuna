@@ -1,2 +1,11 @@
 # Ignore temporary R files
 *.DS_Store
+*.Rapp.history
+
+# Ignore outputs
+*.png
+*.pdf
+
+# package source
+*.tar.gz
+*.tar
