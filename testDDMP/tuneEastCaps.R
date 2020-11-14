@@ -18,7 +18,7 @@ westMP <- "MP_msyCapF23M"
 
 # Make MPs
 source("makeGridMPs.R")
-eastCaps <- seq( from = 10, to = 40, length.out = 5 )
+eastCaps <- seq( from = 20, to = 60, length.out = 5 )
 eastCaps <- c(eastCaps,"msy",Inf)
 
 MPnames <- makeGridMPs( M = 1,

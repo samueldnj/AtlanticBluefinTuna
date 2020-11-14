@@ -301,16 +301,13 @@ calcHCR <- function(  AM       = 1,
   msy_s     <- c(fitTable$MSY_E, fitTable$MSY_W)
   if( !is.null(FmultM) )
   {
-    Fmsy_s <- c( fitTable$M_E, fitTable$M_W )*FmultM
+    Fmsy_s <- c( fitTable$M_Es, fitTable$M_Ws )*FmultM
   }
   if( F23M )
   {
-    #if( AS == 1 )
-    #  Fmsy_s  <- c(fitTable$M_E, fitTable$M_W)#*2/3
-    #else
       Fmsy_s  <- c(fitTable$M_E, fitTable$M_W*2/3)
   }
-  else
+  if( is.null(FmultM) & !F23M )
     Fmsy_s  <- c(fitTable$Fmsy_E, fitTable$Fmsy_W)
 
   # Biomass at upper control point
