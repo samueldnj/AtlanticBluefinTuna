@@ -18,7 +18,7 @@ westMP <- "MP_msyCapF23M"
 
 # Make MPs
 source("makeGridMPs.R")
-nllWts <- c(0,0.01,0.025,0.05,0.1,.5,"last10")
+nllWts <- c(0,0.01,0.025,0.05,0.1,.5,1.0,"last10")
 
 MPnames <- makeGridMPs( M = 1,
                         eastCap = Inf,
