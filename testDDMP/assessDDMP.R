@@ -31,6 +31,7 @@ assessDDmm <- function( x,
                         k             = 5,
                         caps          = c(Inf,Inf),
                         F23M          = FALSE,
+                        FmultM        = NULL,
                         UCP           = "Bmsy",
                         check         = TRUE,
                         maxDeltaTACup = 0.2,
@@ -162,6 +163,7 @@ assessDDmm <- function( x,
                     FUN       = calcHCR,
                     fitTable  = fitTable,
                     F23M      = F23M,
+                    FmultM    = FmultM,
                     caps      = caps,
                     UCP       = UCP,
                     AS        = AS )
@@ -285,6 +287,7 @@ class(assessDDmm)<-"MSMP"
 calcHCR <- function(  AM       = 1,
                       fitTable = fitTable,
                       F23M     = FALSE,
+                      FmultM   = NULL,
                       caps     = c(Inf,Inf),
                       UCP    = "Bmsy",
                       AS       = 1 )
@@ -296,6 +299,10 @@ calcHCR <- function(  AM       = 1,
 
   B_s       <- c(fitTable$Bnext_E, fitTable$Bnext_W)
   msy_s     <- c(fitTable$MSY_E, fitTable$MSY_W)
+  if( !is.null(FmultM) )
+  {
+    Fmsy_s <- c( fitTable$M_E, fitTable$M_W )*FmultM
+  }
   if( F23M )
   {
     #if( AS == 1 )

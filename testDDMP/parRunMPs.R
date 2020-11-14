@@ -42,7 +42,7 @@ testMPs    <- list( MP_0.1 = c("MP_noCapFM1","MP_msyCapF23M"),
                     MP_last10 = c("MP_noCapFMlast10","MP_msyCapF23M")
                    )
 #######
-OMdvec <- 1:7
+OMdvec <- 1:4
 library(parallel)
 omClust <- makeCluster( floor(detectCores()/2) )
 
@@ -51,16 +51,16 @@ omClust <- makeCluster( floor(detectCores()/2) )
 #                       assessInt = 2,
 #                       MPs = testMPs,
 #                       checkMPs = TRUE,
-#                       projFolder = "oct22" )
+#                       projFolderName = "oct22" )
 
-testMSE <- parLapply( cl = omClust,
-                      X = OMdvec, 
-                      FUN = runCMPs,
-                      assessInt = 2,
-                      MPs = testMPs,
-                      checkMPs = TRUE,
-                      projFolder = "samTest" )
+testMSE <- clusterApplyLB(  cl = omClust,                      
+                            x = OMdvec, 
+                            fun = parRunCMPs,
+                            assessInt = 2,
+                            MPs = testMPs,
+                            checkMPs = TRUE,
+                            projFolderName = "samTest" )
 
-stopCluster(ROMclust)
+stopCluster(omClust)
 
 

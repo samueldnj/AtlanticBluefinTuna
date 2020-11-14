@@ -483,8 +483,7 @@ plotFitChecks <- function(  OM = "OM_1d",
 }
 
 # Wrapper for runCMPs to run OMs in parallel, best for
-# deterministic OMs. Experimenting with running a
-# 2 core snowfall inside a parallel package cluster.
+# deterministic OMs.
 parRunCMPs <- function( iOM = 1,
                         MPs = list( test = c("MP_testMean","MP_testMean") ),
                         assessInt = 2,
@@ -498,16 +497,18 @@ parRunCMPs <- function( iOM = 1,
   source("calcEquilibriumDD.R")
   source("MPs.R")
   source("plots.R")
-  # Export to snowfall cluster
-  sfInit(parallel=TRUE, cpus = 2)
-  sfLibrary( ABTMSE )
-  sfLibrary( TMB )
-  sfClusterCall("loadABT")
-  sfSource("assessDDMP.R")
-  sfSource("MPs.R")
-  sfSource("calcEquilibriumDD.R")
 
-  MSEobj <- runCMPs(  iOM = iOM,
+  # sfInit(parallel=TRUE, cpus = 2)
+  # sfLibrary( ABTMSE )
+  # sfLibrary( TMB )
+  # sfClusterCall("loadABT")
+  # sfSource("assessDDMP.R")
+  # sfSource("MPs.R")
+  # sfSource("calcEquilibriumDD.R")
+
+  omNum <- iOM
+
+  MSEobj <- runCMPs(  iOM = omNum,
                       MPs = MPs,
                       assessInt = assessInt,
                       checkMPs = checkMPs,
