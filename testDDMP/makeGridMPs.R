@@ -10,7 +10,7 @@ westCaps <- seq( from = 1, to = 5, length.out = 5 )
 eastCaps <- c(eastCaps,"msy",Inf)
 westCaps <- c(westCaps,"msy",Inf)
 
-nllMults <- c(0.01,0.025,0.05,0.1,0.5,"last10")
+nllMults <- c(0.01,0.025,0.05,0.1,"last10")
 
 
 makeGridMPs <- function(  M = Mmults,

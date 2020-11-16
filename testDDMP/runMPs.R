@@ -49,8 +49,6 @@ testMPs    <- list( MP_0.1 = c("MP_noCapFM1","MP_msyCapF23M"),
                    )
 #######
 OMdvec <- 1:7
-library(parallel)
-omClust <- makeCluster(floor(detectCores()/2) )
 
 # mixCapMSE <- lapply(  X = OMdvec, 
 #                       FUN = runCMPs,

@@ -16,6 +16,8 @@ OMdvec <- 1:96
 
 westMP <- "MP_msyCapF23M"
 
+checkFolder <- "tuneMmult"
+
 # Make MPs
 source("makeGridMPs.R")
 Mmults <- seq(from = 0.3, to = 1.5, length.out = 5)

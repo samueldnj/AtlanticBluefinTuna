@@ -29,17 +29,17 @@ noCapMPs <- list( #emp_msyCap   = c("emp_msyCap","emp_msyCap"),
                   #emp_msyCapB0 = c("emp_msyCapB0","emp_msyCapB0"),
                   #emp_msyCapFM = c("emp_msyCapFM","emp_msyCapFM")
                   #emp_msyCapFMB0 = c("emp_msyCapFMB0","emp_msyCapFMB0")
-                  emp_noCapFMB0 = c("emp_noCapFMB0","emp_noCapFMB0")
+                  emp_trendTAC = c("emp_trendTAC","emp_trendTAC")
                 )
                   
 
-OMdvec <- paste( "OM_", (1:96),"d",sep = "" )
+OMdvec <- paste( "OM_", (1:4),"d",sep = "" )
 
 fmMSEs <- lapply( X = OMdvec, 
                   FUN = runCMPs,
                   assessInt = 2,
                   MPs = noCapMPs,
                   checkMPs = TRUE,
-                  projFolderName = "sep17" )
+                  projFolderName = "testTrend" )
 
 #z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")

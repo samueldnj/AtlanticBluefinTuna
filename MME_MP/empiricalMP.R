@@ -30,6 +30,8 @@ empMMMP <- function(  x, dset,
                       UCP           = "Bmsy",
                       TACrule       = "weighted",
                       wts           = rep(0,5),
+                      phi           = NULL,
+                      trendYrs      = 4,
                       check         = TRUE,
                       maxDeltaTACup = 0.2,
                       maxDeltaTACdn = 0.5,
@@ -59,8 +61,10 @@ empMMMP <- function(  x, dset,
   # Now smooth MED and GOM - average last
   # four points - maybe use Loess smoother later
   nT        <- dim(dset[[AS]]$Iobs)[3]
+
   GOMsmooth <- mean(  dset[[AS]]$Iobs[x,GOMidxNo,(nT-3):nT],
                       na.rm = T)
+
   MEDsmooth <- mean(  dset[[AS]]$Iobs[x,MEDidxNo,(nT-3):nT],
                       na.rm = T)
 
@@ -142,6 +146,32 @@ empMMMP <- function(  x, dset,
     TAC <- mean(TACvec)
   else if( TACrule == "min" )
     TAC <- min(TACvec)
+  else if( TACrule == "trend" )
+  {
+    # Calculate trend in spawn index on log scale
+    if( AS == 1 )
+      trendIdx <- dset[[AS]]$Iobs[x,MEDidxNo,(nT-trendYrs + 1):nT]
+    if( AS == 2 )
+      trendIdx <- dset[[AS]]$Iobs[x,GOMidxNo,(nT-trendYrs + 1):nT]
+    
+    trend.df <- data.frame(x = 1:4, y = log(trendIdx))
+    trend.lm <- lm( y ~ x, data = trend.df)
+    trend.grad <- coef(trend.lm)[2]
+
+    # zones are -inf < -2phi < phi < phi < 2phi < int
+    TACvec <- TACvec[order(TACvec)]
+
+    if( trend.grad <= -2*phi )
+      TAC <- TACvec[1]
+    else if( trend.grad <= -phi )
+      TAC <- TACvec[2]
+    else if( trend.grad <= phi )
+      TAC <- TACvec[3]
+    else if( trend.grad <= 2*phi )
+      TAC <- TACvec[4]
+    else TAC <- TACvec[5]
+    
+  }
 
   hcrList <- list( Be=Be, Fes=Fes, Fea=Fea, ptse=ptse,
                    Bw=Bw, Fws=Fws, Fwa=Fwa, ptsw=ptsw )
@@ -185,11 +215,14 @@ empMMMP <- function(  x, dset,
     outTable$area       <- areaNames[AS]
     outTable$simNum     <- x
       
-    if(!dir.exists("outTables"))
-      dir.create("outTables")
+
+    outTableFolder <- "./outTables"
+
+    if(!dir.exists(outTableFolder))
+      dir.create(outTableFolder)
 
     outTableFileName <- paste("outTable_sim",x,areaNames[AS],".csv",sep = "")
-    outTableFilePath <- file.path("outTables",outTableFileName)
+    outTableFilePath <- file.path(outTableFolder,outTableFileName)
 
     if(!file.exists(outTableFilePath))
     {
@@ -235,7 +268,7 @@ calcHCR <- function(  OM       = 1,
   msy_s     <- c(fitTable$MSY_MED, fitTable$MSY_GOM)
 
   if( FM )
-    Fmsy_s  <- c(fitTable$M_E*2/3, fitTable$M_W*2/3)
+    Fmsy_s  <- c(fitTable$M_E*FM, fitTable$M_W*FM)
   else
     Fmsy_s  <- c(fitTable$Fmsy_MED, fitTable$Fmsy_GOM)
 

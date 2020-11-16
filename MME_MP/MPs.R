@@ -8,6 +8,24 @@
 
 checkMP <<- TRUE
 
+emp_trendTAC <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x         = x,
+                  dset      = dset,
+                  caps      = c(Inf,Inf),
+                  TACrule   = "trend",
+                  phi       = 0.2,
+                  trendYrs  = 4,
+                  FM        = 1/3,
+                  AS        = AS,
+                  check     = checkMP,
+                  UCP       = "Bmsy",
+                  mpName    = "emp_trendTAC" )
+
+  return(TAC)
+}
+class(emp_trendTAC)<-"MSMP"
+
 emp_noCap <- function( x, dset, AS )
 {
   TAC <- empMMMP( x       = x,
@@ -208,7 +226,7 @@ class(emp_conCapFMB0)<-"MSMP"
 runCMPs <- function(  OM = "OM_1d",
                       MPs = list( test = c("empMPtest_Mean","empMPtest_Mean") ),
                       assessInt = 2,
-                      checkMPs = FALSE,
+                      checkMPs = TRUE,
                       projFolderName = NULL )
 {
   library(ABTMSE)
@@ -222,7 +240,9 @@ runCMPs <- function(  OM = "OM_1d",
   checkMP <<- checkMPs
 
   # Clear outTables directory
-  outTableFiles <- list.files("./outTables", full.names = TRUE)
+  outTableFolder <- "./outTables"
+
+  outTableFiles <- list.files(outTableFolder, full.names = TRUE)
   if( length(outTableFiles) > 0)
     unlink(outTableFiles)
 
@@ -264,7 +284,7 @@ runCMPs <- function(  OM = "OM_1d",
               introtext=paste("Multi-model delay difference assessment on", OM,sep =""), 
               filenam=paste(MSEsymbol,"_report",sep = ""))  
 
-  outTableFiles <- list.files("./outTables", full.names = TRUE)
+  outTableFiles <- list.files(outTableFolder, full.names = TRUE)
   nSims <- dim(MSEobj@SSB)[2]
 
   westCheckTableFiles <- outTableFiles[grepl(x = outTableFiles, pattern = "West") ]
