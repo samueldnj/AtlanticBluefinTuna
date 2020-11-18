@@ -384,11 +384,12 @@ loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
                       prefix = "test",
                       folder = "./MSEs" )
 { 
+  browser()
 
   # Search the folder for MSE outputs
   mseObjFileList  <- list.files(folder)
   mseObjID        <- paste("MSE", prefix, "_", OMid, sep = "" )
-  mseFileName     <- paste(mseObjID, ".Rdata", sep = "")
+  mseFileName     <- paste(mseObjID, ".rda", sep = "")
 
   load( file.path(folder,mseFileName) )
   
@@ -540,7 +541,7 @@ plotViolin <- function( OMvec = paste0("MSE_",1:96),
                         ptcex = 1,
                         modelBased=TRUE,
                         mseStatsFile="mseStats.Rdata",
-                        folder = "./MSEs/oct22/rdas" )
+                        folder = "./MSEs/eastMgrid/rdas" )
 {
   library(vioplot)
 
@@ -575,22 +576,27 @@ plotViolin <- function( OMvec = paste0("MSE_",1:96),
                      FUN = readRDS )
     names(test0) <- OMvec  
     
-    mixCap <- lapply( X = paste0(1:96,"d"), 
-                         FUN = loadMSE, 
-                         prefix = "_OM",
-                         folder = "./MSEs/newClustAug28-2" )
-    names(mixCap) <- OMvec
+    # mixCap <- lapply( X = paste0(1:96,"d"), 
+    #                      FUN = loadMSE, 
+    #                      prefix = prefix,
+    #                      folder = folder )
+
+    # names(mixCap) <- OMvec
 
     J <- test0[[1]]@nMPs
-    J[2] <- mixCap[[1]]@nMPs-1
+    # J[2] <- mixCap[[1]]@nMPs-1
 
-    allMSE <- list( test0=test0, mixCap=mixCap )
 
-    j <- c("No Catch",
-           "a=0.1",
-           "a=0.01",
-           "last10",
-           "a=0")
+    allMSE <- list( test0=test0 ) # mixCap=mixCap )
+
+
+
+    j <- c( "No Catch",
+            "F=0.3M",
+            "F=0.6M",
+            "F=0.9M",
+            "F=1.2M",
+            "F=1.5M")
 
   }
   else
@@ -698,14 +704,14 @@ plotViolin <- function( OMvec = paste0("MSE_",1:96),
 
     par( mar=c(0.4,4,0,0.5) )
     vioplot( west[ ,1,k], west[ ,2,k], west[ ,3,k], west[ ,4,k],
-             west[ ,5,k], #west[ ,6,k], #west[ ,7,k], west[ ,8,k], #west[ ,9,k],
+             west[ ,5,k], west[ ,6,k], #west[ ,7,k], west[ ,8,k], #west[ ,9,k],
              ylim=c(0,ymax[1]),
              ylab=paste("",x[k]), las=1, names=j2 )
     u <- par("usr")
     rect(u[1], u[3], u[2], u[4], col="white", border=NA )
     grid()
     vioplot( west[ ,1,k], west[ ,2,k], west[ ,3,k], west[ ,4,k],
-             west[ ,5,k], #west[ ,6,k], #west[ ,7,k], west[ ,8,k], #west[ ,9,k],
+             west[ ,5,k], west[ ,6,k], #west[ ,7,k], west[ ,8,k], #west[ ,9,k],
              ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
 
     if( k==X )
@@ -713,14 +719,14 @@ plotViolin <- function( OMvec = paste0("MSE_",1:96),
 
     par( mar=c(0.4,2,0,0.5) )
     vioplot( east[ ,1,k], east[ ,2,k], east[ ,3,k], east[ ,4,k],
-             east[ ,5,k], #east[ ,6,k], #east[ ,7,k], east[ ,8,k], #east[ ,9,k],
+             east[ ,5,k], east[ ,6,k], #east[ ,7,k], east[ ,8,k], #east[ ,9,k],
              ylim=c(0,ymax[2]),
              ylab=paste("",x[k]), las=1, names=j2 )
     u <- par("usr")
     rect(u[1], u[3], u[2], u[4], col="white", border=NA )
     grid()
     vioplot( east[ ,1,k], east[ ,2,k], east[ ,3,k], east[ ,4,k],
-             east[ ,5,k], #east[ ,6,k], #east[ ,7,k], east[ ,8,k], #east[ ,9,k],
+             east[ ,5,k], east[ ,6,k], #east[ ,7,k], east[ ,8,k], #east[ ,9,k],
              ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
 
     if( k==X )
@@ -744,6 +750,8 @@ plotViolin <- function( OMvec = paste0("MSE_",1:96),
   mtext( side=3, text="         West                                                    East", outer=TRUE )
   par( font=1 )
 
+
+  browser()
 }
 
 plotROMs <- function( par="Br30", CMP=2 )

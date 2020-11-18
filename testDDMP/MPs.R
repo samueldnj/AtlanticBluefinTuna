@@ -420,21 +420,6 @@ MP_hiCap23M.4B0 <- function( x, dset, AS )
 class(MP_hiCap23M.4B0)<-"MSMP"
 
 
-loadMSE <- function(  OMid = "OM_1d",
-                      prefix = "test",
-                      folder = "./MSEs" )
-{ 
-
-  # Search the folder for MSE outputs
-  mseObjFileList  <- list.files(folder)
-  mseObjID        <- paste("MSE", prefix, "_", OMid, sep = "" )
-  mseFileName     <- paste(mseObjID, ".Rdata", sep = "")
-
-  load( file.path(folder,mseFileName) )
-  
-  return( get( mseObjID ) )
-}
-
 
 plotFitChecks <- function(  OM = "OM_1d",
                             projFolder = "./MSEs/testMP",
