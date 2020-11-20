@@ -505,9 +505,13 @@ runCMPs <- function(  iOM = 1,
     dir.create("./outTables")
   
   outTableFiles <- list.files("./outTables", full.names = TRUE)
+  fitTableFiles <- list.files("./fitTables", full.names = TRUE)
   
   if( length(outTableFiles) > 0 )
     unlink(outTableFiles)
+
+  if( length(fitTableFiles) > 0 )
+    unlink(fitTableFiles)
 
   # get OM as an environment variable from
   # the char vector label
@@ -613,8 +617,14 @@ runCMPs <- function(  iOM = 1,
     }
   }
   # Remove outTableFiles
+  outTableFiles <- list.files("./outTables", full.names = TRUE)
+  fitTableFiles <- list.files("./fitTables", full.names = TRUE)
+  
   if( length(outTableFiles) > 0)
     unlink(outTableFiles)
+
+  if( length(fitTableFiles) > 0)
+    unlink(fitTableFiles)
 
 
 
