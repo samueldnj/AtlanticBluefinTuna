@@ -52,7 +52,7 @@ testMSE <- lapply(  X = OMdvec,
                     FUN = runCMPs,
                     assessInt = 2,
                     MPs = testMPs,
-                    checkMPs = FALSE,
+                    checkMPs = TRUE,
                     projFolder = saveDir )
 
 

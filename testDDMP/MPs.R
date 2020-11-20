@@ -6,7 +6,7 @@
 #
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-checkMP <<- FALSE
+checkMP <<- TRUE
 
 
 
@@ -467,42 +467,6 @@ plotFitChecks <- function(  OM = "OM_1d",
 
 }
 
-# Wrapper for runCMPs to run OMs in parallel, best for
-# deterministic OMs.
-parRunCMPs <- function( iOM = 1,
-                        MPs = list( test = c("MP_testMean","MP_testMean") ),
-                        assessInt = 2,
-                        checkMPs = FALSE,
-                        projFolderName = NULL,
-                        isRob = FALSE )
-{
-  # Load a bunch of shit
-  source("initTest.R")
-  source("assessDDMP.R")
-  source("calcEquilibriumDD.R")
-  source("MPs.R")
-  source("plots.R")
-
-  # sfInit(parallel=TRUE, cpus = 2)
-  # sfLibrary( ABTMSE )
-  # sfLibrary( TMB )
-  # sfClusterCall("loadABT")
-  # sfSource("assessDDMP.R")
-  # sfSource("MPs.R")
-  # sfSource("calcEquilibriumDD.R")
-
-  omNum <- iOM
-
-  MSEobj <- runCMPs(  iOM = omNum,
-                      MPs = MPs,
-                      assessInt = assessInt,
-                      checkMPs = checkMPs,
-                      projFolderName = projFolderName,
-                      isRob = isRob)
-
-  return(MSEobj)
-}
-
 
 # runCMPs()
 # Wrapper function for the new("MSE")
@@ -518,7 +482,7 @@ parRunCMPs <- function( iOM = 1,
 runCMPs <- function(  iOM = 1,
                       MPs = list( test = c("MP_testMean","MP_testMean") ),
                       assessInt = 2,
-                      checkMPs = FALSE,
+                      checkMPs = TRUE,
                       projFolderName = NULL,
                       isRob = FALSE )
 {
@@ -541,7 +505,8 @@ runCMPs <- function(  iOM = 1,
     dir.create("./outTables")
   
   outTableFiles <- list.files("./outTables", full.names = TRUE)
-  if( length(outTableFiles) > 0)
+  
+  if( length(outTableFiles) > 0 )
     unlink(outTableFiles)
 
   # get OM as an environment variable from
@@ -650,6 +615,8 @@ runCMPs <- function(  iOM = 1,
   # Remove outTableFiles
   if( length(outTableFiles) > 0)
     unlink(outTableFiles)
+
+
 
   return(MSEobj)
 }

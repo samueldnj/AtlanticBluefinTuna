@@ -36,6 +36,9 @@ makeGridMPs <- function(  M = Mmults,
   cat("# ", MPfile ,"\n", file = MPfile, append = TRUE,sep = "")
   cat("# ", as.character(Sys.Date()) ,"\n", file = MPfile, append = TRUE,sep = "")
   cat("# \n", file = MPfile, append = TRUE,sep = "")
+  cat("checkMP <<- TRUE\n", file = MPfile, append = TRUE,sep = "")
+  cat("# \n", file = MPfile, append = TRUE,sep = "")
+  cat("# \n", file = MPfile, append = TRUE,sep = "")
 
   # Now loop over the grid, and make the MP
   for( k in 1:nrow(grid))
@@ -59,6 +62,7 @@ makeGridMPs <- function(  M = Mmults,
 
     cat("\n", file = MPfile, append = TRUE,sep = "")
     cat("\n", file = MPfile, append = TRUE,sep = "")
+
     cat(mpName," <- function( x, dset, AS)\n", file = MPfile, append = TRUE,sep = "")
     cat("{\n", file = MPfile, append = TRUE,sep = "")
     cat("  TAC <- assessDDmm( x = x,\n", file = MPfile, append = TRUE,sep = "")

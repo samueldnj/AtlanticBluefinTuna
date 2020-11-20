@@ -8,6 +8,9 @@
 #
 # --------------------------------------------------------------------------
 
+source("empiricalMP.R")
+source("MPs.R")
+
 loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
                       OMid = "OM_1d",
                       prefix = "test",
@@ -27,28 +30,32 @@ loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
 plotViolin <- function( OMvec = paste("OM_",1:96,"d",sep = ""), 
                         prefix = NULL,
                         ptcex = 1,
-                        saveStats = FALSE )
+                        MSEs = c("sep17","sep7","eastMgrid"),
+                        saveStats = TRUE )
 {
   library(vioplot)
 
-  noCap <- lapply( X = OMvec, 
+  folders <- paste0("./MSEs/",MSEs)
+
+  allMSE <- vector(mode = "list", length = length(MSEs))
+  J <- numeric(length=length(MSEs))
+  for( k in 1:length(MSEs))
+  {
+    allMSE[[k]] <- lapply( X = OMvec, 
                    FUN = loadMSE, 
                    prefix = prefix,
-                   folder = "./MSEs/sep5" )
-  names(noCap) <- OMvec
+                   folder = folders[k] )
+    names(allMSE[[k]]) <- OMvec
+    J[k] <- allMSE[[k]][[1]]@nMPs
+    if(k > 1)
+      J[k] <- J[k] - 1
+  }
+
+  I <- length(allMSE[[1]])
 
 
-  I <- length(noCap)
-  
-  J <- noCap[[1]]@nMPs
-  #J[2] <- noCap2[[1]]@nMPs-1
-  #J[3] <- noCap3[[1]]@nMPs-1
-
-  allMSE <- list( noCap=noCap)
-                  #noCap2=noCap2,
-                  #noCap3=noCap3 )
-
-  j <- character(sum(J))
+  jEast <- character(sum(J))
+  jWest <- character(sum(J))
   k <- 1
   nudge <- 0
   for( iMSE in 1:length(J) )
@@ -57,13 +64,14 @@ plotViolin <- function( OMvec = paste("OM_",1:96,"d",sep = ""),
       nudge <- 1
     for( iMP in (1:J[iMSE]+nudge) )
     {
-      j[k] <- allMSE[[iMSE]][[iMSE]]@MPs[[iMP]][1]
+      jEast[k] <- allMSE[[iMSE]][[iMSE]]@MPs[[iMP]][1]
+      jWest[k] <- allMSE[[iMSE]][[iMSE]]@MPs[[iMP]][2]
       k <- k+1
     }
   }
-  j2 <- character(length(j))
+  j2 <- character(length(jEast))
 
-  MPcols  <-  brewer.pal( 3,  "Set1")
+  MPcols  <-  RColorBrewer::brewer.pal( 3,  "Set1")
 
   cols <- rep("grey",length(k))
   #cols[2:5] <- MPcols[1]
@@ -75,18 +83,17 @@ plotViolin <- function( OMvec = paste("OM_",1:96,"d",sep = ""),
   x <- c("C10","C20","C30","D30","LD","Br30")
   X <- length(x)
 
-  j <- c("No Catch",
-         #"emp_noCap", 
-         # "emp_noCapB0",
-         # "emp_noCapFM",
-         # "emp_noCapFMB0" )
-          "emp_msyCap",
-          "emp_msyCapB0",
-          "emp_msyCapFM",
-          "emp_msyCapFMB0" )
+  # Let's pull MPs from MSE objects
 
-  east <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,j,x) )
-  west <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,j,x) )
+  # j <- c("No Catch",
+  #        #"emp_noCap", 
+  #        # "emp_noCapB0",
+  #        # "emp_noCapFM",
+  #        # "emp_noCapFMB0" )
+  #         "emp_trendTAC" )
+
+  east <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,jEast,x) )
+  west <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,jWest,x) )
 
   j0 <- 1
   for( iMSE in 1:length(J) )
@@ -127,31 +134,34 @@ plotViolin <- function( OMvec = paste("OM_",1:96,"d",sep = ""),
       ymax <- c(4.1,4.1)
 
     par( mar=c(0.4,4,0,0.5) )
-    vioplot( west[ ,1,k], west[ ,2,k], west[ ,3,k], west[ ,4,k],
-             west[ ,5,k], #west[ ,6,k], west[ ,7,k], west[ ,8,k],
-             ylim=c(0,ymax[1]),
-             ylab=paste("",x[k]), las=1, names=j2 )
+    westMat <- west[,,k]
+    vioplot(  westMat,
+              use.cols = TRUE,
+              ylim=c(0,ymax[1]),
+              ylab=paste("",x[k]), las=1, names=j2 )
     u <- par("usr")
     rect(u[1], u[3], u[2], u[4], col="white", border=NA )
     grid()
-    vioplot( west[ ,1,k], west[ ,2,k], west[ ,3,k], west[ ,4,k],
-             west[ ,5,k], #west[ ,6,k], west[ ,7,k], west[ ,8,k],
-             ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
+
+    vioplot(  westMat,
+              use.cols = TRUE,
+              ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
 
     if( k==X )
       abline( h=1, lty=2 )
 
     par( mar=c(0.4,2,0,0.5) )
-    vioplot( east[ ,1,k], east[ ,2,k], east[ ,3,k], east[ ,4,k],
-             east[ ,5,k], #east[ ,6,k], east[ ,7,k], east[ ,8,k],
-             ylim=c(0,ymax[2]),
-             ylab=paste("",x[k]), las=1, names=j2 )
+    eastMat <- east[,,k]
+    vioplot(  eastMat,
+              use.cols = TRUE,
+              ylim=c(0,ymax[2]),
+              ylab=paste("",x[k]), las=1, names=j2 )
     u <- par("usr")
     rect(u[1], u[3], u[2], u[4], col="white", border=NA )
     grid()
-    vioplot( east[ ,1,k], east[ ,2,k], east[ ,3,k], east[ ,4,k],
-             east[ ,5,k], #east[ ,6,k], east[ ,7,k], east[ ,8,k],
-             ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
+    vioplot(  eastMat,
+              use.cols = TRUE,
+              ylab=paste("",x[k]), las=1, add=TRUE, col=cols )
 
     if( k==X )
       abline( h=1, lty=2 )
@@ -159,13 +169,14 @@ plotViolin <- function( OMvec = paste("OM_",1:96,"d",sep = ""),
 
   parr <- par("usr")
   par( mar=c(0,4,0,0.5) )
+  labels <- list(jWest = jWest, jEast = jEast)
   for( h in 1:2 )
   {
     if( h==2 )
       par( mar=c(0,2,0,0.5) )
     plot( x=c(parr[1],parr[2]), y=c(0,1), type="n", yaxs="i",
           axes=FALSE, xlab="", ylab="" )
-    text( seq(0.9,sum(J)+0.3,length.out=sum(J)), par("usr")[4]-0.04, labels=j,
+    text( seq(0.9,sum(J)+0.3,length.out=sum(J)), par("usr")[4]-0.04, labels=labels[[h]],
           srt=45, adj=c(1.1,1.1), xpd=TRUE, cex=.9 )
   }
 # triangles at max, horiz line at 1, symbols for axes,

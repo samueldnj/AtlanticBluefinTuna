@@ -12,14 +12,14 @@ emp_trendTAC <- function( x, dset, AS )
 {
   TAC <- empMMMP( x         = x,
                   dset      = dset,
-                  caps      = c(Inf,Inf),
+                  caps      = c('msy','msy'),
                   TACrule   = "trend",
                   phi       = 0.2,
                   trendYrs  = 4,
-                  FM        = 1/3,
+                  FM        = 1,
                   AS        = AS,
                   check     = checkMP,
-                  UCP       = "Bmsy",
+                  UCP       = ".4B0",
                   mpName    = "emp_trendTAC" )
 
   return(TAC)
@@ -355,9 +355,9 @@ runCMPs <- function(  OM = "OM_1d",
       }
     }
   }
-
-  # Remove checkTables for next run
-  system( paste("rm -r ", outTableFiles[i], sep = "") )
+  # Remove outTableFiles
+  if( length(outTableFiles) > 0)
+    unlink(outTableFiles)
 
   return(MSEobj)
 }

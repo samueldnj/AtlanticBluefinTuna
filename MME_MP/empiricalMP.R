@@ -142,12 +142,13 @@ empMMMP <- function(  x, dset,
 
   if( TACrule == "weighted" )
     TAC    <- sum( clustk$wts * TACvec )
-  else if( TACrule == "mean" )
+  if( TACrule == "mean" )
     TAC <- mean(TACvec)
-  else if( TACrule == "min" )
+  if( TACrule == "min" )
     TAC <- min(TACvec)
-  else if( TACrule == "trend" )
+  if( TACrule == "trend" & !is.null(phi) )
   {
+    wts <- clustk$wts
     # Calculate trend in spawn index on log scale
     if( AS == 1 )
       trendIdx <- dset[[AS]]$Iobs[x,MEDidxNo,(nT-trendYrs + 1):nT]
@@ -159,18 +160,24 @@ empMMMP <- function(  x, dset,
     trend.grad <- coef(trend.lm)[2]
 
     # zones are -inf < -2phi < phi < phi < 2phi < int
-    TACvec <- TACvec[order(TACvec)]
+    wts     <- wts[order(TACvec)]
+    TACvec  <- TACvec[order(TACvec)]
+
 
     if( trend.grad <= -2*phi )
-      TAC <- TACvec[1]
-    else if( trend.grad <= -phi )
-      TAC <- TACvec[2]
-    else if( trend.grad <= phi )
-      TAC <- TACvec[3]
-    else if( trend.grad <= 2*phi )
-      TAC <- TACvec[4]
-    else TAC <- TACvec[5]
+      wts <- wts * c(4,2,1,.5,.25)
+    if( trend.grad <= -phi & trend.grad > -2*phi )
+      wts <- wts * c(2,4,2,1,.5)
+    if( trend.grad <= phi & trend.grad > 0 )
+      wts <- wts * c(1,2,4,2,1)
+    if( trend.grad <= 2*phi & trend.grad > phi )
+      wts <- wts * c(.5,1,2,4,2)
+    if( trend.grad > 2*phi)
+      wts <- wts * c(.25,.5,1,2,4)
     
+    wts <- wts / sum(wts)
+    TAC <- sum( wts * TACvec )
+
   }
 
   hcrList <- list( Be=Be, Fes=Fes, Fea=Fea, ptse=ptse,
