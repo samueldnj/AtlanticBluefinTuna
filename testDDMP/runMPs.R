@@ -42,13 +42,18 @@ sfSource("calcEquilibriumDD.R")
 
 #######options( warn = -1 )
 #######
-testMPs    <- list( MP_0.1 = c("MP_noCapFM1","MP_msyCapF23M"),
-                    #MP_0.025 = c("MP_noCapFM025","MP_msyCapF23M"),
-                    MP_0.01 = c("MP_noCapFM01","MP_msyCapF23M"),
-                    MP_last10 = c("MP_noCapFMlast10","MP_msyCapF23M")
-                   )
+# testMPs    <- list( MP_0.1 = c("MP_noCapFM1","MP_msyCapF23M"),
+#                     #MP_0.025 = c("MP_noCapFM025","MP_msyCapF23M"),
+#                     MP_0.01 = c("MP_noCapFM01","MP_msyCapF23M"),
+#                     MP_last10 = c("MP_noCapFMlast10","MP_msyCapF23M")
+#                    )
 #######
-OMdvec <- 1:7
+
+lfrDDMPs <- list( lfrDD_001 = c("MP_noCap_F1.13M_last10","noCap_F1.09M_last10"),
+                  lfrDD_002 = c("MP_noCap_F1.13M_last10","noCap_F0.52M_last10"),
+                  lfrDD_003 = c("MP_noCap_F1.13M_last10","noCap_F0.23M_last10"))
+
+OMdvec <- 1:96
 
 # mixCapMSE <- lapply(  X = OMdvec, 
 #                       FUN = runCMPs,
@@ -60,8 +65,8 @@ OMdvec <- 1:7
 testMSE <- lapply(  X = OMdvec, 
                     FUN = runCMPs,
                     assessInt = 2,
-                    MPs = testMPs,
+                    MPs = lfrDDMPs,
                     checkMPs = TRUE,
-                    projFolder = "samTest" )
+                    projFolder = "lfrDDMPs_eBr30eq1.0" )
 
 

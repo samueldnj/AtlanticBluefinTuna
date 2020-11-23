@@ -10,6 +10,7 @@
 
 source("empiricalMP.R")
 source("MPs.R")
+library(ABTMSE)
 
 loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
                       OMid = "OM_1d",
@@ -27,10 +28,10 @@ loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
   return( get( mseObjID ) )
 }
 
-plotViolin <- function( OMvec = paste("OM_",1:96,"d",sep = ""), 
+plotViolin <- function( MSEs = c("sep17","sep7","eastMgrid"),
+                        OMvec = paste("OM_",1:96,"d",sep = ""), 
                         prefix = NULL,
                         ptcex = 1,
-                        MSEs = c("sep17","sep7","eastMgrid"),
                         saveStats = TRUE )
 {
   library(vioplot)

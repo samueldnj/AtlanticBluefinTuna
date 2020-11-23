@@ -684,7 +684,9 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
       expScal[1:(ncol(nll_gt)-10)] <- 0
     else if( is.numeric(nllWt) )
     {
-      etmp <- 1 - exp( -nllWt*(1:ncol(nll_gt)) )
+      nIdx <- ncol(nll_gt)
+      beta <- log(100)/nllWt - nIdx
+      etmp <- 1 / (1 + exp(-nllWt * ( 1:nIdx + beta)))
       expScal <- etmp / max(etmp)
     }
     nll_gt <- t( t(nll_gt)*expScal )

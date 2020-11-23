@@ -8,8 +8,61 @@
 
 checkMP <<- TRUE
 
+# This MP targets BR30 = 1 in the east
+MP_noCap_F1.13M_last10 <- function( x, dset, AS)
+{
+  TAC <- assessDDmm( x = x,
+                     dset = dset,
+                     caps = c(Inf,Inf),
+                     FmultM = 1.13,
+                     F23M = FALSE,
+                     AS = AS,
+                     mpName = 'MP_noCap_F1.13M_last10',
+                     nllWt ='last10' )
+}
+class(MP_noCap_F1.13M_last10)<-'MSMP'
 
+# This MP targets BR30 = 1.5 in the west
+MP_noCap_F0.23M_last10 <- function( x, dset, AS)
+{
+  TAC <- assessDDmm( x = x,
+                     dset = dset,
+                     caps = c(Inf,Inf),
+                     FmultM = 0.23,
+                     F23M = FALSE,
+                     AS = AS,
+                     mpName = 'MP_noCap_F0.23M_last10',
+                     nllWt ='last10' )
+}
+class(MP_noCap_F0.23M_last10)<-'MSMP'
 
+# This MP targets BR30 = 1.25 in the west
+MP_noCap_F0.52M_last10 <- function( x, dset, AS)
+{
+  TAC <- assessDDmm( x = x,
+                     dset = dset,
+                     caps = c(Inf,Inf),
+                     FmultM = 0.52,
+                     F23M = FALSE,
+                     AS = AS,
+                     mpName = 'MP_noCap_F0.52M_last10',
+                     nllWt ='last10' )
+}
+class(MP_noCap_F0.52M_last10)<-'MSMP'
+
+# This MP targets BR30 = 1.0 in the west
+MP_noCap_F1.09M_last10 <- function( x, dset, AS)
+{
+  TAC <- assessDDmm( x = x,
+                     dset = dset,
+                     caps = c(Inf,Inf),
+                     FmultM = 1.09,
+                     F23M = FALSE,
+                     AS = AS,
+                     mpName = 'MP_noCap_F1.09M_last10',
+                     nllWt ='last10' )
+}
+class(MP_noCap_F1.09M_last10)<-'MSMP'
 
 # NO CAPS FOR EAST
 

@@ -15,22 +15,33 @@ source("empiricalMP.R")
 source("MPs.R")
 source("plots.R")
 
-sfInit(parallel=TRUE, cpus = 2 )
-sfLibrary( ABTMSE )
-sfLibrary( TMB )
-sfClusterCall("loadABT")
-sfSource("empiricalMP.R")
-sfSource("MPs.R")
-sfSource("plots.R")
+# sfInit(parallel=TRUE, cpus = 2 )
+# sfLibrary( ABTMSE )
+# sfLibrary( TMB )
+# sfClusterCall("loadABT")
+# sfSource("empiricalMP.R")
+# sfSource("MPs.R")
+# sfSource("plots.R")
 
 options( warn = -1 )
 
-noCapMPs <- list( emp_msyCap   = c("emp_msyCap","emp_msyCap"),
-                  emp_msyCapB0 = c("emp_msyCapB0","emp_msyCapB0"),
-                  emp_msyCapFM = c("emp_msyCapFM","emp_msyCapFM"),
-                  emp_msyCapFMB0 = c("emp_msyCapFMB0","emp_msyCapFMB0"),
-                  emp_trendTAC = c("emp_trendTAC","emp_trendTAC")
+noCapTrendMPs <- list(  #emp_msyCap   = c("emp_msyCap","emp_msyCap"),
+                        #emp_msyCapB0 = c("emp_msyCapB0","emp_msyCapB0"),
+                        #emp_msyCapF23M = c("emp_msyCapF23M","emp_msyCapF23M")
+                        #emp_msyCapF23MB0 = c("emp_msyCapF23MB0","emp_msyCapF23MB0"),
+                        emp_noCapTrendTAC = c("emp_noCapTrendTAC","emp_noCapTrendTAC"),
+                        emp_noCapTrendWtdTAC = c("emp_noCapTrendWtdTAC","emp_noCapTrendWtdTAC"),
+                        emp_noCapTrendPoisTAC = c("emp_noCapTrendPoisTAC","emp_noCapTrendPoisTAC")
                 )
+
+noCapMPs <- list( emp_noCap   = c("emp_noCap","emp_noCap"),
+                  emp_noCapB0 = c("emp_noCapB0","emp_noCapB0"),
+                  emp_noCapF23M = c("emp_noCapF23M","emp_noCapF23M"),
+                  emp_noCapF23MB0 = c("emp_noCapF23MB0","emp_noCapF23MB0"),
+                  emp_noCapTrendTAC = c("emp_noCapTrendTAC","emp_noCapTrendTAC")
+                )
+
+
                   
 
 OMdvec <- paste( "OM_", (1:96),"d",sep = "" )
@@ -38,9 +49,9 @@ OMdvec <- paste( "OM_", (1:96),"d",sep = "" )
 fmMSEs <- lapply( X = OMdvec, 
                   FUN = runCMPs,
                   assessInt = 2,
-                  MPs = noCapMPs,
+                  MPs = noCapTrendMPs,
                   checkMPs = TRUE,
-                  projFolderName = "baseMPs" )
+                  projFolderName = "noCapTrendMPs" )
 
 #z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
 

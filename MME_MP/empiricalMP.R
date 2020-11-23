@@ -140,13 +140,22 @@ empMMMP <- function(  x, dset,
   else
     TACvec <- mmTACs$TAC_W
 
+  # if( x == 1 & dim(dset[[1]]$Cobs)[2] == 56 & TACrule == "trend")
+  #   browser()
+
+  # Set default to mean TAC
+  wts <- exp(wts)
+
   if( TACrule == "weighted" )
-    TAC    <- sum( clustk$wts * TACvec )
+    wts <- clustk$wts
   if( TACrule == "mean" )
-    TAC <- mean(TACvec)
+    wts <- rep(1,5)
   if( TACrule == "min" )
-    TAC <- min(TACvec)
-  if( TACrule == "trend" & !is.null(phi) )
+  {
+    wts <- rep(0,5)
+    wts[which.min(TACvec)] <- 1
+  }
+  if( !is.null(phi) )
   {
     wts <- clustk$wts
     # Calculate trend in spawn index on log scale
@@ -158,27 +167,52 @@ empMMMP <- function(  x, dset,
     trend.df <- data.frame(x = 1:4, y = log(trendIdx))
     trend.lm <- lm( y ~ x, data = trend.df)
     trend.grad <- coef(trend.lm)[2]
+    propGrowth <- exp(trend.grad)-1
 
     # zones are -inf < -2phi < phi < phi < 2phi < int
     wts     <- wts[order(TACvec)]
     TACvec  <- TACvec[order(TACvec)]
 
 
-    if( trend.grad <= -2*phi )
-      wts <- wts * c(4,2,1,.5,.25)
-    if( trend.grad <= -phi & trend.grad > -2*phi )
-      wts <- wts * c(2,4,2,1,.5)
-    if( trend.grad <= phi & trend.grad > 0 )
-      wts <- wts * c(1,2,4,2,1)
-    if( trend.grad <= 2*phi & trend.grad > phi )
-      wts <- wts * c(.5,1,2,4,2)
-    if( trend.grad > 2*phi)
-      wts <- wts * c(.25,.5,1,2,4)
-    
-    wts <- wts / sum(wts)
-    TAC <- sum( wts * TACvec )
+    if( TACrule == "weighted")
+    {
+      if( propGrowth <= -2*phi )
+        wts <- wts * c(4,2,1,.5,.25)
+      if( propGrowth <= -phi & propGrowth > -2*phi )
+        wts <- wts * c(2,4,2,1,.5)
+      if( propGrowth <= phi & propGrowth > -phi )
+        wts <- wts * c(1,2,4,2,1)
+      if( propGrowth <= 2*phi & propGrowth > phi )
+        wts <- wts * c(.5,1,2,4,2)
+      if( propGrowth > 2*phi)
+        wts <- wts * c(.25,.5,1,2,4)
+    }
+    if( TACrule == "trend" )
+    {
+      if( propGrowth <= -2*phi )
+        wts <- c(1,0,0,0,0)
+      if( propGrowth <= -phi & propGrowth > -2*phi )
+        wts <- c(1,1,0,0,0)
+    }   
+
+    if( TACrule == "pois" )
+    {
+      if( propGrowth <= -2*phi )
+        wts <- dpois(1:5, lambda = 1)
+      if( propGrowth <= -phi & propGrowth > -2*phi )
+        wts <- dpois(1:5, lambda = 2)
+      if( propGrowth <= phi & propGrowth > -phi )
+        wts <- dpois(1:5, lambda = 3)
+      if( propGrowth <= 2*phi & propGrowth > phi )
+        wts <- dpois(1:5, lambda = 4)
+      if( propGrowth > 2*phi)
+        wts <- dpois(1:5, lambda = 5)
+    }
 
   }
+
+  wts <- wts / sum(wts)
+  TAC <- sum( wts * TACvec )
 
   hcrList <- list( Be=Be, Fes=Fes, Fea=Fea, ptse=ptse,
                    Bw=Bw, Fws=Fws, Fwa=Fwa, ptsw=ptsw )
@@ -310,7 +344,7 @@ calcHCR <- function(  OM       = 1,
                       Fmsy_s = Fmsy_a,
                       Bmsy_s = Bmsy_a )
 
-  TAC_a     <- B_a * (1 - exp( - Ftarg_a ))
+  TAC_a     <- B_a * (1 - exp(-Ftarg_a))
   
   for( aIdx in 1:length(B_a) )
   {

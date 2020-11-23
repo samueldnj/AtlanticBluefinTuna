@@ -20,7 +20,7 @@ checkFolder <- "tuneMmult"
 
 # Make MPs
 source("makeGridMPs.R")
-Mmults <- seq(from = 0.8, to = 1.6, length.out = 5)
+Mmults <- seq(from = 0.85, to = 1.55, length.out = 6)
 
 MPnames <- makeGridMPs( M = Mmults,
                         eastCap = Inf,
