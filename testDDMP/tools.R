@@ -19,6 +19,106 @@
 # 
 # --------------------------------------------------------------------------
 
+makePerfSummary <- function(  MSE = "lfrDDMPs_eBr30eq1.0",
+                              OMvec = 1:96   )
+{
+  folders <- paste0("./MSEs/",MSE)
+
+  allMSE <- vector(mode = "list", length = length(MSE))
+  J <- numeric(length=length(MSE))
+  for( k in 1:length(MSE))
+  {
+    X <- paste0( "./MSEs/",MSE[k], "/rdas/MSE_", OMvec, ".rda" )
+    allMSE[[k]] <- lapply(  X = X, 
+                            FUN = readRDS )
+    names(allMSE[[k]]) <- OMvec
+
+    J[k] <- allMSE[[k]][[1]]@nMPs
+    if(k > 1)
+      J[k] <- J[k] - 1
+  }
+
+
+  I <- length(allMSE[[1]])
+
+
+
+
+  jEast <- character(sum(J))
+  jWest <- character(sum(J))
+  k <- 1
+  nudge <- 0
+  for( iMSE in 1:length(J) )
+  {
+    if( iMSE > 1 )
+      nudge <- 1
+    for( iMP in (1:J[iMSE]+nudge) )
+    {
+      jEast[k] <- allMSE[[iMSE]][[iMSE]]@MPs[[iMP]][1]
+      jWest[k] <- allMSE[[iMSE]][[iMSE]]@MPs[[iMP]][2]
+      k <- k+1
+    }
+  }
+  j2 <- character(length(jEast))
+
+  x <- c("C10","C20","C30","D30","LD","Br30")
+  X <- length(x)
+
+  # Let's pull MPs from MSE objects
+
+  # j <- c("No Catch",
+  #        #"emp_noCap", 
+  #        # "emp_noCapB0",
+  #        # "emp_noCapFM",
+  #        # "emp_noCapFMB0" )
+  #         "emp_trendTAC" )
+
+
+  east <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,jEast,x) )
+  west <- array( data=NA, dim=c(I,sum(J),X), dimnames=list(OMvec,jWest,x) )
+
+  j0 <- 1
+  for( iMSE in 1:length(J) )
+  {
+    j1 <- j0 + J[iMSE] - 1
+    keepRow <- 1:J[iMSE]
+
+    if( iMSE>1 )
+    {
+      keepRow <- keepRow + 1
+    }
+
+    for( i in 1:I )
+    {
+      perf <- getperf(allMSE[[iMSE]][[i]])
+      east[i,j0:j1, ] <- as.matrix(perf[[1]][keepRow,x])
+      west[i,j0:j1, ] <- as.matrix(perf[[2]][keepRow,x])
+    }
+    j0 <- j1 + 1
+  }
+
+  mseStats <- list(east=east,west=west)
+  save( mseStats, file=file.path("MSEs",MSE,"mseStats.Rdata" ))
+
+  ePerf <- apply(X = east, FUN = median, MARGIN = c(2,3))
+  wPerf <- apply(X = west, FUN = median, MARGIN = c(2,3))
+
+  ePerf.df <- as.data.frame(ePerf)
+  ePerf.df$Stock <- "East"
+  wPerf.df <- as.data.frame(wPerf)
+  wPerf.df$Stock <- "West"
+
+  out.df <- rbind(ePerf.df,wPerf.df)
+
+  write.csv(out.df, file = file.path("MSEs",MSE,"medPerfStats.csv"))
+
+  out <-list( east = ePerf.df, west = wPerf.df)
+
+  out
+}
+
+
+
 getIndices <- function( minT=1952, maxT=2018, useGear=NULL )
 {
   indexTable <- .readParFile( "fitIndices.txt" )

@@ -538,13 +538,12 @@ plotHCRs <- function( Be, Fes, Fea, ptse, Bw, Fws, Fwa, ptsw )
 
 
 
-plotViolin <- function( OMvec = paste0("MSE_",1:96), 
+plotViolin <- function( MSEs = "eastMgrid",
+                        OMvec = paste0("MSE_",1:96), 
                         prefix = NULL,
                         ptcex = 1,
                         modelBased=TRUE,
-                        MSEs = "eastMgrid_refine",
-                        mseStatsFile="mseStats.Rdata",
-                        folder = "./MSEs/eastMgrid_refine/rdas" )
+                        mseStatsFile="mseStats.Rdata" )
 {
   library(vioplot)
 
@@ -602,6 +601,8 @@ plotViolin <- function( OMvec = paste0("MSE_",1:96),
   }
   else
   {
+
+    browser()
     test <- lapply( X = OMvec, 
                      FUN = loadMSE, 
                      prefix = prefix,

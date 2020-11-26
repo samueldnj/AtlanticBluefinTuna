@@ -49,9 +49,9 @@ sfSource("calcEquilibriumDD.R")
 #                    )
 #######
 
-lfrDDMPs <- list( lfrDD_001 = c("MP_noCap_F1.13M_last10","noCap_F1.09M_last10"),
-                  lfrDD_002 = c("MP_noCap_F1.13M_last10","noCap_F0.52M_last10"),
-                  lfrDD_003 = c("MP_noCap_F1.13M_last10","noCap_F0.23M_last10"))
+lfrDDMPs <- list( lfrDD_001 = c("MP_noCap_F1.13M_last10","MP_msyCap_F1.09M_last10"),
+                  lfrDD_002 = c("MP_noCap_F1.13M_last10","MP_msyCap_F0.52M_last10"),
+                  lfrDD_003 = c("MP_noCap_F1.13M_last10","MP_msyCap_F0.23M_last10"))
 
 OMdvec <- 1:96
 

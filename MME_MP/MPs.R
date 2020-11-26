@@ -8,6 +8,23 @@
 
 checkMP <<- TRUE
 
+# optimal empirical MP for East stock (Br30 = 1)
+emp_noCap_F.3MB0_tr4x0.2 <- function( x, dset, AS)
+{
+  TAC <- empMMMP( x = x,
+                  dset = dset,
+                  AS = AS,
+                  caps = c(Inf,Inf),
+                  FM = .3,
+                  mpName = 'emp_noCap_F.3MB0_tr4x0.2',
+                  UCP = '.4B0',
+                  phi = 0.2,
+                  trendYrs = 4,
+                  TACrule = 'trend' )
+}
+class(emp_noCap_F.3MB0_tr4x0.2)<-'MSMP'
+
+
 emp_trendTAC <- function( x, dset, AS )
 {
   TAC <- empMMMP( x         = x,
