@@ -124,6 +124,104 @@ class(MP_noCapFMlast10)<-"MSMP"
 
 
 
+# MP_noCapB0 - UCP = .4B0
+MP_noCapB0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c(Inf,Inf),
+                     F23M    = FALSE,
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapB0",
+                     UCP     = '.4B0',
+                     nllWt   = NULL  )
+  return(TAC)
+}
+class(MP_noCapB0)<-"MSMP"
+
+# MP_msyCap - a catch cap at estimated
+# MSY is applied
+MP_msyCapB0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c("msy","msy"),
+                     F23M    = FALSE,
+                     check   = checkMP,
+                     AS      = AS,
+                     UCP     = '.4B0',
+                     mpName  = "MP_msyCapB0"  )
+  return(TAC)
+}
+class(MP_msyCapB0)<-"MSMP"
+
+# MP_noCapFMB0 - UCP = .4B0, F = 2/3M,M
+MP_noCapFMB0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapFMB0",
+                     UCP     = '.4B0',
+                     nllWt   = NULL  )
+  return(TAC)
+}
+class(MP_noCapFMB0)<-"MSMP"
+
+# MP_msyCapFMB0 - a catch cap at estimated
+# MSY is applied  F = 2/3M,M
+MP_msyCapFMB0 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c("msy","msy"),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     UCP     = '.4B0',
+                     mpName  = "MP_msyCapFMB0",
+                     nllWt   = NULL  )
+  return(TAC)
+}
+class(MP_msyCapFMB0)<-"MSMP"
+
+# MP_noCapFMB0 - UCP = .4B0, F = 2/3M,M
+MP_noCapFMB0last10 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c(Inf,Inf),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     mpName  = "MP_noCapFMB0last10",
+                     UCP     = '.4B0',
+                     nllWt   = 'last10'  )
+  return(TAC)
+}
+class(MP_noCapFMB0last10)<-"MSMP"
+
+# MP_msyCapFMB0last10 - a catch cap at estimated
+# MSY is applied  F = 2/3M,M
+MP_msyCapFMB0last10 <- function( x, dset, AS )
+{
+  TAC <- assessDDmm( x       = x,
+                     dset    = dset,
+                     caps    = c("msy","msy"),
+                     F23M    = TRUE,
+                     check   = checkMP,
+                     AS      = AS,
+                     UCP     = '.4B0',
+                     mpName  = "MP_msyCapFMB0last10",
+                     nllWt   = 'last10'  )
+  return(TAC)
+}
+class(MP_msyCapFMB0last10)<-"MSMP"
+
 
 
 
@@ -198,20 +296,6 @@ MPtest_loCap23M.4B0 <- function( x, dset, AS )
 }
 class(MPtest_loCap23M.4B0)<-"MSMP"
 
-# MP_msyCap - a catch cap at estimated
-# MSY is applied
-MP_msyCap <- function( x, dset, AS )
-{
-  TAC <- assessDDmm( x       = x,
-                     dset    = dset,
-                     caps    = c("msy","msy"),
-                     F23M    = FALSE,
-                     check   = checkMP,
-                     AS      = AS,
-                     mpName  = "MP_msyCap"  )
-  return(TAC)
-}
-class(MP_msyCap)<-"MSMP"
 
 # MP_msyCap - a catch cap at estimated
 # MSY is applied

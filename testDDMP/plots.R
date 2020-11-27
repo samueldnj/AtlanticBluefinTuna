@@ -545,7 +545,7 @@ plotViolin <- function( MSEs = "eastMgrid",
                         modelBased=TRUE,
                         mseStatsFile="mseStats.Rdata" )
 {
-  library(vioplot)
+  
 
 #  noCap <- lapply( X = OMvec, 
 #                   FUN = loadMSE, 

@@ -20,19 +20,34 @@
 # --------------------------------------------------------------------------
 
 makePerfSummary <- function(  MSE = "trendMPs",
-                              OMvec = paste("OM_",1:96,"d",sep = "")   )
+                              OMvec = 1:96   )
 {
   folders <- paste0("./MSEs/",MSE)
 
   allMSE <- vector(mode = "list", length = length(MSE))
   J <- numeric(length=length(MSE))
+
   for( k in 1:length(MSE))
   {
-    allMSE[[k]] <- lapply( X = OMvec, 
-                   FUN = loadMSE, 
-                   prefix = NULL,
-                   folder = folders[k] )
-    names(allMSE[[k]]) <- OMvec
+    # First list.dirs
+    MSEdir <- list.dirs(folders[k],recursive = FALSE, full.names = FALSE )
+    if("rdas" %in% MSEdir )
+    {
+
+      X <- paste0( folders[k], "/rdas/MSE_", OMvec, ".rda" )
+      allMSE[[k]] <- lapply(  X = X,
+                              FUN = readRDS )
+      names( allMSE[[k]] ) <- paste("MSE_",OMvec)
+
+    } else {
+      OMlabs <- paste("OM_",OMvec,"d", sep = "")
+      allMSE[[k]] <- lapply( X = OMlabs, 
+                     FUN = loadMSE, 
+                     prefix = NULL,
+                     folder = folders[k] )
+      names(allMSE[[k]]) <- OMlabs
+    }
+    
     J[k] <- allMSE[[k]][[1]]@nMPs
     if(k > 1)
       J[k] <- J[k] - 1

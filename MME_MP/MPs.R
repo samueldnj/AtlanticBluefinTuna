@@ -24,6 +24,73 @@ emp_noCap_F.3MB0_tr4x0.2 <- function( x, dset, AS)
 }
 class(emp_noCap_F.3MB0_tr4x0.2)<-'MSMP'
 
+# optimal empirical MP for West stock (Br30 = 1.06)
+emp_noCap_F1MB0_trWtd4x0.2 <- function( x, dset, AS)
+{
+  TAC <- empMMMP( x = x,
+                  dset = dset,
+                  AS = AS,
+                  caps = c(Inf,Inf),
+                  FM = 1,
+                  mpName = 'emp_noCap_F1MB0_trWtd4x0.2',
+                  UCP = '.4B0',
+                  phi = 0.2,
+                  trendYrs = 4,
+                  TACrule = 'weighted' )
+}
+class(emp_noCap_F1MB0_trWtd4x0.2)<-'MSMP'
+
+# empirical MP for West stock w/ Br30 = 1.27
+emp_noCap_F23MB0_trWtd4x0.1 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x         = x,
+                  dset      = dset,
+                  caps      = c(Inf,Inf),
+                  TACrule   = "weighted",
+                  phi       = 0.1,
+                  trendYrs  = 4,
+                  FM        = 2/3,
+                  AS        = AS,
+                  check     = checkMP,
+                  UCP       = ".4B0",
+                  mpName    = "emp_noCap_F23MB0_trWtd4x0.1" )
+
+  return(TAC)
+}
+class(emp_noCap_F23MB0_trWtd4x0.1)<-"MSMP"
+
+# optimal empirical MP for West stock (Br30 = 1.5)
+emp_msyCap_F.6MB0 <- function( x, dset, AS)
+{
+  TAC <- empMMMP( x = x,
+                  dset = dset,
+                  AS = AS,
+                  caps = c(Inf,Inf),
+                  FM = .6,
+                  mpName = 'emp_msyCap_F.6MB0',
+                  UCP = '.4B0',
+                  phi = NULL,
+                  trendYrs = 4,
+                  TACrule = 'weighted' )
+}
+class(emp_msyCap_F.6MB0)<-'MSMP'
+
+# optimal empirical MP for West stock (Br30 = 1.06)
+emp_noCap_F1MB0 <- function( x, dset, AS)
+{
+  TAC <- empMMMP( x = x,
+                  dset = dset,
+                  AS = AS,
+                  caps = c(Inf,Inf),
+                  FM = 1,
+                  mpName = 'emp_noCap_F1MB0',
+                  UCP = '.4B0',
+                  phi = NULL,
+                  trendYrs = 4,
+                  TACrule = 'weighted' )
+}
+class(emp_noCap_F1MB0)<-'MSMP'
+
 
 emp_trendTAC <- function( x, dset, AS )
 {
@@ -97,23 +164,6 @@ emp_noCapTrendTAC <- function( x, dset, AS )
 }
 class(emp_noCapTrendTAC)<-"MSMP"
 
-emp_noCapTrendWtdTAC <- function( x, dset, AS )
-{
-  TAC <- empMMMP( x         = x,
-                  dset      = dset,
-                  caps      = c(Inf,Inf),
-                  TACrule   = "weighted",
-                  phi       = 0.1,
-                  trendYrs  = 4,
-                  FM        = 2/3,
-                  AS        = AS,
-                  check     = checkMP,
-                  UCP       = ".4B0",
-                  mpName    = "emp_noCapTrendWtdTAC" )
-
-  return(TAC)
-}
-class(emp_noCapTrendWtdTAC)<-"MSMP"
 
 emp_noCapTrendPoisTAC <- function( x, dset, AS )
 {
@@ -330,7 +380,7 @@ class(emp_conCapF23MB0)<-"MSMP"
 #   MPs = a list of character 2-ples of MP names (E/W)
 #   assessInt = integer of assessment intervals, required
 #               for plotting purposes
-runCMPs <- function(  OM = "OM_1d",
+runCMPs <- function(  iOM = 1,
                       MPs = list( test = c("empMPtest_Mean","empMPtest_Mean") ),
                       assessInt = 2,
                       checkMPs = TRUE,
@@ -345,6 +395,8 @@ runCMPs <- function(  OM = "OM_1d",
   loadABT()
 
   checkMP <<- checkMPs
+
+  OM <- paste0("OM_",iOM,"d")
 
   # Clear outTables directory
   outTableFolder <- "./outTables"
@@ -375,15 +427,19 @@ runCMPs <- function(  OM = "OM_1d",
   assign( x = paste("MSE_",OM,sep = ""),
           value = MSEobj )
 
+  suppressWarnings(dir.create("MSEs"))
   if(!is.null(projFolderName))
   {
     projFolderPath <- file.path("MSEs",projFolderName)
     dir.create(file.path("MSEs",projFolderName))
+    dir.create(file.path("MSEs",projFolderName,"rdas"))
+    dir.create(file.path("MSEs",projFolderName,"reports"))
   }
   else projFolderPath <- "MSEs"
 
   # Save that MSE
-  save( list = MSEsymbol, file = file.path(projFolderPath,paste(MSEsymbol,".Rdata",sep = "")) )  
+  rdsName <- paste0("MSE_",iOM,".rda")
+  saveRDS( MSEobj, file=file.path("MSEs",projFolderName,"rdas",rdsName) )
   # Create the report
   MSE_report( MSEobj, 
               dir=file.path(getwd(),projFolderPath), 
@@ -463,6 +519,8 @@ runCMPs <- function(  OM = "OM_1d",
     }
   }
   # Remove outTableFiles
+  outTableFiles <- list.files("./outTables", full.names = TRUE)
+  
   if( length(outTableFiles) > 0)
     unlink(outTableFiles)
 

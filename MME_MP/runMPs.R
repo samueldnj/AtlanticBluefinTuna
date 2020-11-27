@@ -41,18 +41,22 @@ noCapMPs <- list( emp_noCap   = c("emp_noCap","emp_noCap"),
                   emp_noCapTrendTAC = c("emp_noCapTrendTAC","emp_noCapTrendTAC")
                 )
 
+empMPs <- list( lfrEM_001 = c("emp_noCap_F.3MB0_tr4x0.2","emp_noCap_F1MB0"),
+                lfrEM_002 = c("emp_noCap_F.3MB0_tr4x0.2","emp_noCap_F23MB0_trWtd4x0.1"),
+                lfrEM_003 = c("emp_noCap_F.3MB0_tr4x0.2","emp_msyCap_F.6MB0") )
 
                   
 
-OMdvec <- paste( "OM_", (1:96),"d",sep = "" )
+OMdvec <- 1:96
 
 fmMSEs <- lapply( X = OMdvec, 
                   FUN = runCMPs,
                   assessInt = 2,
-                  MPs = noCapTrendMPs,
+                  MPs = empMPs,
                   checkMPs = TRUE,
-                  projFolderName = "noCapTrendMPs" )
+                  projFolderName = "lfrEM_eBr30eq1.0" )
 
 #z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
 
-source("tuneEastMmult.R")
+# source("tuneWestMmult.R")
+# source("tuneWestTrendPhi.R")

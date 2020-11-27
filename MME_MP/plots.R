@@ -11,6 +11,7 @@
 source("empiricalMP.R")
 source("MPs.R")
 library(ABTMSE)
+library(vioplot)
 
 loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
                       OMid = "OM_1d",
@@ -28,25 +29,38 @@ loadMSE <- function(  #OMvec = paste("OM_",1:15,"d", sep = ""),
   return( get( mseObjID ) )
 }
 
-plotViolin <- function( MSEs = c("sep17","sep7","eastMgrid"),
-                        OMvec = paste("OM_",1:96,"d",sep = ""), 
+plotViolin <- function( MSE = c("sep17","sep7","eastMgrid"),
+                        OMvec = 1:96, 
                         prefix = NULL,
                         ptcex = 1,
                         saveStats = TRUE )
 {
-  library(vioplot)
+  folders <- paste0("./MSEs/",MSE)
 
-  folders <- paste0("./MSEs/",MSEs)
+  allMSE <- vector(mode = "list", length = length(MSE))
+  J <- numeric(length=length(MSE))
 
-  allMSE <- vector(mode = "list", length = length(MSEs))
-  J <- numeric(length=length(MSEs))
-  for( k in 1:length(MSEs))
+  for( k in 1:length(MSE))
   {
-    allMSE[[k]] <- lapply( X = OMvec, 
-                   FUN = loadMSE, 
-                   prefix = prefix,
-                   folder = folders[k] )
-    names(allMSE[[k]]) <- OMvec
+    # First list.dirs
+    MSEdir <- list.dirs(folders[k],recursive = FALSE, full.names = FALSE )
+    if("rdas" %in% MSEdir )
+    {
+
+      X <- paste0( folders[k], "/rdas/MSE_", OMvec, ".rda" )
+      allMSE[[k]] <- lapply(  X = X,
+                              FUN = readRDS )
+      names( allMSE[[k]] ) <- paste("MSE_",OMvec)
+
+    } else {
+      OMlabs <- paste("OM_",OMvec,"d", sep = "")
+      allMSE[[k]] <- lapply( X = OMlabs, 
+                     FUN = loadMSE, 
+                     prefix = NULL,
+                     folder = folders[k] )
+      names(allMSE[[k]]) <- OMlabs
+    }
+    
     J[k] <- allMSE[[k]][[1]]@nMPs
     if(k > 1)
       J[k] <- J[k] - 1
