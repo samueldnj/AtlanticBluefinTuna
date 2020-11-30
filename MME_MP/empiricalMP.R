@@ -155,6 +155,9 @@ empMMMP <- function(  x, dset,
     wts <- rep(0,5)
     wts[which.min(TACvec)] <- 1
   }
+  fitTable$origWts <- wts
+  propGrowth <- NULL
+  trendIdx <- NULL
   if( !is.null(phi) )
   {
     wts <- clustk$wts
@@ -169,9 +172,14 @@ empMMMP <- function(  x, dset,
     trend.grad <- coef(trend.lm)[2]
     propGrowth <- exp(trend.grad)-1
 
+    fitTable$propGrowth <- propGrowth
+
     # zones are -inf < -2phi < phi < phi < 2phi < int
     wts     <- wts[order(TACvec)]
     TACvec  <- TACvec[order(TACvec)]
+
+    fitTable$phi <- phi
+    fitTable$trendYrs <- trendYrs
 
 
     if( TACrule == "weighted")
@@ -215,7 +223,9 @@ empMMMP <- function(  x, dset,
   TAC <- sum( wts * TACvec )
 
   hcrList <- list( Be=Be, Fes=Fes, Fea=Fea, ptse=ptse,
-                   Bw=Bw, Fws=Fws, Fwa=Fwa, ptsw=ptsw )
+                   Bw=Bw, Fws=Fws, Fwa=Fwa, ptsw=ptsw, 
+                   propGrowth = propGrowth,
+                   wts = wts, trendIdx = trendIdx )
 
   save( hcrList, file=paste("HCRs/hcrList",x,"-",ncol(dset[[1]]$Cobs),".Rdata",sep="") )
 

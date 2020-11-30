@@ -50,18 +50,18 @@ sfSource("calcEquilibriumDD.R")
 #######
 
 
-# lfrDDMPs <- list( lfrDD_001 = c("MP_noCap_F1.13M_last10","MP_msyCap_F1.09M_last10"),
-#                   lfrDD_002 = c("MP_noCap_F1.13M_last10","MP_msyCap_F0.52M_last10"),
-#                   lfrDD_003 = c("MP_noCap_F1.13M_last10","MP_msyCap_F0.23M_last10"))
+lfrDDMPs <- list( lfrDD_001 = c("MP_noCap_F1.13M_last10","MP_msyCap_F1.09M_last10"),
+                  lfrDD_002 = c("MP_noCap_F1.13M_last10","MP_msyCap_F0.52M_last10"),
+                  lfrDD_003 = c("MP_noCap_F1.13M_last10","MP_msyCap_F0.23M_last10"))
 
-initMPs <- c( DD_NoCap          = c("MP_noCapB0","MP_noCapB0"),
-              DD_MSYCap         = c("MP_msyCapB0","MP_msyCapB0"),
-              DD_NoCapFM        = c("MP_noCapFMB0","MP_noCapFMB0"),
-              DD_MSYCapFM       = c("MP_msyCapFMB0","MP_msyCapFMB0"),
-              DD_MixCapFM       = c("MP_noCapFMB0","MP_msyCapFMB0"),
-              DD_MixCapFMlast10 = c("MP_noCapFMB0last10","MP_msyCapFMB0last10"),)
+# initMPs <- c( DD_NoCap          = c("MP_noCapB0","MP_noCapB0"),
+#               DD_MSYCap         = c("MP_msyCapB0","MP_msyCapB0"),
+#               DD_NoCapFM        = c("MP_noCapFMB0","MP_noCapFMB0"),
+#               DD_MSYCapFM       = c("MP_msyCapFMB0","MP_msyCapFMB0"),
+#               DD_MixCapFM       = c("MP_noCapFMB0","MP_msyCapFMB0"),
+#               DD_MixCapFMlast10 = c("MP_noCapFMB0last10","MP_msyCapFMB0last10"),)
 
-OMdvec <- 1:96
+OMdvec <- 1:12
 
 # mixCapMSE <- lapply(  X = OMdvec, 
 #                       FUN = runCMPs,
@@ -74,6 +74,7 @@ testMSE <- lapply(  X = OMdvec,
                     FUN = runCMPs,
                     assessInt = 2,
                     MPs = lfrDDMPs,
+                    isRob = TRUE,
                     checkMPs = TRUE,
                     projFolder = "lfrDDMPs_eBr30eq1.0" )
 

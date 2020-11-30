@@ -49,7 +49,7 @@ emp_noCap_F23MB0_trWtd4x0.1 <- function( x, dset, AS )
                   TACrule   = "weighted",
                   phi       = 0.1,
                   trendYrs  = 4,
-                  FM        = 2/3,
+                  FM        = 0.67,
                   AS        = AS,
                   check     = checkMP,
                   UCP       = ".4B0",
@@ -65,7 +65,7 @@ emp_msyCap_F.6MB0 <- function( x, dset, AS)
   TAC <- empMMMP( x = x,
                   dset = dset,
                   AS = AS,
-                  caps = c(Inf,Inf),
+                  caps = c('msy','msy'),
                   FM = .6,
                   mpName = 'emp_msyCap_F.6MB0',
                   UCP = '.4B0',
@@ -82,7 +82,7 @@ emp_noCap_F1MB0 <- function( x, dset, AS)
                   dset = dset,
                   AS = AS,
                   caps = c(Inf,Inf),
-                  FM = 1,
+                  FM = 1.0,
                   mpName = 'emp_noCap_F1MB0',
                   UCP = '.4B0',
                   phi = NULL,
@@ -163,6 +163,42 @@ emp_noCapTrendTAC <- function( x, dset, AS )
   return(TAC)
 }
 class(emp_noCapTrendTAC)<-"MSMP"
+
+emp_noCapFMB0_tr4x0.1 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x         = x,
+                  dset      = dset,
+                  caps      = c(Inf,Inf),
+                  TACrule   = "trend",
+                  phi       = 0.1,
+                  trendYrs  = 4,
+                  FM        = .3,
+                  AS        = AS,
+                  check     = checkMP,
+                  UCP       = ".4B0",
+                  mpName    = "emp_noCapFMB0_tr4x0.1" )
+
+  return(TAC)
+}
+class(emp_noCapFMB0_tr4x0.1)<-"MSMP"
+
+emp_noCapFMB0_trWtd4x0.1 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x         = x,
+                  dset      = dset,
+                  caps      = c(Inf,Inf),
+                  TACrule   = "weighted",
+                  phi       = 0.1,
+                  trendYrs  = 4,
+                  FM        = .3,
+                  AS        = AS,
+                  check     = checkMP,
+                  UCP       = ".4B0",
+                  mpName    = "emp_noCapFMB0_trWtd4x0.1" )
+
+  return(TAC)
+}
+class(emp_noCapFMB0_trWtd4x0.1)<-"MSMP"
 
 
 emp_noCapTrendPoisTAC <- function( x, dset, AS )
@@ -275,6 +311,38 @@ emp_msyCapF23M <- function( x, dset, AS )
   return(TAC)
 }
 class(emp_msyCapF23M)<-"MSMP"
+
+emp_msyCapF.3MB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c("msy","msy"),
+                  TACrule = "weighted",
+                  FM      = .3,
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_msyCapF.3MB0" )
+
+  return(TAC)
+}
+class(emp_msyCapF.3MB0)<-"MSMP"
+
+emp_noCapF.3MB0 <- function( x, dset, AS )
+{
+  TAC <- empMMMP( x       = x,
+                  dset    = dset,
+                  caps    = c(Inf,Inf),
+                  TACrule = "weighted",
+                  FM      = .3,
+                  AS      = AS,
+                  check   = checkMP,
+                  UCP     = ".4B0",
+                  mpName  = "emp_noCapF.3MB0" )
+
+  return(TAC)
+}
+class(emp_noCapF.3MB0)<-"MSMP"
 
 emp_msyCapB0 <- function( x, dset, AS )
 {
