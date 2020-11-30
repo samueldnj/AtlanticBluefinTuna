@@ -632,7 +632,10 @@ runCMPs <- function(  iOM = 1,
   # Load ABT objects in this environment
   loadABT()
 
-  OM <- paste0("OM_",iOM,"d")
+  if(isRob)
+    OM <- paste0("ROM_",iOM,"d")
+  else 
+    OM <- paste0("OM_",iOM,"d")
 
   # Set Check switch
   checkMP <<- checkMPs
