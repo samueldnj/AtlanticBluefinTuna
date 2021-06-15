@@ -20,15 +20,34 @@ makeGridconstU( eMult = seq(from = 1, to = 5, by = 1),
 
 source("autoConstUgridMPs.R")
                   
+projFolder <- "testConstU_allOMs"
 
-OMdvec <- 1
+OMdvec <- 1:48
 
 gridUmultMSEs <- lapply(  X = OMdvec, 
                           FUN = runCMPs,
                           MPs = gridMPs,
                           checkMPs = TRUE,
                           reloadABT = FALSE,
-                          projFolderName = "testConstU_multGrid_OM1" )
+                          projFolderName = projFolder )
+
+pH30_E <- lapply(X = gridUmultMSEs, FUN = pH30, pp = 1)
+pH30_W <- lapply(X = gridUmultMSEs, FUN = pH30, pp = 2)
+
+PGK_E <- lapply(X = gridUmultMSEs, FUN = PGK, pp = 1)
+PGK_W <- lapply(X = gridUmultMSEs, FUN = PGK, pp = 2)
+
+yrHealth_E <- lapply(X = gridUmultMSEs, FUN = tfHealthy_t, pp = 1)
+yrHealth_W <- lapply(X = gridUmultMSEs, FUN = tfHealthy_t, pp = 2)
+
+perfMetricList <- list( pH30_E = pH30_E,
+                        pH30_W = pH30_W,
+                        PGK_E = PGK_E,
+                        PGK_W = PGK_W,
+                        yrHealth_E = yrHealth_E,
+                        yrHealth_W = yrHealth_W )
+
+saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
 #z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
 
