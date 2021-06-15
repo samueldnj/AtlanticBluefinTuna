@@ -19,24 +19,16 @@ makeGridconstU( eMult = seq(from = 1, to = 5, by = 1),
                 outFile = "autoConstUgridMPs.R" )
 
 source("autoConstUgridMPs.R")
-
-# sfInit(parallel=TRUE, cpus = 2 )
-# sfLibrary( ABTMSE )
-# sfLibrary( TMB )
-# sfClusterCall("loadABT")
-# sfSource("empiricalMP.R")
-# sfSource("MPs.R")
-# sfSource("plots.R")
                   
 
 OMdvec <- 1
 
-gridHRMSEs <- lapply( X = OMdvec, 
-                      FUN = runCMPs,
-                      MPs = gridMPs,
-                      checkMPs = TRUE,
-                      reloadABT = FALSE,
-                      projFolderName = "testConstU_multGrid_OM1" )
+gridUmultMSEs <- lapply(  X = OMdvec, 
+                          FUN = runCMPs,
+                          MPs = gridMPs,
+                          checkMPs = TRUE,
+                          reloadABT = FALSE,
+                          projFolderName = "testConstU_multGrid_OM1" )
 
 #z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
 

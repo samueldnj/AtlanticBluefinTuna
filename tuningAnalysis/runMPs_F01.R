@@ -14,7 +14,7 @@ source("initTest.R")
 source("runCMPs.R")
 source("makeGridMPs_F01.R")
 
-makeGridFzero1( qGrid = seq(from = 0.2, to = 0.8, by = 0.1),
+makeGridFzero1( qGrid = seq(from = 0.3, to = 0.6, by = 0.1),
                 outFile = "autoF01gridMPs.R")
 
 source("autoF01gridMPs.R")
@@ -28,14 +28,14 @@ source("autoF01gridMPs.R")
 # sfSource("plots.R")
                   
 
-OMdvec <- 1
+OMdvec <- c(1:3)
 
-gridHRMSEs <- lapply( X = OMdvec, 
+gridqMSEs <- lapply(  X = OMdvec, 
                       FUN = runCMPs,
                       MPs = gridMPs,
                       checkMPs = TRUE,
                       reloadABT = FALSE,
-                      projFolderName = "testF01_qGrid_OM1" )
+                      projFolderName = "testF01_qGrid_OM1to3" )
 
 #z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
 

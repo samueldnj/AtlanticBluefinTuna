@@ -42,5 +42,9 @@ for( pkg in cranPackages )
 devtools::install_local("../ABTMSE/", type = "source" )
 #install.packages("../ABTMSE_6.6.4.tar", repos=NULL, type="source" )
 
-# library(ABTMSE)
+library(ABTMSE)
+
+
+if(!any(grepl(x = ls(), pattern = "dset_example_West")))
+    loadABT()
 
