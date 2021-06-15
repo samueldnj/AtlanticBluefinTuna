@@ -1,5 +1,13 @@
 ## An alternate version of the Fzero1 MP that does OK. No constraint 
 ## on TAC change. Tune using q
+
+#####################
+# required packages #
+if(!require(fishmethods)){
+  install.packages('fishmethods')
+}
+library(fishmethods)
+
  
 ##################
 # F01 based MP
@@ -15,13 +23,7 @@ Fzero1W <- function(  x,
                       nyears=55,
                       IndexID_bio = 14)
   {
-    #####################
-    # required packages #
-    if(!require(fishmethods)){
-      install.packages('fishmethods')
-    }
-    library(fishmethods)
-   
+    
     # required functions
     # Range Normalization
     RangeNorm = function(x,maxN=1,minN=0){
@@ -93,13 +95,7 @@ Fzero1E <- function(  x,
                       nyears=55,
                       IndexID_bio = 2)
   {
-    #####################
-    # required packages #
-    if(!require(fishmethods)){
-      install.packages('fishmethods')
-    }
-    library(fishmethods)
-   
+    
     # required functions
     # Range Normalization
     RangeNorm = function(x,maxN=1,minN=0){
