@@ -107,7 +107,7 @@ setMethod("plot", signature(x = "OMd"),function(x){
 #})
 setMethod("plot",
           signature(x = "MSE"),
-          function(x,quants=c(0.05,0.5,0.95),nworms=10, startyr=2019,modelyr=55,rev=T,byarea=F,MSY=T){
+          function(x,quants=c(0.05,0.5,0.95),nworms=10, startyr=2021,modelyr=57,rev=T,byarea=F,MSY=T){
 
             MSE<-x
             nsim<-MSE@nsim
@@ -116,13 +116,13 @@ setMethod("plot",
             allyears<-proyears+nyears
             nMPs<-MSE@nMPs
 
-            CC<-MSE@C/1000000
+            CC<-MSE@C/1E6
 
             #somenames=c("Green Kobe","Final depletion","AAV Yield","Yield","Yield 5% DR", "Yield 10% DR", "Yield -5% DR")
 
             #stats<-getperf(MSE)
-            yrs<-startyr:(startyr+MSE@proyears-4)
-            refyears<-modelyr:(modelyr+MSE@proyears-4)
+            yrs<-startyr:(startyr+MSE@proyears-5)
+            refyears<-modelyr:(modelyr+MSE@proyears-5)
             worms<-1:min(nworms,MSE@nsim)
 
             xtick<-pretty(seq(yrs[1],yrs[length(yrs)],length.out=3))
@@ -142,7 +142,6 @@ setMethod("plot",
               SSBnorm[,,,refyears]<-MSE@SSB[,,,refyears]/array(rep(MSE@dynB0[,,dB0yrs],each=nMPs)*rep(rep(MSE@SSBMSY_SSB0,each=nMPs),length(refyears)),c(nMPs,nsim,2,length(refyears)))
               SSBnorm[,,,1:(modelyr-1)]<-SSBnorm[,,,modelyr]
             }
-
 
             SSBq<-apply(SSBnorm,c(1,3,4),quantile,p=quants,na.rm=T)
             SSBlim<-cbind(rep(0,MSE@npop),apply(SSBq,3,max,na.rm=T))
@@ -228,8 +227,8 @@ setMethod("plot",
                 abline(h=0)
                 abline(h=1,lty=2)
 
-                if(!MSY)mtext('SSB relative to 2018',3,adj=-0.8,line=-1,cex=0.7)
-                if(MSY)mtext('SSB relative SSB_MSY',3,adj=-0.8,line=-1,cex=0.7)
+                if(!MSY)mtext('SSB relative to 2018',3,adj=-0.89,line=-1,cex=0.7)
+                if(MSY)mtext('SSB relative SSB_MSY',3,adj=-0.89,line=-1,cex=0.7)
 
               }
             }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/MPs.R
 \name{Islope1_i7}
 \alias{Islope1_i7}
-\title{An index-based (INDEX 7 - GOM_LAR_SUV) management procedure that incrementally changes TAC to achieve a stable index(a management procedure of class MP).}
+\title{An index-based (INDEX 7 - JPN_LL_NEAtl2) management procedure that incrementally changes TAC to achieve a stable index(a management procedure of class MP).}
 \usage{
 Islope1_i7(x, dset)
 }
@@ -21,9 +21,9 @@ Islope1_i7(x, dset)
 a TAC recommendation arising from \code{x, dset}.
 }
 \description{
-An index-based (INDEX 7 - GOM_LAR_SUV) management procedure that incrementally changes TAC to achieve a stable index(a management procedure of class MP).
+An index-based (INDEX 7 - JPN_LL_NEAtl2) management procedure that incrementally changes TAC to achieve a stable index(a management procedure of class MP).
 }
 \examples{
-Islope1_i7(1,dset_example_East)
-sapply(1:10,Islope1_i7,dset_example_East)
+Islope1_i4(1,dset_example_East)
+sapply(1:10,Islope1_i4,dset_example_East)
 }

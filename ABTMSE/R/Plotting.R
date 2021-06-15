@@ -1,5 +1,29 @@
 # Plotting code
 
+plotcomp<-function(out,plotnam=""){
+
+  par(mfrow=c(5,2),mai=c(0.2,0.2,0.1,0.1),omi=c(0.3,0.4,0.3,0.01))
+
+  ys<-c(1980,1990,2000,2010,2016)-1965+1
+
+  for(i  in 1:length(ys)){
+
+    for(pp in 2:1){
+
+      Ns<-apply(out$N[pp,ys[i],,,],2,sum)
+      barplot(Ns,col='blue',border="white",names.arg=c(as.character(c(1:34)),"35+"),width=1,cex.axis =0.8)
+      legend('top',legend=1964+ys[i],bty='n',cex=1.1)
+
+    }
+  }
+
+  mtext(c("West Stock","East Stock"),3,adj=c(0.25,0.8),line=0.3,outer=T)
+  mtext(plotnam,3,line=0.5,outer=T,font=2)
+  mtext("Ages 1-35+",1,line=0.6,outer=T)
+  mtext("Number of fish",2,line=0.4,outer=T)
+
+}
+
 
 plotindex2<-function(Base,pCPUE){
 
@@ -243,6 +267,140 @@ movplot<-function(mov,anam,custom){
   }
 
 }
+
+plotSSBMSE<-function(MSEs){
+  MSE<-MSEs[[1]]
+  nsim<-MSE@nsim
+  nyears<-MSE@nyears
+  proyears<-MSE@proyears
+  allyears<-proyears+nyears
+  nMPs<-MSE@nMPs
+
+  CC<-MSE@C/1000000
+
+  #somenames=c("Green Kobe","Final depletion","AAV Yield","Yield","Yield 5% DR", "Yield 10% DR", "Yield -5% DR")
+
+  #stats<-getperf(MSE)
+  yrs<-startyr:(startyr+MSE@proyears-4)
+  refyears<-modelyr:(modelyr+MSE@proyears-4)
+  worms<-1:min(nworms,MSE@nsim)
+
+  xtick<-pretty(seq(yrs[1],yrs[length(yrs)],length.out=3))
+
+  SSBcol="light blue"
+  Catcol="light grey"
+
+  Cq<-apply(CC,c(1,3,4),quantile,p=quants)
+  Clim<-cbind(rep(0,MSE@npop),apply(Cq[3,,,refyears],2,max))
+  if(!MSY){
+    if(byarea)SSBnorm<-MSE@SSBa/array(MSE@SSBa[,,,MSE@nyears],dim(MSE@SSBa))
+    if(!byarea)SSBnorm<-MSE@SSB/array(MSE@SSB[,,,MSE@nyears],dim(MSE@SSB))
+  }else{
+    SSBnorm<-array(NA,c(nMPs,nsim,2,allyears)) # because you only have dynB0 for future years
+    dB0yrs<-(proyears-length(refyears))+1:length(refyears)
+    #SSBnorm[,,,refyears]<-MSE@SSBa[,,,refyears]/array(rep(MSE@dynB0[,,dB0yrs],each=nMPs)/rep(rep(MSE@SSBMSY_SSB0,each=nMPs),length(refyears)),c(nMPs,nsim,2,length(refyears)))
+    SSBnorm[,,,refyears]<-MSE@SSB[,,,refyears]/array(rep(MSE@dynB0[,,dB0yrs],each=nMPs)*rep(rep(MSE@SSBMSY_SSB0,each=nMPs),length(refyears)),c(nMPs,nsim,2,length(refyears)))
+    SSBnorm[,,,1:(modelyr-1)]<-SSBnorm[,,,modelyr]
+  }
+
+  SSBq<-apply(SSBnorm,c(1,3,4),quantile,p=quants,na.rm=T)
+  SSBlim<-cbind(rep(0,MSE@npop),apply(SSBq,3,max,na.rm=T))
+
+  linecols<-rep(c("black","orange","blue","red","green","light grey","grey","pink","purple","brown"),100)
+
+  MPnams<-unlist(MSE@MPs)
+  MPnamsj<-paste(MPnams[(1:MSE@nMPs)*2-1],MPnams[(1:MSE@nMPs)*2],sep="-")
+
+  par(mfrow=c(MSE@nMPs,MSE@npop*4),mai=c(0.05,0.05,0.35,0.05),omi=c(0.5,0.05,0.15,0.02))
+  rsz<-5
+  fill<-NA
+  rw<-c(fill,rep(1,rsz),rep(2,rsz),fill,rep(3,rsz),rep(4,rsz),fill,fill,rep(5,rsz),rep(6,rsz),fill,rep(7,rsz),rep(8,rsz))
+  lmat<-matrix(NA,ncol=rsz*MSE@nMPs,nrow=rsz*8+5)
+  for(i in 1:nMPs)lmat[,(i-1)*rsz+1:rsz]<-rw+(i-1)*8
+  lmat<-t(lmat)
+  lmat[is.na(lmat)]<-max(lmat,na.rm=T)+1
+  layout(lmat)
+
+  pind<-1:MSE@npop
+  if(rev)pind=MSE@npop:1
+
+  gridcol='light grey'
+
+  for(MP in 1:MSE@nMPs){
+    for(pp in pind){
+      # Catch projection  ---
+      # Col 1: Catch quantiles
+      ytick<-pretty(seq(0,Clim[pp,2],length.out=4))
+      plot(range(yrs),Clim[pp,],axes=F,col="white",xlab="",ylab="",ylim=Clim[pp,])
+      abline(h=ytick,col=gridcol)
+      abline(v=xtick,col=gridcol)
+      polygon(c(yrs,yrs[length(yrs):1]),
+              c(Cq[1,MP,pp,refyears],Cq[3,MP,pp,refyears[length(yrs):1]]),
+              col=Catcol,border=F)
+      lines(yrs,Cq[2,MP,pp,refyears],lwd=1.5,col="black")
+      if(MP<MSE@nMPs)axis(1,at=xtick,labels=NA)
+      if(MP==MSE@nMPs)axis(1,at=xtick,labels=xtick,las=2)
+      abline(h=0)
+
+      axis(2,ytick,labels=ytick)
+      #legend('topright',legend="Catches (t)",bty='n')
+
+
+      # Col 2: Catch worms
+      plot(range(yrs),Clim[pp,],axes=F,col="white",xlab="",ylab="",ylim=Clim[pp,])
+      abline(h=ytick,col=gridcol)
+      abline(v=xtick,col=gridcol)
+      for(i in 1:length(worms))lines(yrs,CC[MP,i,pp,refyears],col=linecols[i],lwd=1.2)
+      if(MP<MSE@nMPs)axis(1,at=xtick,labels=NA)
+      if(MP==MSE@nMPs)axis(1,at=xtick,labels=xtick,las=2)
+      abline(h=0)
+
+      mtext('Catches (kt)',3,adj=-0.8,line=-1,cex=0.7)
+
+
+      # SSB projection  ---
+      # Col 3: SSB quantiles
+      ytick<-pretty(seq(0,SSBlim[pp,2],length.out=4))
+      plot(range(yrs),SSBlim[pp,],axes=F,col="white",xlab="",ylab="",ylim=SSBlim[pp,])
+      abline(h=ytick,col=gridcol)
+      abline(v=xtick,col=gridcol)
+      polygon(c(yrs,yrs[length(yrs):1]),
+              c(SSBq[1,MP,pp,refyears],SSBq[3,MP,pp,refyears[length(yrs):1]]),
+              col=SSBcol,border=F)
+      lines(yrs,SSBq[2,MP,pp,refyears],lwd=1.5,col="black")
+      if(MP<MSE@nMPs)axis(1,at=xtick,labels=NA)
+      if(MP==MSE@nMPs)axis(1,at=xtick,labels=xtick,las=2)
+      abline(h=0)
+      abline(h=1,lty=2)
+      axis(2,ytick,labels=ytick)
+      #legend('topright',legend="SSB relative to 2018",bty='n')
+
+      mtext(MPnams[(MP-1)*2+pp],3,adj=-0.35,line=0.3,cex=0.9)
+
+      # Col 4: SSB worms
+      plot(range(yrs),SSBlim[pp,],axes=F,col="white",xlab="",ylab="",ylim=SSBlim[pp,])
+      abline(h=ytick,col=gridcol)
+      abline(v=xtick,col=gridcol)
+      for(i in 1:length(worms))lines(yrs,SSBnorm[MP,i,pp,refyears],col=linecols[i],lwd=1.2)
+      if(MP<MSE@nMPs)axis(1,at=xtick,labels=NA)
+      if(MP==MSE@nMPs)axis(1,at=xtick,labels=xtick,las=2)
+      abline(h=0)
+      abline(h=1,lty=2)
+
+      if(!MSY)mtext('SSB relative to 2018',3,adj=-0.8,line=-1,cex=0.7)
+      if(MSY)mtext('SSB relative SSB_MSY',3,adj=-0.8,line=-1,cex=0.7)
+
+    }
+  }
+
+  texty<-paste(MSE@Snames[pind],"Area")
+  if(!byarea|MSY) texty<-paste(MSE@Snames[pind],"(Catch by area, SSB by stock)")
+  mtext(texty,3,adj=c(0.15,0.85),line=-0.45,outer=T,font=2)
+
+}
+
+
+
 
 
 

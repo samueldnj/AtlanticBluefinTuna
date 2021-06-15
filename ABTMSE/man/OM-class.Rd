@@ -78,6 +78,13 @@
 \item{Ibeta_ignore}{logical, should hyperstability of indices be included?}
 \item{qinc}{real number, percentage annual changes in catchability affecting the CPUE indices}
 \item{SSBpR}{matrix simulation by stock}
+\item{Fleets}{list of fleet attributes from OMI}
+\item{Istats}{data.frame of Index statistics}
+\item{Ires}{array of historical index residuals (sim,index,year)}
+\item{Deterministic}{logical, should deterministic recruitment be simulated in projections}
+\item{Obs}{character, the type of observation error model assumed for simulating future catch data}
+\item{Imp}{character, the implementaiton error model assumed for simulating how well MP advice is adhered to}
+\item{checks}{returns m3 matching information}
 \item{seed}{a random seed for generation of simulations to ensure reproducibility}
 }
 }

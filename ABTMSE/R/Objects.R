@@ -50,6 +50,8 @@
 #' \item{lwb}{length-weight parameter b W=aL^b(currently unused)}
 #' \item{len_age}{an array of length-at-age [stock, age, year]}
 #' \item{wt_age}{an array of weight-at-age [stock, age, year]}
+#' \item{wt_len}{a matrix of weight-at-length [stock, len]}
+#' \item{Fec_len}{a matrix of Fecundity-at-length [stock, len]}
 #' \item{Fec}{an array of spawning biomass-at-age [stock, age, year]}
 #' \item{SRtype}{a character vector denoting the form of the stock-recruitment relationship: BH Beverton Holt, HS Hockey Stick [stock]}
 #' \item{steep}{a vector of steepness by stock [stock]}
@@ -62,7 +64,6 @@
 #' \item{nCPUEq}{the number of CPUE indices used in the model fitting}
 #' \item{nCPUEobs}{the number of CPUE index observations used in model fitting}
 #' \item{CPUEobs}{a data frame of CPUE catch rate observations [year, stock, area, subyear, fleet, index] fitted against vulnerable biomass}
-#' \item{CPUEwt}{a vector of CPUE index weights [nCPUEq]}
 #' \item{nE}{the number of partial F series (typically nfleets)}
 #' \item{nEobs}{the number effort observations (partial F's) one for each catch observations}
 #' \item{Eobs}{a data frame of effort observations one line per observation [year, subyear, area, fleet, effort]}
@@ -73,9 +74,8 @@
 #' \item{nI}{the number of fishery independent indices (e.g. 2: a spawning biomass survey in the GOM and MED)}
 #' \item{nIobs}{the number of fishery independent indices}
 #' \item{Iobs}{a data frame of fishery independent relative abundance observations [year, subyear, area, stock, index number, type (biomass/ssb), index]}
-#' \item{Iwt}{a vector of fishery independent relative abundance index weights [nI]}
 #' \item{nPSAT}{the number of electronic tags of known stock of origin}
-#' \item{PSAT}{a data frame of electronic tag movements [stock, age, subyear, duration til recapture (subyears), from area, to area, number of tags]}
+#' \item{PSAT}{a data frame of electronic tag movements [stock, age, subyear, duration til recapture (subyears), from area, to area, number of tags, total from area]}
 #' \item{nPSAT2}{the number of electronic tags of unknown stock of origin}
 #' \item{PSAT2}{a data frame of electronic tag movements [age, subyear, duration til recapture (subyear), from area, to area, prob(stock1), prob(stock2)]}
 #' \item{nTag}{the number of conventional tagging movement observations}
@@ -97,8 +97,6 @@
 #' \item{movtype}{the type of movement model (1: Gravity model, 2: Markov model)}
 #' \item{Ilencat}{the categories of length specific vulnerable biomass}
 #' \item{CobsCV}{a vector nf long, the catch observation error (lognormal sd)}
-#' \item{CPUEobsCV}{a vector nCPUEq long, the index observation error (lognormal sd)}
-#' \item{IobsCV}{a vector nI long, the fishery independent index observation error (lognormal sd)}
 #' \item{CLCV_num}{the numerator of the normal observation error on lengths}
 #' \item{RDCV}{the recruitment deviation penalty (sigma R)(lognormal sd)}
 #' \item{SSBfit}{the type of SSBfit 1:SSB0 2:SSBnow}
@@ -133,6 +131,8 @@
 #' \item{MPind}{a data frame of fishery indices used for informing management procedures in subsequent MSE analysis (currently unused)}
 #' \item{MIinv}{a 1 or 0 determining whether the fit should attempt to be MI invariant}
 #' \item{MICV}{numerical value of the CV in additional to regional FMod deviations}
+#' \item{SpatPr}{matrix of Spatial priors}
+#' \item{SpatFrac}{matrix of spatial priors}
 #' \item{debug}{a logical (0 or 1) value determing whether the model should be run for a single iteration to check for errors}
 #' \item{verbose}{a logical (0 or 1) value determing whether more complete information should be provided in each iteration of the model estimation}
 #' \item{datacheck}{a unique number for checking that data were read into the model correctly}
@@ -141,6 +141,9 @@
 #' \item{nMovExc}{integer the number of rows in the movement exclusion data frame}
 #' \item{MovExc}{a data frame of movement exceptions}
 #' \item{Phases}{the phases of the various parameter estimates (1,2,3)}
+#' \item{ET_LHF}{the type of likelihood function used for electronic tagging data (1,2: zero intercept)}
+#' \item{LC_LHF}{the type of likelihood function used for length composition data (1,2: zero intercept)}
+#' \item{beta}{numerical value, the hyperstability parameter assumed for all indices (e.g. 0.9 = hyperstable, 1.1 = hyperdeplete)}
 #' }
 setClass("OMI",representation(
   # Description
@@ -159,32 +162,33 @@ setClass("OMI",representation(
   iALK='array',#p y a l (trans)
   lwa='numeric', lwb='numeric',
   len_age='array', wt_age='array', # p a y (trans)
+  wt_len="matrix",Fec_len="matrix",
   Fec='array', SSBpR='numeric',# p a (wt*mat) (trans)
   nSR='numeric',SRminyr='numeric',SRmaxyr='numeric',SRp="numeric",SRpar="numeric",SRtype="character",
   nRDs='numeric', RDno ="matrix", RDts="matrix",
   spawns='numeric',canspawn='matrix', # p r (trans)
   Ma='array', # p a (trans)
   nCobs='integer',  Cobs='matrix', # nCobs x 5 (y s r f Cobs) (trans)
-  nCPUEq='integer',  nCPUEobs='integer',  CPUEobs='matrix', CPUEwt='numeric', # nCPUEobs x 6 (y s r q f index) (trans)
+  nCPUEq='integer',  nCPUEobs='integer',  CPUEobs='matrix', #CPUEwt='numeric', # nCPUEobs x 6 (y s r q f index) (trans)
   nE='integer',                  # number of partial f series (basically nfleets but coding seperatly to later account for catchability mirroring)
   nEobs='integer',Eobs='matrix', # nE x 5 (y s r f partial F)
   nCLobs='integer',CLobs='matrix', # nCLobs x 6 (y s r f l N) (trans)
   HCobs='array', # (y x s, x r x a) (trans)
   RAI='array', # r s y (not trans)
-  nI='integer',nIobs='integer',Iobs='matrix', Iwt='numeric', # nI x 7 (y s spawn_area pp index(=pp if SSB) type(biomass/ssb) index) (trans)
+  nI='integer',nIobs='integer',Iobs='matrix', #Iwt='numeric', # nI x 7 (y s spawn_area pp index(=pp if SSB) type(biomass/ssb) index) (trans)
   nPSAT='integer',PSAT='matrix', # nPSAT x 7 (p a s t fr tr N) (trans)
   nPSAT2='integer',PSAT2='matrix', # nPSAT2 x 5+(np) (a s t fr tr SOOp1 SOOp2) (trans)
   nTag='integer',Tag='matrix', # nTag x 10 (y s r a - y s r f a N)
   nSOOobs ='integer',SOOobs='matrix',# nSOOobs x 6 (p a y s r N) (trans)
   nsel='integer',seltype='numeric', selind='numeric', # nf
   ratiolim='numeric', infleclim='numeric',
-  nma='integer',ma='numeric', # na
+  nma='integer',ma='numeric', macat='matrix',# na
   nMP='integer',nmovind='integer',movind='matrix',# nmovind x 4 (p s r r)
   nmov1='integer',mov1='matrix', # nmov1 x 4 (p s r r)
   Ilencat='matrix',
   movtype='integer',
-  CobsCV='numeric', CPUEobsCV='numeric',# fleets,
-  IobsCV='numeric',# nI (np if SSB)
+  #CobsCV='numeric', CPUEobsCV='numeric',# fleets,
+  #IobsCV='numeric',# nI (np if SSB)
   CLCV_num='numeric',
   RDCV='numeric',
   nSSBprior='numeric',SSBprior='matrix',SSBCV='numeric',
@@ -209,6 +213,7 @@ setClass("OMI",representation(
   MPind="data.frame",# the MP indices
   MIinv="integer",# Master index - independent mode?
   MICV="numeric",# Master index CV around FMod
+  SpatPr="matrix", SpatFrac="matrix",
   debug='integer',verbose='integer',datacheck='integer',
 
   # Misc
@@ -216,7 +221,10 @@ setClass("OMI",representation(
   Inames='character',
   nMovExc='integer',
   MovExc="data.frame",
-  Phases="numeric"
+  Phases="numeric",
+  ET_LHF="numeric",
+  LC_LHF="numeric",
+  beta="numeric"
 
 ))
 
@@ -256,6 +264,7 @@ setClass("OMI",representation(
 #' \item{BMSYbcv}{a 2 item vector specifying the maximum extend of bias in simulated BMSY (a target biomass level) as a lognormal sd}
 #' \item{MPind}{a data frame containing the indices that may be used by MPs in closed loop simulation [year, index number, index name, index, CV, stock, type (1: vulnerable biomass, 2: ssb), source, applies to model areas]}
 #' \item{MPind_stats}{a list containing the statistical properties of model fits (currently unused)}
+#' \item{MinAC}{a minimum value for index lag-1 autocorrelation in residuals}
 #' }
 setClass("Obs",representation(Name="character",
                Ccv="numeric",Cbcv="numeric", Cbias="numeric",                 # Observation error and bias in total annual catches
@@ -272,7 +281,8 @@ setClass("Obs",representation(Name="character",
                hbcv="numeric",                                                # Bias in observation of steepness
                Recbcv="numeric",IMSYbcv="numeric",                            # Bias in observation of recent recrutiment, target CPUE (CPUE @ MSY)
                MSYbcv="numeric",BMSYbcv="numeric",                            # Bias in observation of target catch and biomass (MSY and BMSY)
-               MPind="data.frame",MPind_stats="list"                          # Indices that may be used in MPs
+               MPind="data.frame",MPind_stats="list",                         # Indices that may be used in MPs
+               MinAC="numeric"                                                # Minimum simulated lag-1 autocorrelation in residuals
 
 ))
 

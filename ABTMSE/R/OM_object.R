@@ -73,6 +73,13 @@
 #' \item{Ibeta_ignore}{logical, should hyperstability of indices be included?}
 #' \item{qinc}{real number, percentage annual changes in catchability affecting the CPUE indices}
 #' \item{SSBpR}{matrix simulation by stock}
+#' \item{Fleets}{list of fleet attributes from OMI}
+#' \item{Istats}{data.frame of Index statistics}
+#' \item{Ires}{array of historical index residuals (sim,index,year)}
+#' \item{Deterministic}{logical, should deterministic recruitment be simulated in projections}
+#' \item{Obs}{character, the type of observation error model assumed for simulating future catch data}
+#' \item{Imp}{character, the implementaiton error model assumed for simulating how well MP advice is adhered to}
+#' \item{checks}{returns m3 matching information}
 #' \item{seed}{a random seed for generation of simulations to ensure reproducibility}
 #' }
 setClass("OM",representation(
@@ -126,14 +133,23 @@ setClass("OM",representation(
   Ibeta_ignore = "logical",                        # Logical, should hyperstability and hyperdepletion be ignored?
   qinc="numeric",                                  # % annual changes in catchability affecting CPUE indices
   SSBpR="array",
+  Fleets="list",
   checks='list',
+  Istats='data.frame',
+  Ires='array',
+  Deterministic="logical",
+  Obs="character",
+  IE="character",
   seed="numeric"                                   # Random seed from which this object was made
 ))
 
-setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,seed=1,
-                                       Recruitment=NULL,Snames=c("East","West"),MLEonly=F,ploty=F,debug=F){
+setMethod("initialize", "OM", function(.Object, OMd="C:/M3", nsim=48, proyears=50, seed=1,
+                                       Recruitment=NULL, Snames=c("East","West"),
+                                       MLEonly=F, Deterministic=F, Obs = "Good_Obs", IE = "Umax_90",
+                                       ploty=F, debug=F, CPUEinds, Iinds, SD_override, AC_override, Yrs_override){
 
   # .Object});   .Object<-new('OM',OMd="C:/M3")
+  # .Object});   .Object<-new('OM',OMd)
 
   .Object@Snames=Snames
 
@@ -141,12 +157,12 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   if(!file.exists(paste0(OMd,"/M3.dat")))stop(paste('Could not build operating model: M3 output file ',paste0(OMd,"/M3.dat")))
 
   cat(paste("Loading operating model input object :",OMd))
-  cat("\n")#.Object@targpop=targpop
+  cat("\n") #.Object@targpop=targpop
   load(file=paste0(OMd,"/OMI"))
 
   cat(paste("Reading operating model fit data from directory:",OMd))
   cat("\n")#.Object@targpop=targpop
-  out<-M3read(OMDir=OMd)
+  out<-M3read(OMd)
 
   .Object@checks<-list(N=out$N, SSB=out$SSB, B=out$B, VB=out$VB, VL=out$VL, FL=out$FL)
 
@@ -184,6 +200,8 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   .Object@nma<-as.integer(out$nma)
   .Object@ma<-ma<-array(rep(c(rep(1,4),rep(2,4),rep(3,na-8)),each=2),c(np,na)) # for some reason this doesn't yet exist.
 
+  .Object@interval<-as.integer(2)   # Management interval
+
   .Object@Wt_age<-out$wt_age
   .Object@Len_age<-out$len_age
 
@@ -214,17 +232,15 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   .Object@hZ<-out$hZ
   .Object@HCobs<-out$HCobs
 
-
   # ---- Get covariance matrix and sample correlated parameters -------
 
   vcv<-read.fit(file=OMd,digits=10,cor_ignore = FALSE)
   pnam<-vcv$names[1:vcv$nopar]
-  #cbind(pnam,vcv$est)
   nparams<-length(pnam)
 
   if(MLEonly){
 
-    message("Only MLE point estimate taken - simulations are identical and deterministic")
+    message("Only MLE point estimate taken - historical simulations are identical and deterministic")
     samps<-as.data.frame(matrix(rep(vcv$est[1:vcv$nopar],each=nsim),nrow=nsim))
     names(samps)<-pnam
 
@@ -268,6 +284,7 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
       message("No MCMC output file located- simulations are identical and deterministic")
       samps<-as.data.frame(matrix(rep(vcv$est[1:vcv$nopar],each=nsim),nrow=nsim))
       names(samps)<-pnam
+
     }
   }
 
@@ -302,7 +319,6 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
 
   }
 
-
   .Object@Rectype<-OMI@SRtype          # time period x stock
 
    opt<-SRplot(out=out,years=OMI@years,type=OMI@SRtype,plot=F,SRminyr=OMI@SRminyr, SRmaxyr=OMI@SRmaxyr)  # general purpose SR info
@@ -321,9 +337,11 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   .Object@Recpars<-array(NA,c(nsim,OMI@nSR,2))   #  1 is steepness or hingepoint, 2 is R0
   .Object@Reccv<-array(NA,c(nsim,OMI@nSR))       #  sigma R (sd of lognormal rec devs)
   .Object@AC<-array(NA,c(nsim,OMI@nSR))          #  lag-1 autocorrelation
+  R0adj<-c(1,0) # M3 automatically separates east and west by a scale of 1 for initialization
 
   for(SRno in 1:OMI@nSR){
 
+    pp<-OMI@SRp[SRno]
     type=OMI@SRtype[SRno]
 
     if(type=="BH"){
@@ -332,20 +350,18 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
       recind<-(1:nparams)[paste0("lnRD",SRno)==pnam]
 
       if(MLEonly){
-        .Object@Recpars[,SRno,2]<-exp(vcv$est[SRno]) # R0
-        recs<-vcv$est[recind] # correct rec dev sequence
+        .Object@Recpars[,SRno,2]<-exp(vcv$est[SRno]+R0adj[pp]) # R0
+        recs<-vcv$est[recind]         # correct rec dev sequence
         .Object@Reccv[,SRno]=sd(recs) # by simulation rec cv
-        .Object@AC[,SRno]<-acf(recs,plot=F)$acf[2,1,1] # by simulation rec autocorrelation
+        .Object@AC[,SRno]<-stats::acf(recs,plot=F)$acf[2,1,1] # by simulation rec autocorrelation
 
       }else{
-        .Object@Recpars[,SRno,2]<-exp(samps[,SRno])
+        .Object@Recpars[,SRno,2]<-exp(samps[,SRno]+R0adj[pp])
         recs<-samps[,recind] # correct rec dev sequence
         .Object@Reccv[,SRno]=apply(recs,1,sd) # by simulation rec cv
-        .Object@AC[,SRno]<-apply(recs,1,FUN=function(x)acf(x,plot=F)$acf[2,1,1]) # by simulation rec autocorrelation
+        .Object@AC[,SRno]<-apply(recs,1,FUN=function(x)stats::acf(x,plot=F)$acf[2,1,1]) # by simulation rec autocorrelation
 
       }
-
-
 
     } else{ # Hockey stick with fixed hinge point
 
@@ -357,12 +373,12 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
         .Object@Recpars[,SRno,2]<-exp(vcv$est[SRno])
         recs<-vcv$est[recind]
         .Object@Reccv[,SRno]=sd(recs)
-        .Object@AC[,SRno]<-acf(recs,plot=F)$acf[2,1,1]
+        .Object@AC[,SRno]<-stats::acf(recs,plot=F)$acf[2,1,1]
       }else{
         .Object@Recpars[,SRno,2]<-exp(samps[,SRno])
         recs<-samps[,recind]
         .Object@Reccv[,SRno]=apply(recs,1,sd)
-        .Object@AC[,SRno]<-apply(recs,1,FUN=function(x)acf(x,plot=F)$acf[2,1,1])
+        .Object@AC[,SRno]<-apply(recs,1,FUN=function(x)stats::acf(x,plot=F)$acf[2,1,1])
       }
 
     }
@@ -378,27 +394,24 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   # ---- Get recruitment deviations -----
   .Object@Recdevs<-array(0,dim=c(nsim,npop,nyears))
   yblock<-2
+
   for(SRno in 1:OMI@nSR){
+
     pp<-OMI@SRp[SRno]
     yind<-OMI@SRminyr[SRno]:OMI@SRmaxyr[SRno]
     recind<-(1:nparams)[paste0("lnRD",SRno)==pnam]
     estind<-rep(recind,each=yblock)[1:length(yind)]
 
-    # test of lognormal bias adjustment
-    #recs<-samps[1,recind]
-    #var<-sum(recs^2)/(length(recs)-1)
-    #exp(recs-var/2)
-
     Ntemp<-apply(as.matrix(samps[,recind]),1,function(x)sum(x^2)/(length(x)-1))
 
     if(MLEonly){
       .Object@Recdevs[,pp,yind]<-exp(as.matrix(samps[,estind])-Ntemp/2)
-      .Object@hR0[,pp,yind]<-exp(samps[,SRno])
+      .Object@hR0[,pp,yind]<-exp(samps[,SRno]+R0adj[pp])
       .Object@hRecpar[,pp,yind]<-.Object@Recpars[,SRno,1]
       .Object@hRectype[pp,yind]<-.Object@Rectype[SRno]
     }else{
       .Object@Recdevs[,pp,yind]<-exp(as.matrix(samps[,estind])-Ntemp/2)
-      .Object@hR0[,pp,yind]<-exp(samps[,SRno])
+      .Object@hR0[,pp,yind]<-exp(samps[,SRno]+R0adj[pp]) # m3 initialization gap of 1
       .Object@hRecpar[,pp,yind]<-.Object@Recpars[,SRno,1]
       .Object@hRectype[pp,yind]<-.Object@Rectype[SRno]
 
@@ -535,6 +548,8 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   sela<-array(NA,c(nsim,out$nsel,nlen))
   sels<-samps[,grep("selpar",pnam)]
   ml<-out$ml
+  LB<-out$LB
+  UB<-out$UB
 
   sc<-1
 
@@ -544,17 +559,17 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
 
     if(out$seltype[ss]==2){
 
-      spar2<-ml[nlen]*(0.05+0.85*exp(spars[,2])/(1+exp(spars[,2])));       #// Inflection point (2) as a fraction of largest length I(0.1|0.8)
-      spar1<-ml[nlen]*(0.005+0.11*(exp(spars[,1])/(1+exp(spars[,1]))));  # // Logistic slope (1) as fraction of inflection point (2) I(0.01|0.5)
+      spar2<-LB[ss]+(UB[ss]-LB[ss])*(0.05+0.85*exp(spars[,2])/(1+exp(spars[,2])));       #// Inflection point (2) as a fraction of largest length I(0.1|0.8)
+      spar1<-(UB[ss]-LB[ss])*(0.005+0.11*(exp(spars[,1])/(1+exp(spars[,1]))));  # // Logistic slope (1) as fraction of inflection point (2) I(0.01|0.5)
       ind<-as.matrix(expand.grid(1:nsim,ss,1:nlen))
       sela[ind]<-1/(1+exp((spar2[ind[,1]]-ml[ind[,3]])/spar1[ind[,1]]))
       sela[,ss,]<-sela[,ss,]/apply(sela[,ss,],1,max)
 
     }else if(out$seltype[ss]==3){
 
-      spar1=ml[nlen]*(0.05+0.95*exp(spars[,1])/(1+exp(spars[,1]))) #// Max selectivity bounded between 5 and 95 percent of length range
+      spar1=LB[ss]+(UB[ss]-LB[ss])*(0.05+0.95*exp(spars[,1])/(1+exp(spars[,1]))) #// Max selectivity bounded between 5 and 95 percent of length range
       spar2=2* spar1*exp(spars[,2])/(1+exp(spars[,2]))      # // Lower sd (divided by 4 just to start at a reasonable guess)
-      spar3=ml[nlen]*exp(spars[,3])         #// Upper sd
+      spar3=(UB[ss]-LB[ss])*exp(spars[,3])         #// Upper sd
       ind<-as.matrix(expand.grid(1:nsim,ss,1:nlen))
       par2or3<-matrix(spar2,nrow=nsim,ncol=nlen)
       cond<-rep(ml,each=nsim)>rep(spar1,nlen) # length is greater than spar1
@@ -565,17 +580,18 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
 
     }
 
+    sela[,ss,ml<LB[ss]]<-0
+    sela[,ss,ml>UB[ss]]<-0
+
     sc<-sc+out$seltype[ss]
 
   }
 
   if(ploty)matplot(t(sela[1,,]),type='l')
 
-  for(ff in 1:nfleets).Object@sel[,ff,]<-sela[,out$selind[ff],]
+  for(ff in 1:nfleets) .Object@sel[,ff,]<-sela[,out$selind[ff],]
 
   .Object@qE<-as.matrix(exp(samps[,grep("lnqE",pnam)]))
-  #.Object@qI<-as.matrix(exp(samps[,grep("lnqI",vcv$names)]))
-  #.Object@qCPUE<-as.matrix(exp(samps[,grep("lnqCPUE",vcv$names)]))
 
   maxF<-apply(out$FL,1:4,max)
   E<-maxF/array(rep(exp(out$lnqE),each=prod(dim(maxF)[1:3])),dim(maxF))
@@ -596,7 +612,6 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
 
   cat("Calculating MSY reference points")
   cat("\n")
-
 
   #FML s, m, r, f, l
   FMLs<-array(NA,c(nsim,nsubyears,nareas,nfleets,nlen))
@@ -621,18 +636,24 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
   optMSY_eq<-ABTMSE::optMSY_eq
   MSYCalcs<-ABTMSE::MSYCalcs
   meanFs<-ABTMSE::meanFs
+  #meanFs2<-ABTMSE::meanFs2
   MSYMLE_parallel<-ABTMSE::MSYMLE_parallel
   res<-array(NA,c(nsim,np,8)) # MSY, FMSYa, UMSY, BMSY, SSBMSY, BMSY/B0, SSBMSY/SSB0, RMSY/R0
 
-  for(i in 1:nsim)res[i,,]<-as.matrix(MSYMLE_parallel(i,FMLs, iALK, N, wt_age, M_age, mat_age, R0_arr, fixpar_arr, SSBpR, SRtypes, maxage)) # recruitment curve assumed to be first of the future assumed types
+  if(MLEonly){
+    MSYmat<-as.matrix(MSYMLE_parallel(1,FMLs, iALK, N, wt_age, M_age, mat_age, R0_arr, fixpar_arr, SSBpR, SRtypes, maxage)) # recruitment curve assumed to be first of the future assumed types
+    for(i in 1:nsim)res[i,,]<-MSYmat
+  }else{
+    for(i in 1:nsim)res[i,,]<-as.matrix(MSYMLE_parallel(i,FMLs, iALK, N, wt_age, M_age, mat_age, R0_arr, fixpar_arr, SSBpR, SRtypes, maxage)) # recruitment curve assumed to be first of the future assumed types
+  }
 
-  .Object@MSY<-res[,,1]#cbind(MSYrefs1[,1],MSYrefs2[,1])
-  .Object@BMSY<-res[,,4]#cbind(MSYrefs1[,2],MSYrefs2[,2])
-  .Object@VBMSY<-res[,,1]/res[,,3] # not calculated
-  .Object@SSBMSY<-res[,,5]#cbind(MSYrefs1[,4],MSYrefs2[,4])
-  .Object@UMSY<-res[,,3]#cbind(MSYrefs1[,5],MSYrefs2[,5])
-  .Object@FMSYa<-res[,,2]#cbind(MSYrefs1[,6],MSYrefs2[,6])
-  .Object@SSBMSY_SSB0<-res[,,7]#cbind(MSYrefs1[,7],MSYrefs2[,7])
+  .Object@MSY<-res[,,1]
+  .Object@BMSY<-res[,,4]
+  .Object@VBMSY<-res[,,1]/res[,,3]
+  .Object@SSBMSY<-res[,,5]
+  .Object@UMSY<-res[,,3]
+  .Object@FMSYa<-res[,,2]
+  .Object@SSBMSY_SSB0<-res[,,7]
 
   OMIfile<-paste0(OMd,"/OMI")
 
@@ -641,15 +662,110 @@ setMethod("initialize", "OM", function(.Object,OMd="C:/M3",nsim=48,proyears=50,s
     load(OMIfile)
     .Object@area_defs=OMI@area_defs
     .Object@areanams=OMI@areanams
+    .Object@Fleets=OMI@Fleets
 
   }
 
   .Object@Ibeta_ignore = TRUE                      # hyperstability and hyperdepletion should be ignored?
-  .Object@qinc=0                                   # no catchability increases affecting cpue indices
+  .Object@qinc = 0                                 # no catchability increases affecting cpue indices
 
   surv<-exp(-t(apply(cbind(c(0,0),OMI@Ma[,1:(OMI@na-1)]),1,cumsum)))
   SSBpR<-apply(surv*OMI@Fec,1,sum)+surv[,OMI@na]*exp(-OMI@Ma[,OMI@na])/(1-exp(-OMI@Ma[,OMI@na]))*OMI@Fec[,OMI@na]
   .Object@SSBpR<-array(rep(SSBpR,each=nsim),c(nsim,OMI@np))
+
+  # Index statistics =======================================================
+  cat('Generating future index deviations')
+  cat("\n")
+
+  CPUEnos<-match(CPUEinds,OMI@CPUEnames)
+  Inos<-match(Iinds,OMI@Inames)
+  Istats<-array(NA,c(length(CPUEnos)+length(Inos),6)) # index x name, lnq, sd, ac1,lencatLB, lencatUB
+  Ires<-array(NA,c(length(CPUEnos)+length(Inos),nyears+proyears)) # MLE residual error
+
+  AC1_int0<-function(res){ # first order autocorrelation with intercept = 0
+    nr<-length(res)
+    sum(res[2:nr]*res[1:(nr-1)]) / sum(res[1:nr]^2)
+  }
+
+  # Calculate statistics for generating future deviations (sd, AC1) and calibrating future data (q)
+  k<-0
+  for(j in CPUEnos){
+
+    k<-k+1
+    ind<-OMI@CPUEobs[,4]==j
+    tempdat<-subset(OMI@CPUEobs,ind)
+    if(CPUEinds[k]%in%Yrs_override$Name){
+      pos<-match(CPUEinds[k]%in%Yrs_override$Name)
+      tempdat<-tempdat[tempdat$Year%in%Yrs_override$start[pos]:Yrs_override$end[pos],] # only specified years
+    }
+    obs<-as.numeric(tempdat[,6])
+    pred<-out$CPUEpred_vec[ind]
+    yrs<-as.numeric(tempdat[,1]+OMI@years[1]-1)
+    yind<-tempdat[,1]
+    res<-log(obs)-log(pred)
+    Ires[k,yind]<-res
+    Istats[k,1]<-CPUEinds[k]
+    Istats[k,2]<-out$lnqCPUE[j]
+    Istats[k,3]<-round(sd(res),4)
+    Istats[k,4]<- max(0,round(AC1_int0(res),4)) # was decided this should be max 0
+    if(tempdat[1,7]>0){
+     Istats[k,5]<-OMI@Ilencat[1,tempdat[1,7]]
+     Istats[k,6]<-OMI@Ilencat[2,tempdat[1,7]]
+    }
+
+    if(CPUEinds[k]%in%SD_override$Name){
+      pos<-match(CPUEinds[k],SD_override$Name)
+      Istats[k,3]<-SD_override$SD[pos]
+    }
+    if(CPUEinds[k]%in%AC_override$Name){
+      pos<-match(CPUEinds[k],AC_override$Name)
+      Istats[k,4]<-AC_override$AC[pos]
+    }
+
+   }
+
+  for(j in Inos){
+    k<-k+1
+    ind<-OMI@Iobs[,5]==j
+    if(Iinds[k-length(CPUEinds)]%in%Yrs_override$Name){
+      pos<-match(Iinds[k-length(CPUEinds)],Yrs_override$Name)
+      ind<-OMI@Iobs[,5]==j & OMI@Iobs[,1]%in%(Yrs_override$start[pos]:Yrs_override$end[pos]) # only specified years
+    }
+    tempdat<-subset(OMI@Iobs,ind)
+
+    obs<-as.numeric(tempdat[,7])
+    pred<-out$Ipred_vec[ind]
+    yrs<-as.numeric(tempdat[,1]+OMI@years[1]-1)
+    yind<-tempdat[,1]
+    res<-log(obs)-log(pred)
+    Ires[k,yind]<-res
+    Istats[k,1]<-Iinds[k-length(CPUEinds)]
+    Istats[k,2]<-out$lnqI[j]
+    Istats[k,3]<-round(sd(res),4)
+    Istats[k,4]<-max(0,round(AC1_int0(res),4))
+
+    if(Iinds[k-length(CPUEinds)]%in%SD_override$Name){
+      pos<-match(Iinds[k-length(CPUEinds)],SD_override$Name)
+      Istats[k,3]<-SD_override$SD[pos]
+    }
+    if(Iinds[k-length(CPUEinds)]%in%AC_override$Name){
+      pos<-match(Iinds[k-length(CPUEinds)],AC_override$Name)
+      Istats[k,4]<-AC_override$AC[pos]
+    }
+    if(tempdat[1,11]>0){
+      Istats[k,5]<-OMI@Ilencat[1,tempdat[1,11]]
+      Istats[k,6]<-OMI@Ilencat[2,tempdat[1,11]]
+    }
+
+  }
+  .Object@Istats=as.data.frame(Istats,stringsAsFactors = F)
+  names(.Object@Istats)<-c("Name","lnq","SD","AC")
+  .Object@Ires<-Ires
+
+  .Object@Deterministic = Deterministic  # defaults to recruitment process error
+  .Object@Obs<-Obs # defaults to Good obs model information
+  .Object@IE<-IE     # defaults to maximum harvest rate of 90%
+
 
   .Object
 

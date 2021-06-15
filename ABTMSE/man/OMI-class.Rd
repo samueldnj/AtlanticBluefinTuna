@@ -51,6 +51,8 @@
 \item{lwb}{length-weight parameter b W=aL^b(currently unused)}
 \item{len_age}{an array of length-at-age [stock, age, year]}
 \item{wt_age}{an array of weight-at-age [stock, age, year]}
+\item{wt_len}{a matrix of weight-at-length [stock, len]}
+\item{Fec_len}{a matrix of Fecundity-at-length [stock, len]}
 \item{Fec}{an array of spawning biomass-at-age [stock, age, year]}
 \item{SRtype}{a character vector denoting the form of the stock-recruitment relationship: BH Beverton Holt, HS Hockey Stick [stock]}
 \item{steep}{a vector of steepness by stock [stock]}
@@ -63,7 +65,6 @@
 \item{nCPUEq}{the number of CPUE indices used in the model fitting}
 \item{nCPUEobs}{the number of CPUE index observations used in model fitting}
 \item{CPUEobs}{a data frame of CPUE catch rate observations [year, stock, area, subyear, fleet, index] fitted against vulnerable biomass}
-\item{CPUEwt}{a vector of CPUE index weights [nCPUEq]}
 \item{nE}{the number of partial F series (typically nfleets)}
 \item{nEobs}{the number effort observations (partial F's) one for each catch observations}
 \item{Eobs}{a data frame of effort observations one line per observation [year, subyear, area, fleet, effort]}
@@ -74,9 +75,8 @@
 \item{nI}{the number of fishery independent indices (e.g. 2: a spawning biomass survey in the GOM and MED)}
 \item{nIobs}{the number of fishery independent indices}
 \item{Iobs}{a data frame of fishery independent relative abundance observations [year, subyear, area, stock, index number, type (biomass/ssb), index]}
-\item{Iwt}{a vector of fishery independent relative abundance index weights [nI]}
 \item{nPSAT}{the number of electronic tags of known stock of origin}
-\item{PSAT}{a data frame of electronic tag movements [stock, age, subyear, duration til recapture (subyears), from area, to area, number of tags]}
+\item{PSAT}{a data frame of electronic tag movements [stock, age, subyear, duration til recapture (subyears), from area, to area, number of tags, total from area]}
 \item{nPSAT2}{the number of electronic tags of unknown stock of origin}
 \item{PSAT2}{a data frame of electronic tag movements [age, subyear, duration til recapture (subyear), from area, to area, prob(stock1), prob(stock2)]}
 \item{nTag}{the number of conventional tagging movement observations}
@@ -98,8 +98,6 @@
 \item{movtype}{the type of movement model (1: Gravity model, 2: Markov model)}
 \item{Ilencat}{the categories of length specific vulnerable biomass}
 \item{CobsCV}{a vector nf long, the catch observation error (lognormal sd)}
-\item{CPUEobsCV}{a vector nCPUEq long, the index observation error (lognormal sd)}
-\item{IobsCV}{a vector nI long, the fishery independent index observation error (lognormal sd)}
 \item{CLCV_num}{the numerator of the normal observation error on lengths}
 \item{RDCV}{the recruitment deviation penalty (sigma R)(lognormal sd)}
 \item{SSBfit}{the type of SSBfit 1:SSB0 2:SSBnow}
@@ -134,6 +132,8 @@
 \item{MPind}{a data frame of fishery indices used for informing management procedures in subsequent MSE analysis (currently unused)}
 \item{MIinv}{a 1 or 0 determining whether the fit should attempt to be MI invariant}
 \item{MICV}{numerical value of the CV in additional to regional FMod deviations}
+\item{SpatPr}{matrix of Spatial priors}
+\item{SpatFrac}{matrix of spatial priors}
 \item{debug}{a logical (0 or 1) value determing whether the model should be run for a single iteration to check for errors}
 \item{verbose}{a logical (0 or 1) value determing whether more complete information should be provided in each iteration of the model estimation}
 \item{datacheck}{a unique number for checking that data were read into the model correctly}
@@ -142,5 +142,8 @@
 \item{nMovExc}{integer the number of rows in the movement exclusion data frame}
 \item{MovExc}{a data frame of movement exceptions}
 \item{Phases}{the phases of the various parameter estimates (1,2,3)}
+\item{ET_LHF}{the type of likelihood function used for electronic tagging data (1,2: zero intercept)}
+\item{LC_LHF}{the type of likelihood function used for length composition data (1,2: zero intercept)}
+\item{beta}{numerical value, the hyperstability parameter assumed for all indices (e.g. 0.9 = hyperstable, 1.1 = hyperdeplete)}
 }
 }

@@ -15,6 +15,7 @@ data(Allocation, envir=environment())
 #' @keywords data
 NULL
 
+
 #' TEST unit object
 #'
 #' @name TEST

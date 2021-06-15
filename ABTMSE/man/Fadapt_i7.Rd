@@ -24,6 +24,6 @@ a TAC recommendation arising from \code{x, dset}.
 An adaptive surplus production management procedure using INDEX 7 (GOM_LAR_SUV) that attempts to identify the slope of changes in surplus production and biomass to locate a gradient of zero (a management procedure of class MP).
 }
 \examples{
-Fadapt_i7(1,dset_example_East)
-sapply(1:10,Fadapt_i7,dset_example_East)
+Fadapt_i4(1,dset_example_East)
+sapply(1:10,Fadapt_i4,dset_example_East)
 }
