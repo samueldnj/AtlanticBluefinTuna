@@ -21,6 +21,7 @@ Fzero1W <- function(  x,
                       IndexID_m = 12, 
                       IndexID_o = 14, 
                       nyears=55,
+                      q = 0.608, # from 2015 VPA continuity run
                       IndexID_bio = 14)
   {
     
@@ -74,8 +75,8 @@ Fzero1W <- function(  x,
     }else{F01 = .2}
    
     # New TAC is F01*I/q
-    q = 0.608E-6 # from 2015 VPA continuity run
-    TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q)
+    
+    TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q/1e-6)
    
     TAC}
  
@@ -93,6 +94,7 @@ Fzero1E <- function(  x,
                       IndexID_m = 12, 
                       IndexID_o = 2, 
                       nyears=55,
+                      q = 0.25,
                       IndexID_bio = 2)
   {
     
@@ -144,8 +146,8 @@ Fzero1E <- function(  x,
     }else{F01 = .2}
    
     # New TAC is F01*I/q
-    q = 0.25E-6 # from 2015 VPA continuity run
-    TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q)
+     # from 2015 VPA continuity run
+    TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q/1e-6)
    
     TAC}
  

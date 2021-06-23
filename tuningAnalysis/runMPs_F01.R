@@ -12,6 +12,7 @@
 # Load the ABTMSE package
 source("initTest.R")
 source("runCMPs.R")
+source("pewPMs.R")
 source("makeGridMPs_F01.R")
 
 makeGridFzero1( qGrid = seq(from = 0.2, to = 0.8, by = 0.1),
@@ -28,6 +29,8 @@ projFolder <- "testF01_qGrid_allOMs"
 # sfSource("empiricalMP.R")
 # sfSource("MPs.R")
 # sfSource("plots.R")
+
+saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
                   
 
 OMdvec <- c(1:48)
@@ -42,6 +45,7 @@ gridqMSEs <- lapply(  X = OMdvec,
 
 
 
+
 pH30_E <- lapply(X = gridqMSEs, FUN = pH30, pp = 1)
 pH30_W <- lapply(X = gridqMSEs, FUN = pH30, pp = 2)
 
@@ -51,15 +55,16 @@ PGK_W <- lapply(X = gridqMSEs, FUN = PGK, pp = 2)
 yrHealth_E <- lapply(X = gridqMSEs, FUN = tfHealthy_t, pp = 1)
 yrHealth_W <- lapply(X = gridqMSEs, FUN = tfHealthy_t, pp = 2)
 
+Br30_E <- lapply(X = gridqMSEs, FUN = Br30, pp = 1)
+Br30_W <- lapply(X = gridqMSEs, FUN = Br30, pp = 2)
+
 perfMetricList <- list( pH30_E = pH30_E,
                         pH30_W = pH30_W,
                         PGK_E = PGK_E,
                         PGK_W = PGK_W,
                         yrHealth_E = yrHealth_E,
-                        yrHealth_W = yrHealth_W )
+                        yrHealth_W = yrHealth_W,
+                        Br30_E = Br30_E,
+                        Br30_W = Br30_W )
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
-
-#z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
-
-# source("tuneEastMmult.R")

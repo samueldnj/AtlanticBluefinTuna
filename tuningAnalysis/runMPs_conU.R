@@ -19,6 +19,8 @@ makeGridconstU( eMult = seq(from = 1, to = 5, by = 1),
                 outFile = "autoConstUgridMPs.R" )
 
 source("autoConstUgridMPs.R")
+
+saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
                   
 projFolder <- "testConstU_allOMs"
 
@@ -40,12 +42,17 @@ PGK_W <- lapply(X = gridUmultMSEs, FUN = PGK, pp = 2)
 yrHealth_E <- lapply(X = gridUmultMSEs, FUN = tfHealthy_t, pp = 1)
 yrHealth_W <- lapply(X = gridUmultMSEs, FUN = tfHealthy_t, pp = 2)
 
+Br30_E <- lapply(X = gridUmultMSEs, FUN = Br30, pp = 1)
+Br30_W <- lapply(X = gridUmultMSEs, FUN = Br30, pp = 2)
+
 perfMetricList <- list( pH30_E = pH30_E,
                         pH30_W = pH30_W,
                         PGK_E = PGK_E,
                         PGK_W = PGK_W,
                         yrHealth_E = yrHealth_E,
-                        yrHealth_W = yrHealth_W )
+                        yrHealth_W = yrHealth_W,
+                        Br30_E = Br30_E,
+                        Br30_W = Br30_W )
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
