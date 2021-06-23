@@ -13,6 +13,7 @@
 source("initTest.R")
 source("runCMPs.R")
 source("makeGridMPs_constU.R")
+source("pewPMs.R")
 source("plots.R")
 source("tools.R")
 
@@ -22,9 +23,14 @@ makeGridconstU( eMult = seq(from = 5, to = 10, by = 1),
 
 source("autoConstUgridMPs.R")
 
-saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
+
                   
 projFolder <- "testConU_5to10_allOMs"
+
+if(!dir.exists(file.path("MSEs",projFolder)))
+  dir.create(file.path("MSEs",projFolder))
+
+saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
 
 OMdvec <- 1:48
 
