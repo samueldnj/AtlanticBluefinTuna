@@ -24,7 +24,7 @@ source("autoConstUgridMPs.R")
 
 saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
                   
-projFolder <- "testConstU_allOMs"
+projFolder <- "testConU_5to10_allOMs"
 
 OMdvec <- 1:48
 
