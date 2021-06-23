@@ -24,6 +24,9 @@ source("autoF01gridMPs.R")
 
 projFolder <- "testF01_qGrid_allOMs"
 
+if(!dir.exists(file.path("MSEs",projFolder)))
+  dir.create(file.path("MSEs",projFolder))
+
 # sfInit(parallel=TRUE, cpus = 2 )
 # sfLibrary( ABTMSE )
 # sfLibrary( TMB )
