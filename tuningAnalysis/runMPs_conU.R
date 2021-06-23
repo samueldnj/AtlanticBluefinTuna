@@ -13,6 +13,8 @@
 source("initTest.R")
 source("runCMPs.R")
 source("makeGridMPs_constU.R")
+source("plots.R")
+source("tools.R")
 
 makeGridconstU( eMult = seq(from = 1, to = 5, by = 1),
                 wMult = seq(from = 7, to = 12, by = 1),
@@ -55,6 +57,14 @@ perfMetricList <- list( pH30_E = pH30_E,
                         Br30_W = Br30_W )
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
+
+gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
+
+gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+                                      projFolder = projFolder)
+
+write.csv(gridPerfMetrics.df, file = file.path("MSEs",projFolder,"perfMetrics.csv"))
+
 
 #z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
 

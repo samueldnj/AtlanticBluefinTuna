@@ -14,6 +14,8 @@ source("initTest.R")
 source("runCMPs.R")
 source("pewPMs.R")
 source("makeGridMPs_F01.R")
+source("tools.R")
+source("plots.R")
 
 makeGridFzero1( qGrid = seq(from = 0.2, to = 0.8, by = 0.1),
                 outFile = "autoF01gridMPs.R")
@@ -68,3 +70,11 @@ perfMetricList <- list( pH30_E = pH30_E,
                         Br30_W = Br30_W )
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
+
+gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
+
+gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+                                      projFolder = projFolder)
+
+write.csv(gridPerfMetrics.df, file = file.path("MSEs",projFolder,"perfMetrics.csv"))
+
