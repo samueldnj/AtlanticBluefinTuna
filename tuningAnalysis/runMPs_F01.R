@@ -27,14 +27,6 @@ projFolder <- "testF01_qGrid_allOMs"
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
 
-# sfInit(parallel=TRUE, cpus = 2 )
-# sfLibrary( ABTMSE )
-# sfLibrary( TMB )
-# sfClusterCall("loadABT")
-# sfSource("empiricalMP.R")
-# sfSource("MPs.R")
-# sfSource("plots.R")
-
 saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
                   
 

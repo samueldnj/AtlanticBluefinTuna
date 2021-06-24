@@ -17,15 +17,15 @@ source("pewPMs.R")
 source("plots.R")
 source("tools.R")
 
-makeGridconstU( eMult = seq(from = 5, to = 10, by = 1),
-                wMult = seq(from = 5, to = 10, by = 1),
-                outFile = "autoConstUgridMPs.R" )
+makeGridconstU( eMult = seq(from = 7.5, to = 7.45, by = 0.05),
+                wMult = seq(from = 8.3, to = 8.5, by = 0.05),
+                outFile = "autoConU_pH30gridMPs.R" )
 
-source("autoConstUgridMPs.R")
+source("autoConU_pH30gridMPs.R")
 
 
                   
-projFolder <- "testConU_5to10_allOMs"
+projFolder <- "conU_pH30_RefineGrid1"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
