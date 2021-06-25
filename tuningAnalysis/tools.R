@@ -57,8 +57,8 @@ makeMP.df_F01 <- function( projFolder = "testF01_qGrid_allOMs" )
   westMPsplit <- stringr::str_split(MPsWest, pattern = "_q")
   qWest <- unlist(westMPsplit)[2*(1:length(westMPsplit))]
 
-  gridMPs.df$qEast <- qEast
-  gridMPs.df$qWest <- qWest
+  gridMPs.df$qEast <- as.numeric(qEast)
+  gridMPs.df$qWest <- as.numeric(qWest)
 
 
   gridMPs.df

@@ -2,7 +2,8 @@
 
 source("Fzero1.R")
 
-makeGridFzero1 <- function(   qGrid = seq(from = 0.05, to = 0.75, by = 0.05),
+makeGridFzero1 <- function(   qEast = seq(from = 0.05, to = 0.75, by = 0.05),
+                              qWest = seq(from = 0.05, to = 0.75, by = 0.05),
                               outFile = "autoF01gridMPs.R")
 { 
   cat("# Automatically generated F01 MPs over q grid \n", file = outFile)
@@ -10,9 +11,9 @@ makeGridFzero1 <- function(   qGrid = seq(from = 0.05, to = 0.75, by = 0.05),
   cat("\n", file = outFile, append = TRUE)
   cat("\n", file = outFile, append = TRUE)
 
-  for( gridIdx in 1:length(qGrid) )
+  for( qIdx in 1:length(qEast) )
   {
-    q <- qGrid[gridIdx]
+    q <- qEast[qIdx]
 
     mpName <- paste0("Fzero1E_q",q)
 
@@ -23,6 +24,12 @@ makeGridFzero1 <- function(   qGrid = seq(from = 0.05, to = 0.75, by = 0.05),
     cat("\n", file = outFile, append = TRUE)
     cat("\n", file = outFile, append = TRUE)
 
+  }
+
+  for( qIdx in 1:length(qWest) )
+  {
+    q <- qWest[qIdx]
+    
     mpName <- paste0("Fzero1W_q",q)
 
     cat(mpName," <- Fzero1W \n", sep = "", file = outFile, append = TRUE)
@@ -38,8 +45,8 @@ makeGridFzero1 <- function(   qGrid = seq(from = 0.05, to = 0.75, by = 0.05),
 
   # Now make the list of CMPs to be tested by the MSE
   # function
-  q.list <- list( qE = qGrid,
-                  qW = qGrid )
+  q.list <- list( qE = qEast,
+                  qW = qWest )
 
   q.exp <- expand.grid(q.list)
 

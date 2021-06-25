@@ -17,12 +17,13 @@ source("makeGridMPs_F01.R")
 source("tools.R")
 source("plots.R")
 
-makeGridFzero1( qGrid = seq(from = 0.2, to = 0.8, by = 0.1),
+makeGridFzero1( qEast = seq(from = 0.25, to = 0.4, by = 0.025),
+                qWest = seq(from = 0.175, to = 0.3, by = 0.025),
                 outFile = "autoF01gridMPs.R")
 
 source("autoF01gridMPs.R")
 
-projFolder <- "testF01_qGrid_allOMs"
+projFolder <- "F01_refineGrid_allTargs"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
@@ -39,30 +40,8 @@ gridqMSEs <- lapply(  X = OMdvec,
                       reloadABT = FALSE,
                       projFolderName = projFolder )
 
-
-
-
-
-pH30_E <- lapply(X = gridqMSEs, FUN = pH30, pp = 1)
-pH30_W <- lapply(X = gridqMSEs, FUN = pH30, pp = 2)
-
-PGK_E <- lapply(X = gridqMSEs, FUN = PGK, pp = 1)
-PGK_W <- lapply(X = gridqMSEs, FUN = PGK, pp = 2)
-
-yrHealth_E <- lapply(X = gridqMSEs, FUN = tfHealthy_t, pp = 1)
-yrHealth_W <- lapply(X = gridqMSEs, FUN = tfHealthy_t, pp = 2)
-
-Br30_E <- lapply(X = gridqMSEs, FUN = Br30, pp = 1)
-Br30_W <- lapply(X = gridqMSEs, FUN = Br30, pp = 2)
-
-perfMetricList <- list( pH30_E = pH30_E,
-                        pH30_W = pH30_W,
-                        PGK_E = PGK_E,
-                        PGK_W = PGK_W,
-                        yrHealth_E = yrHealth_E,
-                        yrHealth_W = yrHealth_W,
-                        Br30_E = Br30_E,
-                        Br30_W = Br30_W )
+perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
+                                    OMs = OMdvec )
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 

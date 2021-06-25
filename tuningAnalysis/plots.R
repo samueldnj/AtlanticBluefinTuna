@@ -44,7 +44,7 @@ findTargPars <- function( surface1 = pH30_Esurf,
 
   # Solve for x value
   xVal <- uniroot( xSpline, interval = range(sameZpars[,1]) )$root
-  yVal <- uniroot( ySpline, interval = range(sameZpars[,1]) )$root
+  yVal <- uniroot( ySpline, interval = range(sameZpars[,2]) )$root
 
   
   targPars <- c(xVal,yVal)
@@ -53,12 +53,14 @@ findTargPars <- function( surface1 = pH30_Esurf,
 }
 
 # response surface plots
-makeRespSurfaces <- function( grid.df,  
-                              tuningPars = c("multEast","multWest"),
+makeRespSurfaces <- function( grid.df = gridPerfMetrics.df,  
+                              tuningPars = c("qEast","qWest"),
                               target = 0.6,
-                              tol = 0.001 )
+                              tol = 0.1 )
 {
   # colBreaks <- seq(from = 0.3, to = 1.0, by = 0.1)
+
+  # browser()
 
   # Probability of being healthy in year 30
   pH30_Etps <- Tps( x = as.matrix(grid.df[,tuningPars]),
@@ -71,6 +73,8 @@ makeRespSurfaces <- function( grid.df,
 
   pH30_Wsurf <- predictSurface(pH30_Wtps)
 
+
+  browser()
 
 
   pH30targPars <- findTargPars( surface1 = pH30_Esurf,
@@ -92,7 +96,6 @@ makeRespSurfaces <- function( grid.df,
 
   pYrH_Wsurf <- predictSurface(pYrH_Wtps)
 
-  browser()
 
   pYrHtargPars <- findTargPars( surface1 = pYrH_Esurf,
                                 surface2 = pYrH_Wsurf,
