@@ -140,3 +140,99 @@ addPerfMetrics <- function( gridMPs.df,
 
   return(gridMPs.df)
 }
+
+
+# Find target parameters in a surface
+findTargPars <- function( surface1 = pH30_Esurf,
+                          surface2 = pH30_Wsurf,
+                          target = .6,
+                          tol = 0.001)
+{
+  # Copy surface1 object and take diff between 1 and 2
+  diffSurface <- surface1
+  diffSurface$z <- abs(surface1$z - surface2$z)
+  # find where they are the same
+  sameZindices    <- which(diffSurface$z < tol, arr.ind = TRUE )  
+
+  # Now we want to limit this to 1 y value for every x, so let's
+  # do that
+  uniqueXind <- unique(sameZindices[,1])
+  uniqueZindices <- array(0, dim = c(length(uniqueXind),2) )
+  sameZvals       <- array(0,dim = c(length(uniqueXind),2))
+  uniqueZindices[,1] <- uniqueXind
+  for( rIdx in 1:length(uniqueXind) )
+  { 
+    xInd <- uniqueXind[rIdx]
+    yInd <- which.min(diffSurface$z[xInd,])
+    uniqueZindices[rIdx,2] <- yInd
+    sameZvals[rIdx,1] <- surface1$z[xInd,yInd]
+    sameZvals[rIdx,2] <- surface2$z[xInd,yInd]
+  }
+
+  sameZpars       <- cbind(surface1$x[uniqueZindices[,1]],surface1$y[uniqueZindices[,2]])
+
+
+
+  # Now, we use the z values from surface 1 along the curve in 
+  # uniqueZindices to create a spline, and solve for the x value (E), 
+  # which will give us the y value (W)
+  splineY <- numeric( length = nrow(uniqueZindices) )
+  for(j in 1:nrow(uniqueZindices))
+    splineY[j] <- surface1$z[uniqueZindices[j,1],uniqueZindices[j,2]]
+
+  # make response spline
+  if(range(splineY)[1] == range(splineY)[2])
+    return(c(NA,NA))
+
+
+  if(target <= range(splineY)[2] & target >= range(splineY)[1])
+  {
+    xSpline <- splinefun(x = sameZpars[,1], y = splineY - target )
+    ySpline <- splinefun(x = sameZpars[,2], y = splineY - target )
+
+    # Solve for x value
+    if(length(unique(sameZpars[,1])) == 2)
+      xVal <- uniroot( xSpline, interval = range(sameZpars[,1]) )$root
+    else xVal <- unique(sameZpars[,1])
+
+    if(length(unique(sameZpars[,2])) == 2)
+      yVal <- uniroot( ySpline, interval = range(sameZpars[,2]) )$root
+    else yVal <- unique(sameZpars[,2])
+    
+    targPars <- c(xVal,yVal)
+  } else targPars <- c(NA,NA)
+  
+  targPars
+}
+
+# response surfaces and solving for target
+# tuning parameter values
+makeRespSurfaces <- function( grid.df = gridPerfMetrics.df,  
+                              tuningPars = c("qEast","qWest"),
+                              resp = "pH30",
+                              target = 0.6,
+                              tol = 0.1 )
+{
+  # Generate response surfaces
+  tpsE <- Tps( x = as.matrix(grid.df[,tuningPars]),
+                    Y = grid.df[[paste0(resp,"_E")]] )
+
+  surfE <- predictSurface(tpsE)
+
+  tpsW <- Tps( x = as.matrix(grid.df[,tuningPars]),
+                    Y = grid.df[[paste0(resp,"_W")]] )
+
+  surfW <- predictSurface(tpsW)
+
+  # Solve for optimal tuning parameters
+  targPars <- findTargPars( surface1 = surfE,
+                            surface2 = surfW,
+                            target = target, tol = tol )
+  
+
+  out <- list(  surfE = surfE,
+                surfW = surfW,
+                targetPars = targPars)
+
+  return(out)
+}

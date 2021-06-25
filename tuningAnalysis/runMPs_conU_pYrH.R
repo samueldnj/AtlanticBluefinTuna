@@ -18,14 +18,14 @@ source("plots.R")
 source("tools.R")
 
 makeGridconstU( eMult = seq(from = 8.85, to = 9.05, by = 0.05),
-                wMult = seq(from = 9.05, to = 9.25, by = 0.05),
+                wMult = seq(from = 9.25, to = 9.45, by = 0.05),
                 outFile = "autoConU_pYrHgridMPs.R" )
 
 source("autoConU_pYrHgridMPs.R")
 
 
                   
-projFolder <- "conU_pYrH_RefineGrid1"
+projFolder <- "conU_pYrH_RefineGrid2"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
