@@ -149,6 +149,8 @@ findTargPars <- function( surface1 = pH30_Esurf,
                           tol = 0.001)
 {
   # Copy surface1 object and take diff between 1 and 2
+  surface1$z[surface1$z >= 1] <- NA
+  surface2$z[surface2$z >= 1] <- NA
   diffSurface <- surface1
   diffSurface$z <- abs(surface1$z - surface2$z)
   # find where they are the same
@@ -191,11 +193,11 @@ findTargPars <- function( surface1 = pH30_Esurf,
     ySpline <- splinefun(x = sameZpars[,2], y = splineY - target )
 
     # Solve for x value
-    if(length(unique(sameZpars[,1])) == 2)
+    if(length(unique(sameZpars[,1])) >= 2)
       xVal <- uniroot( xSpline, interval = range(sameZpars[,1]) )$root
     else xVal <- unique(sameZpars[,1])
 
-    if(length(unique(sameZpars[,2])) == 2)
+    if(length(unique(sameZpars[,2])) >= 2)
       yVal <- uniroot( ySpline, interval = range(sameZpars[,2]) )$root
     else yVal <- unique(sameZpars[,2])
     
