@@ -2,7 +2,7 @@
 # 3star) tuned to 1.5
 # indices modified 
 # with cap in the west
-BR_E3s<-function(x,dset,alp=1.69){
+BR_E3s<-function(x, dset, alp=1.69 ){
   
   lastyr = dim(dset$Iobs)[3]                # Most recent year
   cury <- dim(dset$TAC)[2] 
