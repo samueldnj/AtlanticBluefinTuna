@@ -1,5 +1,6 @@
 # Automatically generated constU MPs over E/W multiplier grid 
 
+source("constU.R")
 
 # EAST MPs
 # pH30
