@@ -1,4 +1,15 @@
-# Plots for tuning analysis
+# Tools for tuning analysis
+
+loadProject <- function(  projFolder = "testF01_qGrid_allOMs", 
+                          OMs = 1:48 )
+{
+  # Load rda files
+  rdas <- paste0("MSEs/",projFolder,"/rdas/MSE_",OMs,".rda" )
+
+  gridMSEs <- lapply(X = rdas, FUN = readRDS )
+  
+  gridMSEs 
+}
 
 # Calculate performance metrics for a grid of
 # operating model objects
@@ -22,6 +33,12 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
   Br30_E <- lapply(X = gridMSEs, FUN = Br30, pp = 1)
   Br30_W <- lapply(X = gridMSEs, FUN = Br30, pp = 2)
 
+  AvC30_E <- lapply(X = gridMSEs, FUN = AvC30, pp = 1)
+  AvC30_W <- lapply(X = gridMSEs, FUN = AvC30, pp = 2)
+
+  AvgBr_E <- lapply(X = gridMSEs, FUN = AvgBr, pp = 1)
+  AvgBr_W <- lapply(X = gridMSEs, FUN = AvgBr, pp = 2)
+
   perfMetricList <- list( pH30_E = pH30_E,
                           pH30_W = pH30_W,
                           PGK_E = PGK_E,
@@ -29,7 +46,11 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
                           yrHealth_E = yrHealth_E,
                           yrHealth_W = yrHealth_W,
                           Br30_E = Br30_E,
-                          Br30_W = Br30_W )
+                          Br30_W = Br30_W,
+                          AvC30_E = AvC30_E,
+                          AvC30_W = AvC30_W,
+                          AvgBr_E = AvgBr_E,
+                          AvgBr_W = AvgBr_W  )
 
   saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
@@ -111,6 +132,24 @@ addPerfMetrics <- function( gridMPs.df,
 
   gridMPs.df$lpcBr30_E <- apply(X = Br30_E, FUN = quantile, MARGIN = 2, probs = 0.05)
   gridMPs.df$lpcBr30_W <- apply(X = Br30_W, FUN = quantile, MARGIN = 2, probs = 0.05)
+
+
+  # Then Average Br
+  AvgBr_E <- abind(PMlist$AvgBr_E, along = 0.5)[,-1,]
+  AvgBr_W <- abind(PMlist$AvgBr_W, along = 0.5)[,-1,]
+
+  gridMPs.df$medAvgBr_E <- apply(X = AvgBr_E, FUN = median, MARGIN = 2)
+  gridMPs.df$medAvgBr_W <- apply(X = AvgBr_W, FUN = median, MARGIN = 2)
+
+  # Then av catch
+  AvC30_E <- abind(PMlist$AvC30_E, along = 0.5)[,-1,]
+  AvC30_W <- abind(PMlist$AvC30_W, along = 0.5)[,-1,]
+
+  gridMPs.df$medAvC30_E <- apply(X = AvC30_E, FUN = median, MARGIN = 2)
+  gridMPs.df$medAvC30_W <- apply(X = AvC30_W, FUN = median, MARGIN = 2)
+
+
+
 
   # Then prob Healthy in year 30
   H30_E <- abind(PMlist$pH30_E, along = 0.5)[,-1,]

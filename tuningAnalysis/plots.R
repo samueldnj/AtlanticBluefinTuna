@@ -39,7 +39,7 @@ plotRespSurfaces <- function( surfList,
     if( j == 1 ) 
       mtext( side = 3, text = "West stock" )
 
-    mtext( side = 4, text = rtext[j], line = 4 )
+    mtext( side = 4, text = rtext[j], line = 5 )
   }
 
   
@@ -50,4 +50,77 @@ plotRespSurfaces <- function( surfList,
 
   targetPars
 
+}
+
+# Helper function to pull out B/Bmsy values
+pullBr <- function( MSE )
+{
+  Br <- MSE@B_BMSY
+  Br
+}
+
+# Helper function to pull out F/FMSY values
+pullFr <- function( MSE )
+{
+  Fr <- MSE@F_FMSY
+  Fr
+}
+
+
+# plot Br and Fr simulation envelopes for
+# a given grid
+plotBrFrSimEnvelopes <- function( MSEgrid, 
+                                  mpIdx = 1:3,
+                                  probs = c(0.025, 0.5, 0.975)  )
+{
+  fYear <- 1965
+  # Pull biomass ratios
+  BrList <- lapply(   X = MSEgrid, FUN = pullBr )
+  # Combine into an array
+  Br.array <- abind(  BrList, along = 0.5 )
+  dimnames(Br.array) <- list( OM = 1:48,
+                              MP = 1:50,
+                              rep = 1:2,
+                              stock = 1:2,
+                              t = 1:109 )
+
+  # Pull F ratios
+  FrList <- lapply(   X = MSEgrid, FUN = pullFr)
+  Fr.array <- abind(  FrList, along = 0.5 )
+  dimnames(Br.array) <- list( OM = 1:48,
+                              MP = 1:50,
+                              rep = 1:2,
+                              stock = 1:2,
+                              t = 1:109 )
+
+  # Calculate envelopes
+  # Biomass
+  Br_MPs <- Br.array[,mpIdx,,,,drop=FALSE]
+  Br_qms <- apply(X = BR_MPs, FUN = quantile, MARGIN = c(2,4,5), probs = probs )
+  # F
+  Fr_MPs <- Br.array[,mpIdx,,,,drop=FALSE]
+  Fr_qms <- apply(X = BR_MPs, FUN = quantile, MARGIN = c(2,4,5), probs = probs )
+
+  # Total number of years
+  totYears <- MSEgrid[[1]]@nyears + MSEgrid[[1]]@proyears
+  yrs <- seq( from = fYear, by = 1, 
+              length.out = totYears )
+
+  maxBr <- max(Br_qms, na.rm = T)
+  maxFr <- max(Fr_qms, na.rm = T)
+
+  mpCols <- RColorBrewer::brewer.pal(n = length(mpIdx), "Dark2")
+  transCols <- scales::alpha(mpCols, alpha = 0.5)
+
+  par(mfrow = c(2,2), mar = c(2,2,2,2), oma = c(3,3,1,2))
+  plot( x = range(yrs), y = c(0,maxBr),
+        type = "n", axes = FALSE )
+    for( mpId in 1:length(mpIdx) )
+    {
+      xPoly <- c(yrs,rev(yrs))
+      yPoly <- c(Br_qms[1,mpId,],rev(Br_qms[3,mpId,]))
+      
+      polygon(  x = xPoly, y = yPoly, 
+                )
+    }
 }
