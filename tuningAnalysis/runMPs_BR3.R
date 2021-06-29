@@ -17,13 +17,13 @@ source("makeGridMPs_BR.R")
 source("tools.R")
 source("plots.R")
 
-makeGridBR( alp = 1.7,
-            bet = 0.9,
-            outFile = "autoBRgrid.R")
-
-# makeGridBR( alp = seq(from = 1.7, to = 3.7, by = 0.5),
-#             bet = seq(from = 0.8, to = 1.2, by = 0.1),
+# makeGridBR( alp = 1.7,
+#             bet = 0.9,
 #             outFile = "autoBRgrid.R")
+
+makeGridBR( alp = seq(from = 1.7, to = 3.7, by = 0.5),
+            bet = seq(from = 0.8, to = 1.2, by = 0.1),
+            outFile = "autoBRgrid.R")
 
 source("autoBRgrid.R")
 
