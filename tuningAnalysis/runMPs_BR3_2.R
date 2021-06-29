@@ -35,7 +35,7 @@ if(!dir.exists(file.path("MSEs",projFolder)))
 saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
                   
 
-OMdvec <- c(25:48)
+OMdvec <- c(33:48)
 
 gridBRMSEs <- lapply(  X = OMdvec, 
                       FUN = runCMPs,
