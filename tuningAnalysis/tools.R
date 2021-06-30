@@ -1,6 +1,6 @@
 # Tools for tuning analysis
 
-loadProject <- function(  projFolder = "testF01_qGrid_allOMs", 
+loadProject <- function(  projFolder = "F01_tuned", 
                           OMs = 1:48 )
 {
   # Load rda files

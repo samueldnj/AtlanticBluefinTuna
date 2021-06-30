@@ -2,7 +2,10 @@
 # 3star) tuned to 1.5
 # indices modified 
 # with cap in the west
-BR_E3s<-function(x, dset, alp=1.69 ){
+BR_E3s<-function( x, 
+                  dset, 
+                  alp=1.69,
+                  TACcap = 45 ){
   
   lastyr = dim(dset$Iobs)[3]                # Most recent year
   cury <- dim(dset$TAC)[2] 
@@ -98,8 +101,8 @@ BR_E3s<-function(x, dset, alp=1.69 ){
   
   #cat(sprintf("x%d year%d %s %.3f %s %.3f %.3f \n",x,lastyr,"Catch ",TAC_E, "Ind2017 ",Ind_E2017,aveInd_E[x,cury-2]),file="East.txt",append=TRUE)
   
-  if(TAC_E>45000000){  
-    TAC_E=45000000
+  if(TAC_E>TACcap*1e6){  
+    TAC_E=TACcap*1e6
   }
   
   if(lastyr<=66){
@@ -125,7 +128,11 @@ class(BR_E3s)<-"MP"
 # 3star) tuned to 1.25
 # indices modified 
 # with cap in the west
-BR_W3s<-function(x,dset,bet=0.95,gam=10.0){
+BR_W3s<-function( x,
+                  dset,
+                  bet=0.95,
+                  gam=10.0,
+                  TACcap = 2.35){
   
   lastyr = dim(dset$Iobs)[3]                # Most recent year
   cury <- dim(dset$TAC)[2] 
@@ -221,8 +228,8 @@ BR_W3s<-function(x,dset,bet=0.95,gam=10.0){
   #  TAC_W=TAC_W
   #}  
   if(lastyr<=66){
-    if(TAC_W>2350000 ){
-      TAC_W=2350000
+    if(TAC_W>TACcap*1e6 ){
+      TAC_W=TACcap*1e6
     }
   }
   

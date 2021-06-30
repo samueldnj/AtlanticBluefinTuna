@@ -4,6 +4,8 @@ source("BR3.R")
 
 makeGridBR <- function( alp = seq(from = 1.7, to = 3.7, by = 0.5),
                         bet = seq(from = 0.8, to = 1.2, by = 0.1),
+                        eCap = 45,
+                        wCap = 2.35,
                         outFile = "autoBRgrid.R")
 { 
   cat("# Automatically generated BR3 MPs over q grid \n", file = outFile)
@@ -20,6 +22,7 @@ makeGridBR <- function( alp = seq(from = 1.7, to = 3.7, by = 0.5),
     cat("# alp = ", a, "\n", file = outFile, sep = "", append = TRUE)
     cat(mpName," <- BR_E3s \n", sep = "", file = outFile, append = TRUE)
     cat("formals(",mpName,")$alp <- ", a, "\n", sep = "", file = outFile, append = TRUE)
+    cat("formals(",mpName,")$TACcap <- ", eCap, "\n", sep = "", file = outFile, append = TRUE)
     cat("class(",mpName,") <- 'MP' \n",sep = "", file = outFile, append = TRUE)
     cat("\n", file = outFile, append = TRUE)
     cat("\n", file = outFile, append = TRUE)
@@ -35,6 +38,7 @@ makeGridBR <- function( alp = seq(from = 1.7, to = 3.7, by = 0.5),
     cat("# bet = ", b, "\n", file = outFile, sep = "", append = TRUE)
     cat(mpName," <- BR_W3s \n", sep = "", file = outFile, append = TRUE)
     cat("formals(",mpName,")$bet <- ", b, "\n", sep = "", file = outFile, append = TRUE)
+    cat("formals(",mpName,")$TACcap <- ", wCap, "\n", sep = "", file = outFile, append = TRUE)
     cat("class(",mpName,") <- 'MP' \n",sep = "", file = outFile, append = TRUE)
     cat("\n", file = outFile, append = TRUE)
     cat("\n", file = outFile, append = TRUE)
