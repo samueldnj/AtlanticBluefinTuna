@@ -17,13 +17,13 @@ source("makeGridMPs_F01.R")
 source("tools.R")
 source("plots.R")
 
-makeGridFzero1( qEast = seq(from = 0.27, to = 0.30, by = 0.01),
+makeGridFzero1( qEast = seq(from = 0.275, to = 0.315, by = 0.01),
                 qWest = seq(from = 0.21, to = 0.25, by = 0.01),
                 outFile = "autoF01gridMPs.R")
 
 source("autoF01gridMPs.R")
 
-projFolder <- "F01_refineGrid2_pYrH"
+projFolder <- "F01_refineGrid3_pYrH"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))

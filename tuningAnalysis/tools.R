@@ -188,8 +188,8 @@ addPerfMetrics <- function( gridMPs.df,
   pYrHealthy_E <- abind(PMlist$PGK_E, along = 0.5)[,-1,]/100
   pYrHealthy_W <- abind(PMlist$PGK_W, along = 0.5)[,-1,]/100
 
-  gridMPs.df$pYrHealthy_E <- apply(X = pYrHealthy_E, FUN = median, MARGIN = 2)
-  gridMPs.df$pYrHealthy_W <- apply(X = pYrHealthy_W, FUN = median, MARGIN = 2)
+  gridMPs.df$pYrHealthy_E <- apply(X = pYrHealthy_E, FUN = mean, MARGIN = 2)
+  gridMPs.df$pYrHealthy_W <- apply(X = pYrHealthy_W, FUN = mean, MARGIN = 2)
 
   # Now min prob healthy in each of the next 30 years
   yrHealth_E <- abind(PMlist$yrHealth_E, along = 0.5)[,-1,]
