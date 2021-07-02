@@ -20,12 +20,26 @@ source("tools.R")
 
 
 
-# OMdvec <- 1:48
+OMdvec <- 1:48
+
+# projFolder <- "BR_initGrid_hiCaps"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )
 
-# projFolder <- "BR_initGrid"
+
+
+# gridMPs.df <- makeMP.df_BR3( projFolder =  projFolder)
+
+# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+#                                       OMs = OMdvec,
+#                                       projFolder = projFolder)
+
+# projFolder <- "BR_refineGrid_YearEach30"
+
+# perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
+#                                     OMs = OMdvec )
+
 
 # gridMPs.df <- makeMP.df_BR3( projFolder =  projFolder)
 
@@ -38,21 +52,22 @@ targPars <- array(NA, dim = c(3,2))
 rownames(targPars) <- c("pH30","pYrH","minProbYrH")
 colnames(targPars) <- c("East","West")
 
-pH30Grid.df <- read.csv("MSEs/BR_initGrid/perfMetrics.csv")
+pH30Grid.df <- read.csv("MSEs/BR_refineGrid_YearEach30/perfMetrics.csv")
 pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,  
                                   tuningPars = c("alpha","beta"),
                                   resp = "pH30",
                                   target = 0.6,
-                                  tol = 0.05 )
+                                  tol = 0.1 )
 
 
-pYrHGrid.df <- read.csv("MSEs/BR_initGrid/perfMetrics.csv")
+pYrHGrid.df <- read.csv("MSEs/BR_initGrid_hiCaps/perfMetrics.csv")
 pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
                                   tuningPars = c("alpha","beta"),
                                   resp = "pYrHealthy",
                                   target = 0.6,
                                   tol = 0.1 )
-minpYrHGrid.df <- read.csv("MSEs/BR_initGrid/perfMetrics.csv")
+
+minpYrHGrid.df <- read.csv("MSEs/BR_refineGrid_YearEach30/perfMetrics.csv")
 minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
                                       tuningPars = c("alpha","beta"),
                                       resp = "minProbYrHealth",

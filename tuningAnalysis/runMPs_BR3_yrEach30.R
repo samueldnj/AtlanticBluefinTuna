@@ -21,13 +21,13 @@ source("plots.R")
 #             bet = 0.9,
 #             outFile = "autoBRgrid.R")
 
-makeGridBR( alp = seq(from = 4.1, to = 4.5, by = 0.1),
-            bet = seq(from = 0.9, to = 1.1, by = 0.05),
+makeGridBR( alp = seq(from = 3.3, to = 4.3, by = 0.2),
+            bet = seq(from = 0.8, to = 1.2, by = 0.1),
             outFile = "autoBRgrid.R")
 
 source("autoBRgrid.R")
 
-projFolder <- "BR_refineGrid_YearEach30"
+projFolder <- "BR_refineGrid2_YearEach30"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
