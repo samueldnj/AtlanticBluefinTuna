@@ -21,7 +21,7 @@ source("plots.R")
 #             bet = 0.9,
 #             outFile = "autoBRgrid.R")
 
-makeGridBR( alp = seq(from = 7, to = 9, by = 0.05),
+makeGridBR( alp = seq(from = 7, to = 9, by = 0.5),
             bet = seq(from = 0.8, to = 1.6, by = 0.2),
             eCap = 50,
             wCap = Inf,
