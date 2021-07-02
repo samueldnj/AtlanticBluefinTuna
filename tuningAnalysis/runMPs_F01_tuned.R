@@ -26,7 +26,7 @@ if(!dir.exists(file.path("MSEs",projFolder)))
 
 # Tuned "grid"
 gridMPs <- list(c('Fzero1E_q0.368', 'Fzero1W_q0.243'),
-                c('Fzero1E_q0.286', 'Fzero1W_q0.225'),
+                c('Fzero1E_q0.295', 'Fzero1W_q0.230'),
                 c('Fzero1E_q0.365', 'Fzero1W_q0.256'))
 
 
@@ -47,7 +47,7 @@ perfMetricList <- calcPerfMetrics(  projFolder = projFolder,
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
-gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
+gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
 
 gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
                                       projFolder = projFolder)

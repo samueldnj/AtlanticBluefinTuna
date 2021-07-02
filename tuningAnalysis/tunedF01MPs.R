@@ -7,9 +7,9 @@ formals(Fzero1E_q0.368)$q <- 0.368
 class(Fzero1E_q0.368) <- 'MP' 
 
 
-Fzero1E_q0.286 <- Fzero1E 
-formals(Fzero1E_q0.286)$q <- 0.286
-class(Fzero1E_q0.286) <- 'MP' 
+Fzero1E_q0.295 <- Fzero1E 
+formals(Fzero1E_q0.295)$q <- 0.295
+class(Fzero1E_q0.295) <- 'MP' 
 
 Fzero1E_q0.365 <- Fzero1E 
 formals(Fzero1E_q0.365)$q <- 0.365
@@ -20,9 +20,9 @@ Fzero1W_q0.243 <- Fzero1W
 formals(Fzero1W_q0.243)$q <- 0.243
 class(Fzero1W_q0.243) <- 'MP' 
 
-Fzero1W_q0.225 <- Fzero1W 
-formals(Fzero1W_q0.225)$q <- 0.225
-class(Fzero1W_q0.225) <- 'MP' 
+Fzero1W_q0.230 <- Fzero1W 
+formals(Fzero1W_q0.230)$q <- 0.230
+class(Fzero1W_q0.230) <- 'MP' 
 
 
 Fzero1W_q0.256 <- Fzero1W 
