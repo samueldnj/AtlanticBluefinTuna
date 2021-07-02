@@ -2,9 +2,9 @@
 
 plotRespSurfaces <- function( surfList,
                               tuningPars = c("multEast","multWest"),
-                              rtext = c("pHealthy t = 30",
-                                        "pHealthy t = 1:30",
-                                        "min(pHealthy | t in 1:30)") )
+                              rtext = c("Year30",
+                                        "All30",
+                                        "Each30") )
 {
   nSurf <- length(surfList)
   # Now plot - we'll get to solving for
@@ -16,13 +16,17 @@ plotRespSurfaces <- function( surfList,
   rownames(targetPars) <- rtext
   colnames(targetPars) <- c('East','West')
 
+  colBreaks <- seq(from = 0, to = 1, length.out = 65)
+  cols <- viridisLite::turbo(n = 64, begin = 0, end = 1, direction = -1)
+
+
   for( j in 1:nSurf )
   {
     targPars <- surfList[[j]]$targetPars
     targetPars[j,] <- targPars
     surfE <- surfList[[j]]$surfE
     surfE$z[surfE$z > 0.97] <- 0.97
-    plot.surface( surfE )
+    plot.surface( surfE, breaks = colBreaks, col = cols, las = 1 )
       points(x = targPars[1], y = targPars[2], col = "grey40",
               pch = 16, cex = 1.5 )
 
@@ -32,7 +36,7 @@ plotRespSurfaces <- function( surfList,
     surfW <- surfList[[j]]$surfW
     surfW$z[surfW$z > 0.97] <- 0.97
 
-    plot.surface( surfW )
+    plot.surface( surfW, breaks = colBreaks, col = cols, las =1 )
       points(x = targPars[1], y = targPars[2], col = "grey40",
               pch = 16, cex = 1.5 )
 
