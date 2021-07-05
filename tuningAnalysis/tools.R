@@ -17,9 +17,7 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
                               OMs = 1:48 )
 {
   # Load rda files
-  rdas <- paste0("MSEs/",projFolder,"/rdas/MSE_",OMs,".rda" )
-
-  gridMSEs <- lapply(X = rdas, FUN = readRDS )
+  gridMSEs <- loadProject( projFolder, OMs = OMs )
 
   pH30_E <- lapply(X = gridMSEs, FUN = pH30, pp = 1)
   pH30_W <- lapply(X = gridMSEs, FUN = pH30, pp = 2)
