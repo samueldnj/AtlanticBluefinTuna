@@ -106,8 +106,8 @@ BR_E3s<-function( x,
   }
   
   if(lastyr<=66){
-    if(TAC_E>36000000 ){
-      TAC_E=36000000
+    if(TAC_E>0.8*TACcap*1e6 ){
+      TAC_E=0.8*TACcap*1e6
     }
     if(TAC_E<12000000 ){
       TAC_E=12000000
