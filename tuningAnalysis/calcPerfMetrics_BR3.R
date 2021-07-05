@@ -22,7 +22,7 @@ source("tools.R")
 
 OMdvec <- 1:48
 
-projFolder <- "BR_initGrid_hiCaps2"
+projFolder <- "BR_initGrid_hiCaps3"
 
 perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
                                     OMs = OMdvec )
@@ -35,17 +35,7 @@ gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
                                       OMs = OMdvec,
                                       projFolder = projFolder)
 
-projFolder <- "BR_refineGrid2_YearEach30"
-
-perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
-                                    OMs = OMdvec )
-
-
-gridMPs.df <- makeMP.df_BR3( projFolder =  projFolder)
-
-gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-                                      OMs = OMdvec,
-                                      projFolder = projFolder)
+ 
 
 
 targPars <- array(NA, dim = c(3,2))
@@ -60,7 +50,7 @@ pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,
                                   tol = 0.1 )
 
 
-pYrHGrid.df <- read.csv("MSEs/BR_initGrid_hiCaps2/perfMetrics.csv")
+pYrHGrid.df <- read.csv("MSEs/BR_initGrid_hiCaps3/perfMetrics.csv")
 pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
                                   tuningPars = c("alpha","beta"),
                                   resp = "pYrHealthy",

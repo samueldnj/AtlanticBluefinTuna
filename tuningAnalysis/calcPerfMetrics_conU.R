@@ -17,10 +17,10 @@ source("pewPMs.R")
 source("plots.R")
 source("tools.R")
 
-OMdvec <- 1:48
+OMdvec <- 1:48  
 
 
-projFolder <- "conU_pYrH_RefineGrid3"
+projFolder <- "testConU_5to10_allOMs"
 
 perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
                                     OMs = OMdvec )

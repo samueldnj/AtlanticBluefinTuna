@@ -19,37 +19,38 @@ source("tools.R")
 
 
 
-# OMdvec <- 1:48
-# projFolder <- "F01_refineGrid_allTargs"
+OMdvec <- 1:48
 
-# perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
-#                                     OMs = OMdvec )
+projFolder <- "F01_refineGrid_allTargs"
 
-
-
-# gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
+perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
+                                    OMs = OMdvec )
 
 
-# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-#                                       OMs = OMdvec,
-#                                       projFolder = projFolder)
+
+gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
 
 
-# projFolder <- "F01_refineGrid2_pYrH"
+gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+                                      OMs = OMdvec,
+                                      projFolder = projFolder)
 
-# gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
 
-# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-#                                       OMs = OMdvec,
-#                                       projFolder = projFolder)
+projFolder <- "F01_refineGrid2_pYrH"
 
-# projFolder <- "F01_refineGrid2_minpYr"
+gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
 
-# gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
+gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+                                      OMs = OMdvec,
+                                      projFolder = projFolder)
 
-# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-#                                       OMs = OMdvec,
-#                                       projFolder = projFolder)
+projFolder <- "F01_refineGrid2_minpYr"
+
+gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
+
+gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+                                      OMs = OMdvec,
+                                      projFolder = projFolder)
 
 targPars <- array(NA, dim = c(3,2))
 rownames(targPars) <- c("pH30","pYrH","minProbYrH")
