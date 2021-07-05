@@ -18,18 +18,18 @@ formals(BR3_E_alp10hiCap)$TACcap <- 55
 class(BR3_E_alp10hiCap) <- 'MP' 
 
 # West MPs
-Br3_W_bet1.01 <- BR_E3s 
-formals(Br3_W_bet1.01)$bet <- 1.01
-class(Br3_W_bet1.01) <- 'MP' 
+BR3_W_bet1.01 <- BR_W3s 
+formals(BR3_W_bet1.01)$bet <- 1.01
+class(BR3_W_bet1.01) <- 'MP' 
 
-Br3_W_bet1.00 <- BR_E3s 
-formals(Br3_W_bet1.00)$bet <- 1.00
-class(Br3_W_bet1.00) <- 'MP' 
+BR3_W_bet1.00 <- BR_W3s 
+formals(BR3_W_bet1.00)$bet <- 1.00
+class(BR3_W_bet1.00) <- 'MP' 
 
-Br3_W_bet1.2hiCap <- BR_W3s 
-formals(Br3_W_bet1.2hiCap)$bet <- 1.2
-formals(Br3_W_bet1.2hiCap)$TACcap <- Inf
-class(Br3_W_bet1.2hiCap) <- 'MP' 
+BR3_W_bet1.2hiCap <- BR_W3s 
+formals(BR3_W_bet1.2hiCap)$bet <- 1.2
+formals(BR3_W_bet1.2hiCap)$TACcap <- Inf
+class(BR3_W_bet1.2hiCap) <- 'MP' 
 
 # "grid"
 gridMPs <- list(c('BR3_E_alp3.806', 'Br3_W_bet1.01'),
