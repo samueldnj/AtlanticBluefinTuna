@@ -35,12 +35,12 @@ saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
 
 OMdvec <- c(1:48)
 
-gridqMSEs <- lapply(  X = OMdvec, 
-                      FUN = runCMPs,
-                      MPs = gridMPs,
-                      checkMPs = TRUE,
-                      reloadABT = FALSE,
-                      projFolderName = projFolder )
+# gridqMSEs <- lapply(  X = OMdvec, 
+#                       FUN = runCMPs,
+#                       MPs = gridMPs,
+#                       checkMPs = TRUE,
+#                       reloadABT = FALSE,
+#                       projFolderName = projFolder )
 
 perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
                                     OMs = OMdvec )

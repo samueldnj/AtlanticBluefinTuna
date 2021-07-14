@@ -19,23 +19,33 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
   # Load rda files
   gridMSEs <- loadProject( projFolder, OMs = OMs )
 
+  # Year30
   pH30_E <- lapply(X = gridMSEs, FUN = pH30, pp = 1)
   pH30_W <- lapply(X = gridMSEs, FUN = pH30, pp = 2)
 
+  # All30
   PGK_E <- lapply(X = gridMSEs, FUN = PGK, pp = 1)
   PGK_W <- lapply(X = gridMSEs, FUN = PGK, pp = 2)
 
+  # Each30
   yrHealth_E <- lapply(X = gridMSEs, FUN = tfHealthy_t, pp = 1)
   yrHealth_W <- lapply(X = gridMSEs, FUN = tfHealthy_t, pp = 2)
 
+  # Br30
   Br30_E <- lapply(X = gridMSEs, FUN = Br30, pp = 1)
   Br30_W <- lapply(X = gridMSEs, FUN = Br30, pp = 2)
 
+  # AvC30
   AvC30_E <- lapply(X = gridMSEs, FUN = AvC30, pp = 1)
   AvC30_W <- lapply(X = gridMSEs, FUN = AvC30, pp = 2)
 
+  # AvgBr
   AvgBr_E <- lapply(X = gridMSEs, FUN = AvgBr, pp = 1)
   AvgBr_W <- lapply(X = gridMSEs, FUN = AvgBr, pp = 2)
+
+  # Lowest Depletion
+  LD_E <- lapply(X = gridMSEs, FUN = LD, pp = 1)
+  LD_W <- lapply(X = gridMSEs, FUN = LD, pp = 2)
 
   perfMetricList <- list( pH30_E = pH30_E,
                           pH30_W = pH30_W,
@@ -48,7 +58,9 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
                           AvC30_E = AvC30_E,
                           AvC30_W = AvC30_W,
                           AvgBr_E = AvgBr_E,
-                          AvgBr_W = AvgBr_W  )
+                          AvgBr_W = AvgBr_W,
+                          LD_E = LD_E,
+                          LD_W = LD_W   )
 
   saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
@@ -172,24 +184,29 @@ addPerfMetrics <- function( gridMPs.df,
   gridMPs.df$medAvC30_E <- apply(X = AvC30_E, FUN = median, MARGIN = 2)
   gridMPs.df$medAvC30_W <- apply(X = AvC30_W, FUN = median, MARGIN = 2)
 
+  # Lowest Depletion
+  LD_E <- abind(PMlist$LD_E, along = 0.5)[,-1,]
+  LD_W <- abind(PMlist$LD_W, along = 0.5)[,-1,]
 
-
+  gridMPs.df$medLD_E <- apply(X = LD_E, FUN = median, MARGIN = 2)
+  gridMPs.df$medLD_W <- apply(X = LD_W, FUN = median, MARGIN = 2)
 
   # Then prob Healthy in year 30
   H30_E <- abind(PMlist$pH30_E, along = 0.5)[,-1,]
   H30_W <- abind(PMlist$pH30_W, along = 0.5)[,-1,]
 
+  # Year30
   gridMPs.df$pH30_E <- apply(X = H30_E, FUN = mean, MARGIN = 2)
   gridMPs.df$pH30_W <- apply(X = H30_W, FUN = mean, MARGIN = 2)
 
-  # Prob healthy over the next 30 years
+  # All30
   pYrHealthy_E <- abind(PMlist$PGK_E, along = 0.5)[,-1,]/100
   pYrHealthy_W <- abind(PMlist$PGK_W, along = 0.5)[,-1,]/100
 
   gridMPs.df$pYrHealthy_E <- apply(X = pYrHealthy_E, FUN = mean, MARGIN = 2)
   gridMPs.df$pYrHealthy_W <- apply(X = pYrHealthy_W, FUN = mean, MARGIN = 2)
 
-  # Now min prob healthy in each of the next 30 years
+  # Each30
   yrHealth_E <- abind(PMlist$yrHealth_E, along = 0.5)[,-1,]
   yrHealth_W <- abind(PMlist$yrHealth_W, along = 0.5)[,-1,]
 
@@ -270,15 +287,52 @@ findTargPars <- function( surface1 = pH30_Esurf,
   targPars
 }
 
-# response surfaces and solving for target
-# tuning parameter values
+# makeSampleSurface()
+# Turns a data-frame of performance metric response
+# values into a surface object (list of x, y, and z)
+# with resolution equal to the sampled grid points.
+makeSampleSurface <- function(  grid.df = gridPerfMetrics.df,  
+                                tuningPars = c("qEast","qWest"),
+                                resp = "pH30" )
+{
+  x <- unique(grid.df[,tuningPars[1]])
+  x <- x[order(x)]
+  y <- unique(grid.df[,tuningPars[2]])
+  y <- y[order(y)]
+
+  nX <- length(x)
+  nY <- length(y)
+
+  zDimNames <- list(x,y)
+  names(zDimNames) <- tuningPars
+
+  z <- array(NA, dim = c(nX,nY), dimnames = zDimNames )
+
+  # Now loop and fill
+  for( xIdx in 1:nX )
+    for( yIdx in 1:nY )
+    {
+      rowIdx <- which(grid.df[,tuningPars[1]] == x[xIdx] & grid.df[,tuningPars[2]] == y[yIdx] )
+      z[xIdx,yIdx] <- grid.df[rowIdx,resp]
+    }
+
+  sampSurf <- list( x = x, y = y, z = z)
+
+  sampSurf
+} # END makeSampleSuface()
+
+
+# Makes a continuous spline meta-model of performance metric 
+# response surfaces over a given grid of tuning parameter values
 makeRespSurfaces <- function( grid.df = gridPerfMetrics.df,  
                               tuningPars = c("qEast","qWest"),
                               resp = "pH30",
                               target = 0.6,
                               tol = 0.1 )
 {
-  # Generate response surfaces
+
+
+  # Estimate response surfaces from data
   tpsE <- Tps( x = as.matrix(grid.df[,tuningPars]),
                     Y = grid.df[[paste0(resp,"_E")]] )
 

@@ -33,7 +33,7 @@ class(BR3_W_bet1.2hiCap) <- 'MP'
 
 # "grid"
 gridMPs <- list(c('BR3_E_alp3.806', 'BR3_W_bet1.01'),
-                c('BR3_E_alp10hiCap', 'BR3_W_bet1.2_hiCap'),
+                c('BR3_E_alp10hiCap', 'BR3_W_bet1.2hiCap'),
                 c('BR3_E_alp3.809', 'BR3_W_bet1.00'))
 
 

@@ -81,6 +81,7 @@ plotBrFrSimEnvelopes <- function( MSEgrid = F01tuned,
 {
   fYear <- 1965
   nMPs  <- length(MSEgrid[[1]]@MPs)
+  vertIdx <- MSEgrid[[1]]@nyears+MPlag+30
   # Pull biomass ratios
   BrList <- lapply(   X = MSEgrid, FUN = pullBr )
   # Combine into an array
@@ -162,6 +163,7 @@ plotBrFrSimEnvelopes <- function( MSEgrid = F01tuned,
          lines( x = yrs, y = Br_MPs[tIdx,mpId,1,1,], col = mpCols[mpId] )
 
       grid()
+      abline(v = yrs[vertIdx], lty = 2, lwd = 1.2 )
   }
   # Next row is F/Fmsy East stock
   for( mpId in 1:length(mpIdx) )
@@ -194,6 +196,7 @@ plotBrFrSimEnvelopes <- function( MSEgrid = F01tuned,
          lines( x = yrs, y = Fr_MPs[tIdx,mpId,1,1,], col = mpCols[mpId] )
 
       grid()
+      abline(v = yrs[vertIdx], lty = 2, lwd = 1.2 )
   }
 
   # Now West stock Br
@@ -225,6 +228,7 @@ plotBrFrSimEnvelopes <- function( MSEgrid = F01tuned,
           lines( x = yrs, y = Br_MPs[tIdx,mpId,1,2,], col = mpCols[mpId] )
 
       grid()
+      abline(v = yrs[vertIdx], lty = 2, lwd = 1.2 )
   }
 
   # Now West stock Fr
@@ -259,6 +263,7 @@ plotBrFrSimEnvelopes <- function( MSEgrid = F01tuned,
          lines( x = yrs, y = Fr_MPs[tIdx,mpId,1,2,], col = mpCols[mpId] )
 
       grid()
+      abline(v = yrs[vertIdx], lty = 2, lwd = 1.2 )
   }
   
   mtext( side = 1, outer = TRUE, text = "Year", line = 3 )
