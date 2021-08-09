@@ -9,7 +9,7 @@ plotRespSurfaces <- function( surfList,
   nSurf <- length(surfList)
   # Now plot - we'll get to solving for
   # optima next.
-  par(mfrow = c(nSurf,2), mar = c(2,2,2,2), oma = c(3,3,2,2) )
+  par(mfrow = c(nSurf,2), mar = c(2,2,2,2), oma = c(3,4,2,2) )
   # Plot probability of being healthy at end of 30 years
   
   targetPars <- array(NA, dim = c(nSurf,2))
@@ -26,7 +26,13 @@ plotRespSurfaces <- function( surfList,
     targetPars[j,] <- targPars
     surfE <- surfList[[j]]$surfE
     surfE$z[surfE$z > 0.97] <- 0.97
-    plot.surface( surfE, breaks = colBreaks, col = cols, las = 1 )
+
+    sampSurfE <- surfList[[j]]$sampSurf_E
+    sampSurfW <- surfList[[j]]$sampSurf_W
+
+
+    plot.surface( sampSurfE, breaks = colBreaks, col = cols, las = 1, type = "C" )
+    # plot.surface( surfE, type = "c", add = TRUE )
       points(x = targPars[1], y = targPars[2], col = "grey40",
               pch = 16, cex = 1.5 )
 
@@ -36,7 +42,7 @@ plotRespSurfaces <- function( surfList,
     surfW <- surfList[[j]]$surfW
     surfW$z[surfW$z > 0.97] <- 0.97
 
-    plot.surface( surfW, breaks = colBreaks, col = cols, las =1 )
+    plot.surface( sampSurfW, breaks = colBreaks, col = cols, las = 1, type = "C" )
       points(x = targPars[1], y = targPars[2], col = "grey40",
               pch = 16, cex = 1.5 )
 
@@ -48,7 +54,7 @@ plotRespSurfaces <- function( surfList,
 
   
   mtext( side = 1, text = tuningPars[1], outer = TRUE )
-  mtext( side = 2, text = tuningPars[2], outer = TRUE )
+  mtext( side = 2, text = tuningPars[2], outer = TRUE, line = 2 )
 
   
 

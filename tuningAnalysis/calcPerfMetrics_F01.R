@@ -21,41 +21,42 @@ source("tools.R")
 
 OMdvec <- 1:48
 
-projFolder <- "F01_refineGrid_allTargs"
+# projFolder <- "F01_refineGrid_allTargs"
 
-perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
-                                    OMs = OMdvec )
-
-
-
-gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
+# perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
+#                                     OMs = OMdvec )
 
 
-gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-                                      OMs = OMdvec,
-                                      projFolder = projFolder)
+
+# gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
 
 
-projFolder <- "F01_refineGrid2_pYrH"
+# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+#                                       OMs = OMdvec,
+#                                       projFolder = projFolder)
 
-gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
 
-gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-                                      OMs = OMdvec,
-                                      projFolder = projFolder)
+# projFolder <- "F01_refineGrid2_pYrH"
 
-projFolder <- "F01_refineGrid2_minpYr"
+# gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
 
-gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
+# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+#                                       OMs = OMdvec,
+#                                       projFolder = projFolder)
 
-gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-                                      OMs = OMdvec,
-                                      projFolder = projFolder)
+# projFolder <- "F01_refineGrid2_minpYr"
+
+# gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
+
+# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+#                                       OMs = OMdvec,
+#                                       projFolder = projFolder)
 
 targPars <- array(NA, dim = c(3,2))
 rownames(targPars) <- c("pH30","pYrH","minProbYrH")
 colnames(targPars) <- c("East","West")
 
+# year30
 pH30Grid.df <- read.csv("MSEs/F01_refineGrid_allTargs/perfMetrics.csv")
 pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,  
                                   tuningPars = c("qEast","qWest"),
@@ -64,13 +65,14 @@ pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,
                                   tol = 0.001 )
 
 # targPars[1,] <- pH30surfaces$
-
+# All30
 pYrHGrid.df <- read.csv("MSEs/F01_refineGrid_allTargs/perfMetrics.csv")
 pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
                                   tuningPars = c("qEast","qWest"),
                                   resp = "pYrHealthy",
                                   target = 0.6,
                                   tol = 0.1 )
+# Each30
 minpYrHGrid.df <- read.csv("MSEs/F01_refineGrid_allTargs/perfMetrics.csv")
 minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
                                       tuningPars = c("qEast","qWest"),

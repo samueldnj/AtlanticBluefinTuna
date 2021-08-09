@@ -22,18 +22,18 @@ source("tools.R")
 
 OMdvec <- 1:48
 
-projFolder <- "BR_initGrid_hiCaps3"
+# projFolder <- "BR_initGrid_hiCaps3"
 
-perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
-                                    OMs = OMdvec )
+# perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
+#                                     OMs = OMdvec )
 
 
 
-gridMPs.df <- makeMP.df_BR3( projFolder =  projFolder)
+# gridMPs.df <- makeMP.df_BR3( projFolder =  projFolder)
 
-gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-                                      OMs = OMdvec,
-                                      projFolder = projFolder)
+# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+#                                       OMs = OMdvec,
+#                                       projFolder = projFolder)
 
  
 

@@ -306,19 +306,28 @@ makeSampleSurface <- function(  grid.df = gridPerfMetrics.df,
   zDimNames <- list(x,y)
   names(zDimNames) <- tuningPars
 
-  z <- array(NA, dim = c(nX,nY), dimnames = zDimNames )
+  zE <- array(NA, dim = c(nX,nY), dimnames = zDimNames )
+  zW <- array(NA, dim = c(nX,nY), dimnames = zDimNames )
+
+  resp_E <- paste0(resp,"_E")
+  resp_W <- paste0(resp,"_W")
 
   # Now loop and fill
   for( xIdx in 1:nX )
     for( yIdx in 1:nY )
     {
       rowIdx <- which(grid.df[,tuningPars[1]] == x[xIdx] & grid.df[,tuningPars[2]] == y[yIdx] )
-      z[xIdx,yIdx] <- grid.df[rowIdx,resp]
+      zE[xIdx,yIdx] <- grid.df[rowIdx,resp_E]
+      zW[xIdx,yIdx] <- grid.df[rowIdx,resp_W]
     }
 
-  sampSurf <- list( x = x, y = y, z = z)
+  sampSurf_E <- list( x = x, y = y, z = zE)
+  sampSurf_W <- list( x = x, y = y, z = zW)
 
-  sampSurf
+  outList <- list(  sampSurf_E = sampSurf_E,
+                    sampSurf_W = sampSurf_W )
+
+  outList
 } # END makeSampleSuface()
 
 
@@ -331,6 +340,7 @@ makeRespSurfaces <- function( grid.df = gridPerfMetrics.df,
                               tol = 0.1 )
 {
 
+  sampSurface <- makeSampleSurface( grid.df, tuningPars, resp )
 
   # Estimate response surfaces from data
   tpsE <- Tps( x = as.matrix(grid.df[,tuningPars]),
@@ -351,7 +361,9 @@ makeRespSurfaces <- function( grid.df = gridPerfMetrics.df,
 
   out <- list(  surfE = surfE,
                 surfW = surfW,
-                targetPars = targPars)
+                targetPars = targPars,
+                sampSurf_E = sampSurface$sampSurf_E,
+                sampSurf_W = sampSurface$sampSurf_W )
 
   return(out)
 }
