@@ -246,6 +246,8 @@ Type objective_function<Type>::operator() ()
   // Biomass positive value penalty multiplier
   DATA_SCALAR(bioPenScale);       // Scalar multiple of bioPen added to obj fun
 
+  DATA_INTEGER(retroYr);
+
   // ------------------------ PARAMETER SECTION ------------------ //
   // Biological parameters //
   PARAMETER_VECTOR(logith_s);     // logit steepness
@@ -606,7 +608,7 @@ Type objective_function<Type>::operator() ()
   for( int g=0; g <nG; g++ )
   { 
     // years/timesteps
-    for( int t=0; t<nT; t++ )
+    for( int t=0; t<retroYr; t++ )
     {
       // only add a contribution if the data exists (It < 0 is missing)
       // We need to add a variable to change the state variable
@@ -658,7 +660,7 @@ Type objective_function<Type>::operator() ()
   // Now add catch, mean weight, and age observations for CR Z estimation
   if( useWbar_a.sum() > 0 )
     for( int a = 0; a < nA; a++ )
-      for( int t = 0; t < nT; t++ )
+      for( int t = 0; t < retroYr; t++ )
       {
         // As before, only add mean weight contributions if that data is provided
         if( wbar_at(a,t) > 0 & useWbar_a(a) == 1 )

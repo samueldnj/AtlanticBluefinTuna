@@ -38,7 +38,8 @@ assessDDmm <- function( x,
                         maxDeltaTACdn = 0.5,
                         mpName        = "assessDDmm",
                         fitOnly       = FALSE,
-                        nllWt         = NULL )
+                        nllWt         = NULL,
+                        retroYr       = NULL )
 {
   source("tools.R")
 
@@ -82,7 +83,8 @@ assessDDmm <- function( x,
                       dset = dset,
                       simNum = x,
                       plotFit=FALSE,
-                      nllWt=nllWt )
+                      nllWt=nllWt,
+                      retroYr=retroYr )
 
     # Make a table of fit info to save to WD
     cnames <- c( "AM", 
@@ -425,12 +427,16 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                     simNum    = x,
                     bioPars   = omBioPars,
                     plotFit   = FALSE,
-                    nllWt    = NULL )
+                    nllWt     = NULL,
+                    retroYr   = NULL )
 {
   # Get model dimensions
   nT <- dim(dset[[1]]$Cobs)[2]
   nA <- 2
   nS <- 2
+
+  if( is.null(retroYr) )
+    retroYr <- nT
 
   omIndices <- omInfo$indices
   omBioPars <- omInfo$bioPars
@@ -606,7 +612,8 @@ fitDD <- function(  omInfo    = omInfo[[as.character(AMs[1])]],
                 baranovIter   = 5,
                 baranovStep   = 0.5,
                 idxType_g     = idxType_g,
-                rType         = 1 )
+                rType         = 1,
+                retroYr       = retroYr )
 
   pars <- list( logith_s      = logit(steep_s),
                 lnB0_s        = log(B0_s),
