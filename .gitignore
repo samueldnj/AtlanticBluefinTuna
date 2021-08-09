@@ -9,3 +9,7 @@
 # package source
 *.tar.gz
 *.tar
+
+# temp files
+*.o
+*.so
