@@ -35,7 +35,7 @@ cranPackages <- c("coda",
 
 for( pkg in cranPackages )
   while(!require(pkg, character.only = TRUE) )
-    install.packages( pkg, repos = "https://mirror.its.sfu.ca/mirror/CRAN/" )
+    install.packages( pkg, repos = "https://muug.ca/mirror/cran/" )
 
 library("ABTMSE")
 loadABT()
