@@ -35,6 +35,10 @@ ConstU_E <- function( x,
 	targetC=mean(dset$Cobs[x,target_yrs],na.rm=TRUE)
 	targetU=multiplierE*(targetC/targetI)
 
+	# Change for retro
+	if(is.null(lastyr))
+		lastyr=dim(dset$Iobs)[3]
+
 	if(lastyr < dim(dset$Iobs)[3])
   {
     lastTAC <- dset$Cobs[x,lastyr-1]
@@ -46,9 +50,7 @@ ConstU_E <- function( x,
 
 	# browser()
 	
-	# Change for retro
-	if(is.null(lastyr))
-		lastyr=dim(dset$Iobs)[3]
+	
 	
 	datayrs=lastyr-(yrs4mean-1):0
 	curI=mean(dset$Iobs[x,IndexE,datayrs],na.rm=TRUE)
