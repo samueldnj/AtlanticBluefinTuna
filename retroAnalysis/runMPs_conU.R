@@ -17,8 +17,8 @@ source("pewPMs.R")
 source("plots.R")
 source("tools.R")
 
-makeGridconstU( eMult = seq(from = 5, to = 10, by = 1),
-                wMult = seq(from = 5, to = 10, by = 1),
+makeGridconstU( eMult = seq(from = 6, to = 8, by = .4),
+                wMult = seq(from = 6.5, to = 9, by = .5),
                 outFile = "autoConstUgridMPs.R" )
 
 source("autoConstUgridMPs.R")

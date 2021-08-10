@@ -38,7 +38,7 @@ for(yIdx in 1:length(retroYrs))
   retroTACs_may[1,1,yIdx] <- BR_E3s(  x = 1, 
                                       dset = dsetE, 
                                       lastyr = yr,
-                                      alp=1.69,
+                                      alp=3.5,
                                       TACcap = 45,
                                       pullD = FALSE )
 
@@ -59,7 +59,7 @@ for(yIdx in 1:length(retroYrs))
                                         target_yr=55,
                                         deltaE_up=0.5,
                                         deltaE_down=0.5,
-                                        multiplierE=7.35)
+                                        multiplierE=7.15)
 
   retroTACs_may[2,2,yIdx] <- ConstU_W(  x=1,
                                         dset=dsetW,
@@ -70,7 +70,7 @@ for(yIdx in 1:length(retroYrs))
                                         target_yr=55,
                                         deltaW_down=0.5,
                                         deltaW_up=0.5,
-                                        multiplierW=7.90)
+                                        multiplierW=7.70)
 
   # EA_1
   retroTACs_may[3,1,yIdx] <- EA_1_E(  x = 1,
