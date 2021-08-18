@@ -20,11 +20,13 @@ source("tools.R")
 OMdvec <- 1:48  
 
 
-# projFolder <- "tuneLW_Br30"
+projFolder <- "testConU_5to10_allOMs"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )
 
+
+# # projFolder <- "conU_minpYrH_RefineGrid2"
 
 # gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
 
@@ -50,20 +52,33 @@ OMdvec <- 1:48
 #                                       OMs = OMdvec,
 #                                       projFolder = projFolder)
 
-Br30Grid.df <- read.csv("MSEs/tuneLW_Br30/perfMetrics.csv")
-Br30surfaces <- makeRespSurfaces( grid.df = Br30Grid.df,  
+pH30Grid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
+pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,  
                                   tuningPars = c("multEast","multWest"),
-                                  resp = "medBr30",
-                                  target = 1.25,
-                                  tol = 0.05 )
+                                  resp = "pH30",
+                                  target = 0.6,
+                                  tol = 0.01 )
 
+pYrHGrid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
+pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
+                                  tuningPars = c("multEast","multWest"),
+                                  resp = "pYrHealthy",
+                                  target = 0.6,
+                                  tol = .1 )
+minpYrHGrid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
+minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
+                                      tuningPars = c("multEast","multWest"),
+                                      resp = "minProbYrHealth",
+                                      target = 0.6,
+                                      tol = 0.01 )
 
-surfList <- list( Br30 = Br30surfaces )
+surfList <- list( pH30 = pH30surfaces,
+                  pYrH = pYrHsurfaces,
+                  minpYrH = minpYrHsurfaces )
 
 
 targPars <- plotRespSurfaces( surfList = surfList,
-                              tuningPars = c("m (East area)","m (West area)"),
-                              rtext = c("Br30"))
+                              tuningPars = c("m (East area)","m (West area)"))
 
 targPars
 

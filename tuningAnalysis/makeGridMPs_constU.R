@@ -36,8 +36,8 @@ makeGridconstU <- function( eMult = seq(from = 1, to = 5, by = 1),
     mpName <- paste0("constU_W_m",westMult)
 
     cat("# eMult = ", westMult, "\n", file = outFile, sep = "", append = TRUE)
-    cat(mpName," <- ConstU_E \n", sep = "", file = outFile, append = TRUE)
-    cat("formals(",mpName,")$multiplierE <- ", westMult, "\n", sep = "", file = outFile, append = TRUE)
+    cat(mpName," <- ConstU_W \n", sep = "", file = outFile, append = TRUE)
+    cat("formals(",mpName,")$multiplierW <- ", westMult, "\n", sep = "", file = outFile, append = TRUE)
     cat("class(",mpName,") <- 'MP' \n",sep = "", file = outFile, append = TRUE)
     cat("\n", file = outFile, append = TRUE)
     cat("\n", file = outFile, append = TRUE)

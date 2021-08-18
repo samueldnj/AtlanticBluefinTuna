@@ -12,13 +12,16 @@
 # ratio between the current value of the indices
 # and the target value, is affected by this tunning paramenter)
 
-EA_1_E= function( x,
-                  dset,
-                  lastyr = NULL,
-                  Targ=1.32,
-                  Deltaup=0.15,
-                  Deltadown=0.15,
-                  yrs4mean=3)
+EA_1_E <- function( x,
+                    dset,
+                    lastyr = NULL,
+                    Targ=1.32,
+                    Deltaup=0.15,
+                    Deltadown=0.15,
+                    Gamma = 0.15,
+                    phaseTime = 0,
+                    initPhz = 56,
+                    yrs4mean=3)
 {
 
 #normalizing indices: years 2014 to 2016 are years 50 to 52 since model starts in 1965  
@@ -46,13 +49,13 @@ EA_1_E= function( x,
     lastTAC <- dset$Cobs[x,lastyr-1]
     currTAC <- dset$Cobs[x,lastyr]
   } else {
-    lastTAC <- dset$MPrec
-    currTAC <- dset$curTAC
+    lastTAC <- dset$MPrec[x]
+    currTAC <- dset$curTAC[x]
   }
   
    #  curI = mean(dset$Iobs[x,1,datayrs],na.rm=T) #
   
-  Gamma <- 0.15
+  # Gamma <- 0.15
   Irat = curI/Targ                          # Index ratio
   Irat_n = Gamma*Irat + (1-Gamma)
   
@@ -73,7 +76,16 @@ EA_1_E= function( x,
     }else{
       TAC = oldTAC*Irat_n
   }
-  
+
+  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
+  }
+
   TAC                                       # Last thing returned is the TAC recommendation
   
 }
@@ -95,6 +107,9 @@ EA_1_W = function(  x,
                     Targ=2.0, 
                     Deltaup=0.15,
                     Deltadown=0.15, 
+                    Gamma = 0.15,
+                    phaseTime = 0,
+                    initPhz = 56,
                     yrs4mean=3, na.rm=T){
 #normalizing indices: years 2014 to 2016 are years 50 to 52 since model starts in 1965
   if(is.null(lastyr))
@@ -111,8 +126,8 @@ EA_1_W = function(  x,
     lastTAC <- dset$Cobs[x,lastyr-1]
     currTAC <- dset$Cobs[x,lastyr]
   } else {
-    lastTAC <- dset$MPrec
-    currTAC <- dset$curTAC
+    lastTAC <- dset$MPrec[x]
+    currTAC <- dset$curTAC[x]
   }
 
 #Weights  
@@ -124,7 +139,7 @@ EA_1_W = function(  x,
   
   #  curI = mean(dset$Iobs[x,IndexNo,datayrs],na.rm=T) # mean of last four years
   
-  Gamma <- 0.15
+  # Gamma <- 0.15
   Irat = curI/Targ        # Index ratio
   Irat_n = (Gamma*Irat) + (1-Gamma)
   
@@ -138,6 +153,15 @@ EA_1_W = function(  x,
     
   }else{
     TAC = oldTAC*Irat_n
+  }
+
+  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
   }
   
   TAC                                       # Last thing returned is the TAC recommendation

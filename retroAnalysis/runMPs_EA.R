@@ -12,48 +12,48 @@
 # Load the ABTMSE package
 source("initTest.R")
 source("runCMPs.R")
-source("makeGridMPs_constU.R")
 source("pewPMs.R")
-source("plots.R")
+source("EA_1.R")
+source("makeGridMPs_EA.R")
 source("tools.R")
+source("plots.R")
 
-makeGridconstU( eMult = seq(from = 6, to = 8, by = .4),
-                wMult = seq(from = 1.0, to = 3.0, by = .5),
-                outFile = "autoConstUgridMPs.R" )
+# makeGridBR( alp = 1.7,
+#             bet = 0.9,
+#             outFile = "autoBRgrid.R")
 
-source("autoConstUgridMPs.R")
+makeGridEA( eGamma = seq(from = 0.1, to = 0.9, by = 0.2),
+            wGamma = seq(from = 0.1, to = 0.9, by = 0.2),
+            outFile = "autoEAgrid.R")
 
+source("autoEAgrid.R")
 
-                  
-projFolder <- "tuneLW_Br30"
+projFolder <- "EA_tuneBr30"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
 
 saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
+                  
 
-OMdvec <- 1:48
+OMdvec <- c(1:48)
 
-gridUmultMSEs <- lapply(  X = OMdvec, 
-                          FUN = runCMPs,
-                          MPs = gridMPs,
-                          checkMPs = TRUE,
-                          reloadABT = FALSE,
-                          projFolderName = projFolder )
-
+gridEAMSEs <- lapply(  X = OMdvec, 
+                      FUN = runCMPs,
+                      MPs = gridMPs,
+                      checkMPs = TRUE,
+                      reloadABT = FALSE,
+                      projFolderName = projFolder )
 
 perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
                                     OMs = OMdvec )
 
-gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
+saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
+
+gridMPs.df <- makeMP.df_EA( projFolder =  projFolder)
 
 gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-                                      OMs = OMdvec,
                                       projFolder = projFolder)
 
 write.csv(gridPerfMetrics.df, file = file.path("MSEs",projFolder,"perfMetrics.csv"))
 
-
-#z <- runCMPs("OM_87d",noCapMPs,checkMPs=1,projFolderName="sep12")
-
-# source("tuneEastMmult.R")

@@ -147,6 +147,31 @@ makeMP.df_BR3 <- function( projFolder = "testConstU_allOMs" )
   gridMPs.df
 }
 
+makeMP.df_EA <- function( projFolder = "EA_tuneBr30" )
+{
+
+  # Get gridMPs
+  gridMPs <- readRDS(file.path("MSEs",projFolder,"gridMPs.rds"))
+
+  # Stack gridMPs into a df
+  gridMPs.df <- do.call(rbind,gridMPs) %>% as.data.frame()
+  colnames(gridMPs.df) <- c("EastMP","WestMP")
+
+  # Pull out tuning par values
+  MPsEast <- gridMPs.df[,1]
+  eastMPsplit <- stringr::str_split(MPsEast, pattern = "_gam")
+  gamEast <- unlist(eastMPsplit)[2*(1:length(eastMPsplit))]
+
+  MPsWest <- gridMPs.df[,2]
+  westMPsplit <- stringr::str_split(MPsWest, pattern = "_gam")
+  gamWest <- unlist(westMPsplit)[2*(1:length(westMPsplit))]
+
+  gridMPs.df$gamE <- as.numeric(gamEast)
+  gridMPs.df$gamW <- as.numeric(gamWest)
+
+  gridMPs.df
+}
+
 # Take gridMPs.df object for the particular CMP
 # and add the performance metrics we've defined
 # to the data.frame. These can then be used to
@@ -229,12 +254,14 @@ findTargPars <- function( surface1 = pH30_Esurf,
                           tol = 0.001)
 {
   # Copy surface1 object and take diff between 1 and 2
-  surface1$z[surface1$z >= 1] <- NA
-  surface2$z[surface2$z >= 1] <- NA
+  surface1$z[surface1$z >= 2*target] <- NA
+  surface2$z[surface2$z >= 2*target] <- NA
   diffSurface <- surface1
   diffSurface$z <- abs(surface1$z - surface2$z)
   # find where they are the same
   sameZindices    <- which(diffSurface$z < tol, arr.ind = TRUE )  
+
+  browser()
 
   # Now we want to limit this to 1 y value for every x, so let's
   # do that

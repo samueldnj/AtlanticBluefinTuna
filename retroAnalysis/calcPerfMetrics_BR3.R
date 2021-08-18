@@ -22,7 +22,7 @@ source("tools.R")
 
 OMdvec <- 1:48
 
-# projFolder <- "BR_initGrid_hiCaps3"
+projFolder <- "BR_tuneBr30"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )
@@ -38,44 +38,40 @@ OMdvec <- 1:48
  
 
 
-targPars <- array(NA, dim = c(3,2))
-rownames(targPars) <- c("pH30","pYrH","minProbYrH")
+targPars <- array(NA, dim = c(1,2))
+rownames(targPars) <- c("medBr30")
 colnames(targPars) <- c("East","West")
 
-pH30Grid.df <- read.csv("MSEs/BR_refineGrid2_YearEach30/perfMetrics.csv")
-pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,  
+Br30Grid.df <- read.csv("MSEs/BR_tuneBr30/perfMetrics.csv")
+Br30surfaces <- makeRespSurfaces( grid.df = Br30Grid.df,  
                                   tuningPars = c("alpha","beta"),
-                                  resp = "pH30",
-                                  target = 0.6,
-                                  tol = 0.1 )
+                                  resp = "medBr30",
+                                  target = 1.25,
+                                  tol = 0.05 )
 
 
-pYrHGrid.df <- read.csv("MSEs/BR_initGrid_hiCaps3/perfMetrics.csv")
-pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
-                                  tuningPars = c("alpha","beta"),
-                                  resp = "pYrHealthy",
-                                  target = 0.6,
-                                  tol = 0.1 )
+# pYrHGrid.df <- read.csv("MSEs/BR_initGrid_hiCaps3/perfMetrics.csv")
+# pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
+#                                   tuningPars = c("alpha","beta"),
+#                                   resp = "pYrHealthy",
+#                                   target = 0.6,
+#                                   tol = 0.1 )
 
-minpYrHGrid.df <- read.csv("MSEs/BR_refineGrid2_YearEach30/perfMetrics.csv")
-minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
-                                      tuningPars = c("alpha","beta"),
-                                      resp = "minProbYrHealth",
-                                      target = 0.6,
-                                      tol = 0.1 )
+# minpYrHGrid.df <- read.csv("MSEs/BR_refineGrid2_YearEach30/perfMetrics.csv")
+# minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
+#                                       tuningPars = c("alpha","beta"),
+#                                       resp = "minProbYrHealth",
+#                                       target = 0.6,
+#                                       tol = 0.1 )
 
 
 
-surfList <- list( pH30 = pH30surfaces,
-                  pYrH = pYrHsurfaces,
-                  minpYrH = minpYrHsurfaces )
+surfList <- list( Br30 = Br30surfaces )
 
 
 targPars <- plotRespSurfaces( surfList = surfList,
                               tuningPars = c("alpha (East area)","beta (West area)"),
-                              rtext = c("pHealthy t = 30",
-                                        "pHealthy t = 1:30",
-                                        "min(pHealthy | t in 1:30)") )
+                              rtext = c("Br30") )
 
 targPars
 
