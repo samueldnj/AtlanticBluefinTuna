@@ -26,6 +26,8 @@ ConstU_E <- function( x,
 											target_yr=55,
 											deltaE_up=0.5,
 											deltaE_down=0.5,
+											phaseTime = 0,
+                    	initPhz = 56,
 											multiplierE=9.3)
 {
 	min_delta=(1-deltaE_down)
@@ -68,6 +70,17 @@ ConstU_E <- function( x,
     TAC=min(oldTAC*delta_ratio,oldTAC*max_delta)
 	}
 
+	# Phase-in
+	if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
+  }
+
+
 	TAC
 }
 class(ConstU_E)<-"MP"
@@ -81,6 +94,8 @@ ConstU_W <- function( x,
 											target_yr=55,
 											deltaW_down=0.5,
 											deltaW_up=0.5,
+											phaseTime = 0,
+                    	initPhz = 56,
 											multiplierW=2.64)
 {
 	min_delta=(1-deltaW_down)
@@ -120,6 +135,17 @@ ConstU_W <- function( x,
 	else {
     TAC=min(oldTAC*delta_ratio,oldTAC*max_delta)
 	}
+
+	# Phase-in
+	if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
+  }
+
 	
 	TAC
 }

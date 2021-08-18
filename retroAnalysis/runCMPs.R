@@ -19,8 +19,8 @@ runCMPs <- function(  iOM = 1,
   library(ABTMSE)
 
   # Load ABT objects in this environment
-  if(!any(grepl(x = ls(), pattern = "dset_example_West")))
-    loadABT()
+  # if(!any(grepl(x = ls(), pattern = "dset_example_West")))
+  #   loadABT()
 
   checkMP <<- checkMPs
 

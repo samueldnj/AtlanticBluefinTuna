@@ -7,6 +7,8 @@ BR_E3s<-function( x,
                   lastyr = NULL,
                   alp=1.69,
                   TACcap = 45,
+                  phaseTime = 0,
+                  initPhz = 56,
                   pullD = FALSE )
 {  
   if(is.null(lastyr))
@@ -157,6 +159,16 @@ BR_E3s<-function( x,
       TAC_E=12000000
     }
   }
+
+  # Phase-in
+  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC_E <- tNow/phaseTime * TAC_E + (phaseTime - tNow)/phaseTime * sqTAC
+  }
   
   #if(lastyr==104){
   #  cat(sprintf("x%d year%d %s %.3f %s %.3f %.3f \n",x,lastyr,"Before ",TAC_E, "Ind2017 ",relInd1,relInd2),file="I1to3.txt",append=TRUE)
@@ -166,6 +178,8 @@ BR_E3s<-function( x,
   
   print(lastyr)
   print(TAC_E)
+
+  return(TAC_E)
 }
 class(BR_E3s)<-"MP"
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -331,10 +345,22 @@ BR_W3s<-function( x,
       TAC_W=TACcap*1e6
     }
   }
+
+    # Phase-in
+  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC_W <- tNow/phaseTime * TAC_W + (phaseTime - tNow)/phaseTime * sqTAC
+  }
   
   cat(sprintf("x%d year%d %.3f  \n",x,lastyr,TAC_W),file="WT.txt",append=TRUE)
   
   print(TAC_W)
+
+  return(TAC_W)
 }
 class(BR_W3s)<-"MP"
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
