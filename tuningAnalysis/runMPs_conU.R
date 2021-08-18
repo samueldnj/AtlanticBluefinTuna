@@ -25,7 +25,7 @@ source("autoConstUgridMPs.R")
 
 
                   
-projFolder <- "testConU_5to10_allOMs"
+projFolder <- "conU_retune_grid1"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
