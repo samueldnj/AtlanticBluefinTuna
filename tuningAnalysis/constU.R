@@ -54,6 +54,7 @@ class(ConstU_E)<-"MP"
 
 ConstU_W <- function( x,
 											dset,
+											IndexE=2,
 											IndexW=3,
 											yrs4mean=3,
 											target_yr=55,
