@@ -20,7 +20,7 @@ source("tools.R")
 OMdvec <- 1:48  
 
 
-projFolder <- "testConU_5to10_allOMs"
+projFolder <- "conU_retune_grid1"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )
@@ -52,20 +52,20 @@ projFolder <- "testConU_5to10_allOMs"
 #                                       OMs = OMdvec,
 #                                       projFolder = projFolder)
 
-pH30Grid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
+pH30Grid.df <- read.csv("MSEs/conU_retune_grid1/perfMetrics.csv")
 pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,  
                                   tuningPars = c("multEast","multWest"),
                                   resp = "pH30",
                                   target = 0.6,
                                   tol = 0.01 )
 
-pYrHGrid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
+pYrHGrid.df <- read.csv("MSEs/conU_retune_grid1/perfMetrics.csv")
 pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
                                   tuningPars = c("multEast","multWest"),
                                   resp = "pYrHealthy",
                                   target = 0.6,
                                   tol = .1 )
-minpYrHGrid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
+minpYrHGrid.df <- read.csv("MSEs/conU_retune_grid1/perfMetrics.csv")
 minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
                                       tuningPars = c("multEast","multWest"),
                                       resp = "minProbYrHealth",
