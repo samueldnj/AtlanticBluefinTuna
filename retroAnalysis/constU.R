@@ -49,8 +49,6 @@ ConstU_E <- function( x,
     lastTAC <- dset$MPrec[x]
     currTAC <- dset$curTAC[x]
   }
-
-	# browser()
 	
 	
 	
@@ -81,7 +79,7 @@ ConstU_E <- function( x,
   }
 
 
-	TAC
+	return(TAC)
 }
 class(ConstU_E)<-"MP"
 
@@ -125,8 +123,10 @@ ConstU_W <- function( x,
 	curU=(curC/curI)
 	delta_ratio=multiplierW*targetU/curU
 
+	# browser()
 		
 	oldTAC = lastTAC
+	TAC <- oldTAC
 
 	if(delta_ratio<1)
 	{
@@ -145,9 +145,8 @@ ConstU_W <- function( x,
     # phase-in TAC
     TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
   }
-
 	
-	TAC
+	return(TAC)
 }
 class(ConstU_W)<-"MP"
 
