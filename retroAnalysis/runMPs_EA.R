@@ -28,7 +28,7 @@ makeGridEA( eGamma = seq(from = 0.1, to = 0.9, by = 0.2),
 
 source("autoEAgrid.R")
 
-projFolder <- "EA_tuneBr30"
+projFolder <- "EA_tuneBr30_targ1"
 
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
