@@ -15,7 +15,7 @@
 EA_1_E <- function( x,
                     dset,
                     lastyr = NULL,
-                    Targ=1.32,
+                    Targ=1.0,
                     Deltaup=0.15,
                     Deltadown=0.15,
                     Gamma = 0.15,
@@ -76,7 +76,7 @@ EA_1_E <- function( x,
     }else{
       TAC = oldTAC*Irat_n
   }
-
+  # Phase-in
   if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
   {
     sqTAC <- dset$Cobs[x,initPhz]
@@ -104,7 +104,7 @@ class(EA_1_E) = "MP"
 EA_1_W = function(  x,
                     dset,
                     lastyr = NULL,
-                    Targ=2.0, 
+                    Targ=1.0, 
                     Deltaup=0.15,
                     Deltadown=0.15, 
                     Gamma = 0.15,
