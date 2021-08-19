@@ -16,7 +16,7 @@ plotRespSurfaces <- function( surfList,
   rownames(targetPars) <- rtext
   colnames(targetPars) <- c('East','West')
 
-  colBreaks <- seq(from = 0, to = 1, length.out = 65)
+  colBreaks <- seq(from = 0, to = 2, length.out = 65)
   cols <- viridisLite::turbo(n = 64, begin = 0, end = 1, direction = -1)
 
 

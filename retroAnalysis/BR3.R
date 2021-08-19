@@ -192,6 +192,8 @@ BR_W3s<-function( x,
                   bet=0.95,
                   gam=10.0,
                   TACcap = 2.35,
+                  phaseTime = 0,
+                  initPhz = 56,
                   pullD = FALSE)
 {
   

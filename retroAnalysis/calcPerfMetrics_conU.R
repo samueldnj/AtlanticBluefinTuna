@@ -20,7 +20,7 @@ source("tools.R")
 OMdvec <- 1:48  
 
 
-# projFolder <- "tuneLW_Br30"
+projFolder <- "tuneLW_Br30"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )

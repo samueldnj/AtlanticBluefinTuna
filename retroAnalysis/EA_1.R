@@ -21,7 +21,8 @@ EA_1_E <- function( x,
                     Gamma = 0.15,
                     phaseTime = 0,
                     initPhz = 56,
-                    yrs4mean=3)
+                    cap = Inf,
+                    yrs4mean=3 )
 {
 
 #normalizing indices: years 2014 to 2016 are years 50 to 52 since model starts in 1965  
@@ -104,7 +105,7 @@ class(EA_1_E) = "MP"
 EA_1_W = function(  x,
                     dset,
                     lastyr = NULL,
-                    Targ=1.0, 
+                    Targ=2.0, 
                     Deltaup=0.15,
                     Deltadown=0.15, 
                     Gamma = 0.15,

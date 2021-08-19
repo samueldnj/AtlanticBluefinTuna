@@ -22,8 +22,8 @@ source("plots.R")
 #             bet = 0.9,
 #             outFile = "autoBRgrid.R")
 
-makeGridEA( eGamma = seq(from = 0.1, to = 0.9, by = 0.2),
-            wGamma = seq(from = 0.1, to = 0.9, by = 0.2),
+makeGridEA( eGamma = seq(from = 0.01, to = 0.09, by = 0.02),
+            wGamma = seq(from = 0.01, to = 0.09, by = 0.02),
             outFile = "autoEAgrid.R")
 
 source("autoEAgrid.R")
