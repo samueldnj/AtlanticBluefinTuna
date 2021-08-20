@@ -87,8 +87,6 @@ EA_1_E <- function( x,
     TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
   }
 
-  browser
-
   if(TAC > cap)
     TAC <- cap
 
