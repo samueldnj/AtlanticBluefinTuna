@@ -21,7 +21,7 @@ source("plots.R")
 #             bet = 0.9,
 #             outFile = "autoBRgrid.R")
 
-makeGridBR( alp = seq(from = 2.5, to = 4.5, by = 0.5),
+makeGridBR( alp = seq(from = 2.6, to = 3.6, by = 0.2),
             bet = seq(from = 0.6, to = 1.2, by = 0.1),
             outFile = "autoBRgrid.R")
 
@@ -35,7 +35,7 @@ if(!dir.exists(file.path("MSEs",projFolder)))
 saveRDS(gridMPs, file = file.path("MSEs",projFolder,"gridMPs.rds"))
                   
 
-OMdvec <- c(1:16)
+OMdvec <- c(1:48)
 
 gridBRMSEs <- lapply(  X = OMdvec, 
                       FUN = runCMPs,

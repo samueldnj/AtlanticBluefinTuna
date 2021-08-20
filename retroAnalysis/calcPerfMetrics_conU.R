@@ -26,11 +26,19 @@ projFolder <- "tuneLW_Br30"
 #                                     OMs = OMdvec )
 
 
-# gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
+gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
 
-# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-#                                       OMs = OMdvec,
-#                                       projFolder = projFolder)
+gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+                                      OMs = OMdvec,
+                                      projFolder = projFolder)
+
+# Save
+write.csv(gridPerfMetrics.df, file = file.path("MSEs",projFolder,"perfMetrics.csv"))
+
+targPars <- array(NA, dim = c(1,2))
+rownames(targPars) <- c("wtdMedBr30")
+colnames(targPars) <- c("East","West")
+
 
 # projFolder <- "conU_pH30_RefineGrid1"
 
@@ -53,9 +61,9 @@ projFolder <- "tuneLW_Br30"
 Br30Grid.df <- read.csv("MSEs/tuneLW_Br30/perfMetrics.csv")
 Br30surfaces <- makeRespSurfaces( grid.df = Br30Grid.df,  
                                   tuningPars = c("multEast","multWest"),
-                                  resp = "medBr30",
+                                  resp = "wtdMedBr30",
                                   target = 1.25,
-                                  tol = 0.05 )
+                                  tol = 0.01 )
 
 
 surfList <- list( Br30 = Br30surfaces )
