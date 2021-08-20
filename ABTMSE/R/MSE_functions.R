@@ -63,7 +63,7 @@ getperf<-function(MSE,rnd=3,outdir=NA,quantiles=c(0.05,0.95),quantile=F){
     AvgBra<-AvgBr(MSE,pp)
     Br30a<-Br30(MSE,pp)
 
-    PGTa<-PGT(MSE,pp)
+    OFTa<-OFT(MSE,pp)
 
     if(!quantile){
     out[[pp]]<-data.frame("AvC10"=apply(AvC10a,1,quantile,p),
@@ -88,7 +88,7 @@ getperf<-function(MSE,rnd=3,outdir=NA,quantiles=c(0.05,0.95),quantile=F){
                           "AAVC"=apply(AAVCa,1,quantile,p),
                           "AvgBr"=apply(AvgBra,1,quantile,p),
                           "Br30"=apply(Br30a,1,quantile,p),
-                          "PGT"=apply(PGTa,1,quantile,p),
+                          "OFT"=apply(OFTa,1,quantile,p),
                           row.names=MPnams)
     }else{
       ptext<-c(p[1]*100,"Med",p[3]*100)
@@ -117,7 +117,7 @@ getperf<-function(MSE,rnd=3,outdir=NA,quantiles=c(0.05,0.95),quantile=F){
                            t(apply(AAVCa,1,quantile,p)),
                             t(apply(AvgBra,1,quantile,p)),
                               t(apply(Br30a,1,quantile,p)),
-                              t(apply(PGTa,1,quantile,p)))
+                              t(apply(OFTa,1,quantile,p)))
 
      out[[pp]]<-as.data.frame(dat,row.names=MPnams,names=pnams)
      names(out[[pp]])<-pnams
@@ -776,5 +776,29 @@ Sub_Results<-function(ResAll,ind){
   ResNew
 }
 
+#' Get Br30 results accounting for OM weights
+#'
+#' @param MSElist A list of the deterministic reference set MSE objects
+#' @param q The percentile of the weighted distribution
+Br30_Wt<-function(MSElist,q=0.5){
+
+  dims<-dim(MSElist[[1]]@SSB)
+  nOMs<-length(MSElist)
+  nMPs<-dims[1]
+
+  getEB<-function(X)Br30(X,1)[,1]
+  getWB<-function(X)Br30(X,2)[,1]
+
+  EBa<-matrix(unlist(lapply(MSElist,getEB)),ncol=nOMs)
+  WBa<-matrix(unlist(lapply(MSElist,getWB)),ncol=nOMs)
+
+  E_Br30<-apply(EBa,1,wtd.quantile,q=q,weight=OM_wt[1:nOMs])
+  W_Br30<-apply(WBa,1,wtd.quantile,q=q,weight=OM_wt[1:nOMs])
+
+  dat<-data.frame(Western=W_Br30,Eastern=E_Br30)
+  row.names(dat)<-unlist(lapply(MSElist[[1]]@MPs,function(X)X[1]))
+  dat
+
+}
 
 

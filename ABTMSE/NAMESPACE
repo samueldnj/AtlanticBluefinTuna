@@ -100,9 +100,9 @@ export(
 
     "RD30",
 
-    "PGT",
     "AvgBr",
     "AvC10",
+    "OFT",
 
     "tomt",
     "TEG",
@@ -214,7 +214,8 @@ export(
     "Sub_Results",
     "Join_Results",
     "Results_compiler",
-    "Shiny"
+    "Shiny",
+    "Br30_Wt"
 )
 exportClasses(
     "OMI",

@@ -224,7 +224,7 @@ AAVC<-function(MSE,pp=1){
   C<-MSE@C[,,pp,]
   C[C==0]<-tiny
 
-  apply(abs(C[,,ind]-C[,,ind1])/C[,,ind1],1:2,quantile,p=0.5,na.rm=T)*100
+  apply(abs(C[,,ind]-C[,,ind1])/C[,,ind1],1:2,mean,na.rm=T)*100
 }
 class(AAVC)<-"PM"
 
@@ -297,5 +297,42 @@ AvgBr<-function(MSE,pp=1){
 class(AvgBr)<-"PM"
 
 
+
+# ================newest metrics  =========================
+
+
+#' Over-fished Trend, the slope in log SSB (Br31 to Br35) when Br30 is less than 1. OFT is 0.1 is Br30 is greater than 1 or slope is greater than 0 (a performance metrics function of class PM)
+#'
+#' @param MSE An object of class MSE
+#' @return a matrix of 1's and zeros, n Management procedures (MSE@nMP) rows and nsim (MSE@nsim) columns from \code{MSE}
+#' @examples
+#' loadABT()
+#' OFT(myMSE2)
+OFT<-function(MSE,pp=1){
+
+  slp3<-function(y){
+
+    y<-y[!is.na(y)]
+    y<-log(y)
+    x1<-1:length(y)
+    mux<-mean(x1)
+    muy<-mean(y,na.rm=T)
+    SS<-sum((x1-mux)^2,na.rm=T)
+    (1/SS)*sum((x1-mux)*(y-muy),na.rm=T)
+
+  }
+
+  SSB<-MSE@SSB[,,pp,MSE@nyears+MPlag+(30:35)]
+  dynB0<-MSE@dynB0[,pp,MPlag+30:35]*MSE@SSBMSY_SSB0[,pp]
+  Brs<-array(NA,dim(SSB))
+  ind<-TEG(dim(SSB))
+  Brs[ind]<-SSB[ind]/dynB0[ind[,c(2,3)]]
+  out<-apply(Brs[,,2:6],1:2,slp3)
+  out[Brs[,,1]>1]<-0.1
+  out[out>0]<-0.1
+  out
+
+}
+class(OFT)<-"PM"
 
 

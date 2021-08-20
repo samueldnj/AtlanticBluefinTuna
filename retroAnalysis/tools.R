@@ -11,6 +11,26 @@ loadProject <- function(  projFolder = "F01_tuned",
   gridMSEs 
 }
 
+Br30_Wt <- function( MSElist, q = 0.5 )
+{
+  dims <- dim(MSElist[[1]]@SSB)
+  nOMs <- length(MSElist)
+  nMPs <- dims[1]
+  getEB <- function(X) Br30(X, 1)[, 1]
+  getWB <- function(X) Br30(X, 2)[, 1]
+  EBa <- matrix(unlist(lapply(MSElist, getEB)), ncol = nOMs)
+  WBa <- matrix(unlist(lapply(MSElist, getWB)), ncol = nOMs)
+  E_Br30 <- apply(EBa, 1, wtd.quantile, q = q, weight = OM_wt[1:nOMs])
+  W_Br30 <- apply(WBa, 1, wtd.quantile, q = q, weight = OM_wt[1:nOMs])
+  dat <- data.frame(Eastern = E_Br30, Western = W_Br30)
+  EastMPs <- unlist(lapply(MSElist[[1]]@MPs, function(X) X[1]))
+  WestMPs <- unlist(lapply(MSElist[[1]]@MPs, function(X) X[2]))
+  dat$eastMP <- EastMPs
+  dat$westMP <- WestMPs
+  # row.names(dat) <- unlist(lapply(MSElist[[1]]@MPs, function(X) X[1]))
+  dat
+}
+
 # Calculate performance metrics for a grid of
 # operating model objects
 calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs", 
@@ -47,6 +67,10 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
   LD_E <- lapply(X = gridMSEs, FUN = LD, pp = 1)
   LD_W <- lapply(X = gridMSEs, FUN = LD, pp = 2)
 
+
+  wtdMedBr30 <- Br30_Wt(gridMSEs, q=.5)
+  wtdLPCBr30 <- Br30_Wt(gridMSEs, q=.05)
+
   perfMetricList <- list( pH30_E = pH30_E,
                           pH30_W = pH30_W,
                           PGK_E = PGK_E,
@@ -55,6 +79,8 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
                           yrHealth_W = yrHealth_W,
                           Br30_E = Br30_E,
                           Br30_W = Br30_W,
+                          wtdMedBr30 = wtdMedBr30,
+                          wtdLPCBr30 = wtdLPCBr30,
                           AvC30_E = AvC30_E,
                           AvC30_W = AvC30_W,
                           AvgBr_E = AvgBr_E,
@@ -194,6 +220,12 @@ addPerfMetrics <- function( gridMPs.df,
   gridMPs.df$lpcBr30_E <- apply(X = Br30_E, FUN = quantile, MARGIN = 2, probs = 0.05)
   gridMPs.df$lpcBr30_W <- apply(X = Br30_W, FUN = quantile, MARGIN = 2, probs = 0.05)
 
+  gridMPs.df$wtdMedBr30_E <- PMlist$wtdMedBr30[-1,"Eastern"]
+  gridMPs.df$wtdMedBr30_W <- PMlist$wtdMedBr30[-1,"Western"]
+
+  gridMPs.df$wtdLPCBr30_E <- PMlist$wtdLPCBr30[-1,"Eastern"]
+  gridMPs.df$wtdLPCBr30_W <- PMlist$wtdLPCBr30[-1,"Western"]
+
 
   # Then Average Br
   AvgBr_E <- abind(PMlist$AvgBr_E, along = 0.5)[,-1,]
@@ -260,8 +292,6 @@ findTargPars <- function( surface1 = pH30_Esurf,
   diffSurface$z <- abs(surface1$z - surface2$z)
   # find where they are the same
   sameZindices    <- which(diffSurface$z < tol, arr.ind = TRUE )  
-
-  browser()
 
   # Now we want to limit this to 1 y value for every x, so let's
   # do that
