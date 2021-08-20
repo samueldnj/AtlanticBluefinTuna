@@ -21,7 +21,7 @@ EA_1_E <- function( x,
                     Gamma = 0.15,
                     phaseTime = 0,
                     initPhz = 56,
-                    cap = Inf,
+                    cap = 5e7,
                     yrs4mean=3 )
 {
 
@@ -87,6 +87,11 @@ EA_1_E <- function( x,
     TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
   }
 
+  browser
+
+  if(TAC > cap)
+    TAC <- cap
+
   TAC                                       # Last thing returned is the TAC recommendation
   
 }
@@ -111,6 +116,7 @@ EA_1_W = function(  x,
                     Gamma = 0.15,
                     phaseTime = 0,
                     initPhz = 56,
+                    cap = Inf,
                     yrs4mean=3, na.rm=T){
 #normalizing indices: years 2014 to 2016 are years 50 to 52 since model starts in 1965
   if(is.null(lastyr))
@@ -164,6 +170,9 @@ EA_1_W = function(  x,
     # phase-in TAC
     TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
   }
+
+  if(TAC > cap )
+    TAC <- cap
   
   TAC                                       # Last thing returned is the TAC recommendation
   
