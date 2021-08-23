@@ -18,15 +18,15 @@ source("plots.R")
 
 source("phasedCMPs.R")
 
-EA_phaseMPs <- list( # EA
-                    EA_noPhz    = c("EA_E","EA_W"),
-                    EA_Phz5     = c("EA_E_Phz5","EA_W_Phz5"),
-                    EA_Phz10    = c("EA_E_Phz10","EA_W_Phz10") )
+# EA_phaseMPs <- list( # EA
+#                     EA_noPhz    = c("EA_E","EA_W"),
+#                     EA_Phz5     = c("EA_E_Phz5","EA_W_Phz5"),
+#                     EA_Phz10    = c("EA_E_Phz10","EA_W_Phz10") )
                 
-LW_phaseMPs <- list( # LW (conU)
-                    conU_noPhz  = c("conU_E", "conU_W"),
-                    conU_Phz5   = c("conU_E_Phz5", "conU_W_Phz5"),
-                    conU_Phz10  = c("conU_E_Phz10", "conU_W_Phz10") )
+# LW_phaseMPs <- list( # LW (conU)
+#                     conU_noPhz  = c("conU_E", "conU_W"),
+#                     conU_Phz5   = c("conU_E_Phz5", "conU_W_Phz5"),
+#                     conU_Phz10  = c("conU_E_Phz10", "conU_W_Phz10") )
                 
 BR_phaseMPs <- list(  # BR
                       BR_noPhz    = c("BR_E", "BR_W"),
@@ -56,7 +56,10 @@ perfMetricList <- calcPerfMetrics(  projFolder = projFolder,
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
-gridMPs.df <- makeMP.df_BR3( projFolder =  projFolder)
+gridMPs.df <- makeMP.df_BR3( projFolder =  projFolder, filename = "mpList.rds")
+
+gridMPs.df$alpha  <- alp
+gridMPs.df$beta   <- bet
 
 gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
                                       projFolder = projFolder)

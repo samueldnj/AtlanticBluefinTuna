@@ -10,9 +10,12 @@ source("EA_1.R")
 
 EA_gammE <- 0.15
 EA_targE <- 1.0
+EA_capE  <- 5e7
 
 EA_gammW <- 0.15
 EA_targW <- 2
+
+formals(EA_1_E)$cap <- EA_capE
 
 # No phase
 EA_E <- EA_1_E
@@ -96,8 +99,8 @@ class(BR_W_Phz10) <- "MP"
 
 
 # LW CMPs
-mE <- 7.04
-mW <- 1.71
+mE <- 7.0
+mW <- 1.61
 
 # no phase
 conU_E <- ConstU_E

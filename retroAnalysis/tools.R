@@ -67,6 +67,15 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
   LD_E <- lapply(X = gridMSEs, FUN = LD, pp = 1)
   LD_W <- lapply(X = gridMSEs, FUN = LD, pp = 2)
 
+  # 10 year catch
+  C10_E <- lapply(X = gridMSEs, FUN = C10, pp = 1)
+  C10_W <- lapply(X = gridMSEs, FUN = C10, pp = 2)
+  
+  # 20 year catch
+  C20_E <- lapply(X = gridMSEs, FUN = C20, pp = 1)
+  C20_W <- lapply(X = gridMSEs, FUN = C20, pp = 2)
+  
+
 
   wtdMedBr30 <- Br30_Wt(gridMSEs, q=.5)
   wtdLPCBr30 <- Br30_Wt(gridMSEs, q=.05)
@@ -86,7 +95,11 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
                           AvgBr_E = AvgBr_E,
                           AvgBr_W = AvgBr_W,
                           LD_E = LD_E,
-                          LD_W = LD_W   )
+                          LD_W = LD_W,
+                          C10_E = C10_E,
+                          C10_W = C10_W,
+                          C20_E = C20_E,
+                          C20_W = C20_W   )
 
   saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
@@ -95,11 +108,12 @@ calcPerfMetrics <- function(  projFolder = "testF01_qGrid_allOMs",
 
 
 # 
-makeMP.df_F01 <- function( projFolder = "testF01_qGrid_allOMs" )
+makeMP.df_F01 <- function( projFolder = "testF01_qGrid_allOMs",
+                            filename = "gridMPS.rds" )
 {
 
   # Get gridMPs
-  gridMPs <- readRDS(file.path("MSEs",projFolder,"gridMPs.rds"))
+  gridMPs <- readRDS(file.path("MSEs",projFolder,filename))
 
   # Stack gridMPs into a df
   gridMPs.df <- do.call(rbind,gridMPs) %>% as.data.frame()
@@ -121,11 +135,12 @@ makeMP.df_F01 <- function( projFolder = "testF01_qGrid_allOMs" )
   gridMPs.df
 }
 
-makeMP.df_conU <- function( projFolder = "testConstU_allOMs" )
+makeMP.df_conU <- function( projFolder = "testConstU_allOMs" ,
+                            filename = "gridMPS.rds" )
 {
 
   # Get gridMPs
-  gridMPs <- readRDS(file.path("MSEs",projFolder,"gridMPs.rds"))
+  gridMPs <- readRDS(file.path("MSEs",projFolder,filename))
 
   # Stack gridMPs into a df
   gridMPs.df <- do.call(rbind,gridMPs) %>% as.data.frame()
@@ -147,11 +162,12 @@ makeMP.df_conU <- function( projFolder = "testConstU_allOMs" )
   gridMPs.df
 }
 
-makeMP.df_BR3 <- function( projFolder = "testConstU_allOMs" )
+makeMP.df_BR3 <- function( projFolder = "testConstU_allOMs" ,
+                            filename = "gridMPS.rds" )
 {
 
   # Get gridMPs
-  gridMPs <- readRDS(file.path("MSEs",projFolder,"gridMPs.rds"))
+  gridMPs <- readRDS(file.path("MSEs",projFolder,filename))
 
   # Stack gridMPs into a df
   gridMPs.df <- do.call(rbind,gridMPs) %>% as.data.frame()
@@ -173,11 +189,12 @@ makeMP.df_BR3 <- function( projFolder = "testConstU_allOMs" )
   gridMPs.df
 }
 
-makeMP.df_EA <- function( projFolder = "EA_tuneBr30" )
+makeMP.df_EA <- function( projFolder = "EA_tuneBr30" ,
+                            filename = "gridMPS.rds" )
 {
 
   # Get gridMPs
-  gridMPs <- readRDS(file.path("MSEs",projFolder,"gridMPs.rds"))
+  gridMPs <- readRDS(file.path("MSEs",projFolder,filename))
 
   # Stack gridMPs into a df
   gridMPs.df <- do.call(rbind,gridMPs) %>% as.data.frame()
@@ -240,6 +257,20 @@ addPerfMetrics <- function( gridMPs.df,
 
   gridMPs.df$medAvC30_E <- apply(X = AvC30_E, FUN = median, MARGIN = 2)
   gridMPs.df$medAvC30_W <- apply(X = AvC30_W, FUN = median, MARGIN = 2)
+
+  # 10 year catch
+  C10_E <- abind(PMlist$C10_E, along = 0.5)[,-1,]
+  C10_W <- abind(PMlist$C10_W, along = 0.5)[,-1,]
+
+  gridMPs.df$medC10_E <- apply(X = C10_E, FUN = median, MARGIN = 2)
+  gridMPs.df$medC10_W <- apply(X = C10_W, FUN = median, MARGIN = 2)
+
+  # 20 year catch
+  C20_E <- abind(PMlist$C20_E, along = 0.5)[,-1,]
+  C20_W <- abind(PMlist$C20_W, along = 0.5)[,-1,]
+
+  gridMPs.df$medC20_E <- apply(X = C20_E, FUN = median, MARGIN = 2)
+  gridMPs.df$medC20_W <- apply(X = C20_W, FUN = median, MARGIN = 2)
 
   # Lowest Depletion
   LD_E <- abind(PMlist$LD_E, along = 0.5)[,-1,]
