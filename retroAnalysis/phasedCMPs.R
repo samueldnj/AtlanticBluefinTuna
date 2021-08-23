@@ -60,8 +60,8 @@ class(EA_W_Phz10) <- "MP"
 
 # BR CMPs
 
-alp <- 3.23
-bet <- 0.94
+alp <- 3.24
+bet <- 0.77
 
 # No Phase
 BR_E <- BR_E3s
