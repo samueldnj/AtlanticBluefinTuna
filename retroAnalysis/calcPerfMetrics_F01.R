@@ -56,40 +56,19 @@ targPars <- array(NA, dim = c(3,2))
 rownames(targPars) <- c("pH30","pYrH","minProbYrH")
 colnames(targPars) <- c("East","West")
 
-# year30
-pH30Grid.df <- read.csv("MSEs/F01_refineGrid_allTargs/perfMetrics.csv")
-pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,  
-                                  tuningPars = c("qEast","qWest"),
-                                  resp = "pH30",
-                                  target = 0.6,
-                                  tol = 0.001 )
-
-# targPars[1,] <- pH30surfaces$
-# All30
-pYrHGrid.df <- read.csv("MSEs/F01_refineGrid_allTargs/perfMetrics.csv")
-pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
-                                  tuningPars = c("qEast","qWest"),
-                                  resp = "pYrHealthy",
-                                  target = 0.6,
-                                  tol = 0.1 )
-# Each30
-minpYrHGrid.df <- read.csv("MSEs/F01_refineGrid_allTargs/perfMetrics.csv")
-minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
+# wtdBr30
+wtdBr30Grid.df <- read.csv("MSEs/testF01_qGrid_allOMs/perfMetrics.csv")
+wtdBr30surfaces <- makeRespSurfaces( grid.df = wtdBr30Grid.df,  
                                       tuningPars = c("qEast","qWest"),
-                                      resp = "minProbYrHealth",
-                                      target = 0.6,
-                                      tol = 0.001 )
+                                      resp = "wtdMedBr30",
+                                      target = 1.25,
+                                      tol = 0.01 )
 
-
-
-
-surfList <- list( pH30 = pH30surfaces,
-                  pYrH = pYrHsurfaces,
-                  minpYrH = minpYrHsurfaces )
+surfList <- list( Br30 = wtdBr30surfaces )
 
 
 targPars <- plotRespSurfaces( surfList = surfList,
-                              tuningPars = c("q (East area)","q (West area)"))
+                              tuningPars = c("q (East area)","q (West area)"),
+                              rtext = c("wtdBr30") )
 
 targPars
-
