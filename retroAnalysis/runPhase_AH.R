@@ -29,14 +29,14 @@ projFolder <- "AH_phaseIn"
 if(!dir.exists(file.path("MSEs",projFolder)))
   dir.create(file.path("MSEs",projFolder))
 
-saveRDS(LW_phaseMPs, file = file.path("MSEs",projFolder,"mpList.rds"))
+saveRDS(AH_phaseMPs, file = file.path("MSEs",projFolder,"mpList.rds"))
                   
 
 OMdvec <- c(1:48)
 
-phzLW_MSEs <- lapply( X = OMdvec, 
+phzAH_MSEs <- lapply( X = OMdvec, 
                       FUN = runCMPs,
-                      MPs = LW_phaseMPs,
+                      MPs = AH_phaseMPs,
                       checkMPs = TRUE,
                       reloadABT = FALSE,
                       projFolderName = projFolder )
