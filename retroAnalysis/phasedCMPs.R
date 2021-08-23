@@ -5,6 +5,7 @@
 source("BR3.R")
 source("constU.R")
 source("EA_1.R")
+source("Fzero1.R")
 
 # EA CMPs
 
@@ -135,5 +136,47 @@ conU_W_Phz10 <- ConstU_W
 formals(conU_W_Phz10)$phaseTime <- 10
 formals(conU_W_Phz10)$multiplierW <- mW
 class(conU_W_Phz10) <- "MP"
+
+
+
+# AH CMPs
+qE <- 0.385
+qW <- 0.305
+
+# no phase
+Fzero1_E <- Fzero1E
+formals(Fzero1_E)$phaseTime <- 0
+formals(Fzero1_E)$q <- qE
+class(Fzero1_E) <- "MP"
+
+Fzero1_W <- Fzero1W
+formals(Fzero1_W)$phaseTime <- 0
+formals(Fzero1_W)$q <- qW
+class(Fzero1_W) <- "MP"
+
+
+# 5 yr
+Fzero1_E_Phz5 <- Fzero1E
+formals(Fzero1_E_Phz5)$phaseTime <- 5
+formals(Fzero1_E_Phz5)$multiplierE <- mE
+class(Fzero1_E_Phz5) <- "MP"
+
+Fzero1_W_Phz5 <- Fzero1W
+formals(Fzero1_W_Phz5)$phaseTime <- 5
+formals(Fzero1_W_Phz5)$multiplierW <- mW
+class(Fzero1_W_Phz5) <- "MP"
+
+# 10-year
+Fzero1_E_Phz10 <- Fzero1E
+formals(Fzero1_E_Phz10)$phaseTime <- 10
+formals(Fzero1_E_Phz10)$multiplierE <- mE
+class(Fzero1_E_Phz10) <- "MP"
+
+Fzero1_W_Phz10 <- Fzero1W
+formals(Fzero1_W_Phz10)$phaseTime <- 10
+formals(Fzero1_W_Phz10)$multiplierW <- mW
+class(Fzero1_W_Phz10) <- "MP"
+
+
 
 

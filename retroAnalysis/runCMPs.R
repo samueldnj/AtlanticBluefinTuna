@@ -12,6 +12,7 @@
 runCMPs <- function(  iOM = 1,
                       MPs = list( test = c("empMPtest_Mean","empMPtest_Mean") ),
                       assessInt = 2,
+                      det = TRUE,
                       checkMPs = TRUE,
                       reloadABT = FALSE,
                       projFolderName = NULL )
@@ -23,8 +24,11 @@ runCMPs <- function(  iOM = 1,
   #   loadABT()
 
   checkMP <<- checkMPs
+  if(det)
+    OM <- paste0("OM_",iOM,"d")
 
-  OM <- paste0("OM_",iOM,"d")
+  if(!det)
+    OM <- paste0("OM_",iOM)
 
   # Clear outTables directory
   outTableFolder <- "./outTables"

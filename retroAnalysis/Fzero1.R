@@ -18,6 +18,8 @@ Fzero1W <- function(  x,
                       lim = c(.1,.4,1), 
                       alp = c(0.75, 0.6, 0.5),
                       ny = NULL,
+                      phaseTime = 0,
+                      initPhz = 56,
                       IndexID_y = 13, 
                       IndexID_m = 12, 
                       IndexID_o = 14, 
@@ -80,6 +82,16 @@ Fzero1W <- function(  x,
   # New TAC is F01*I/q
   
   TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q/1e-6)
+
+  # Phase-in
+  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
+  }
  
   TAC
 
@@ -95,6 +107,8 @@ Fzero1E <- function(  x,
                       yrsmth = 3, 
                       lim = c(.1,.4,1), 
                       ny = NULL,
+                      phaseTime = 0,
+                      initPhz = 56,
                       alp = c(0.75, 0.6, 0.5),
                       IndexID_y = 1, 
                       IndexID_m = 12, 
@@ -156,6 +170,16 @@ Fzero1E <- function(  x,
   # New TAC is F01*I/q
    # from 2015 VPA continuity run
   TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q/1e-6)
+
+  # Phase-in
+  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  {
+    sqTAC <- dset$Cobs[x,initPhz]
+
+    tNow <- lastyr - initPhz 
+    # phase-in TAC
+    TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
+  }
  
   TAC
 }
