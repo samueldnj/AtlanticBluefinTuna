@@ -75,5 +75,6 @@ targPars <- plotRespSurfaces( surfList = surfList,
 
 targPars
 
+write.csv( targPars, file = file.path("MSEs",projFolder,"targPars.csv"))
 
 
