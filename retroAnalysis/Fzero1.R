@@ -84,11 +84,11 @@ Fzero1W <- function(  x,
   TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q/1e-6)
 
   # Phase-in
-  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  if(phaseTime > 0 & (ny <= initPhz + phaseTime) )
   {
     sqTAC <- dset$Cobs[x,initPhz]
 
-    tNow <- lastyr - initPhz 
+    tNow <- ny - initPhz 
     # phase-in TAC
     TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
   }
@@ -172,11 +172,11 @@ Fzero1E <- function(  x,
   TAC =F01*(dset$Iobs[x,IndexID_bio,][ny]/q/1e-6)
 
   # Phase-in
-  if(phaseTime > 0 & (lastyr <= initPhz + phaseTime) )
+  if(phaseTime > 0 & (ny <= initPhz + phaseTime) )
   {
     sqTAC <- dset$Cobs[x,initPhz]
 
-    tNow <- lastyr - initPhz 
+    tNow <- ny - initPhz 
     # phase-in TAC
     TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
   }
