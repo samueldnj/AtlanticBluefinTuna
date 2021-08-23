@@ -215,6 +215,33 @@ makeMP.df_EA <- function( projFolder = "EA_tuneBr30" ,
   gridMPs.df
 }
 
+
+makeMP.df_EA <- function( projFolder = "EA_tuneBr30" ,
+                            filename = "gridMPS.rds" )
+{
+
+  # Get gridMPs
+  gridMPs <- readRDS(file.path("MSEs",projFolder,filename))
+
+  # Stack gridMPs into a df
+  gridMPs.df <- do.call(rbind,gridMPs) %>% as.data.frame()
+  colnames(gridMPs.df) <- c("EastMP","WestMP")
+
+  # Pull out tuning par values
+  MPsEast <- gridMPs.df[,1]
+  eastMPsplit <- stringr::str_split(MPsEast, pattern = "_targ")
+  targEast <- unlist(eastMPsplit)[2*(1:length(eastMPsplit))]
+
+  MPsWest <- gridMPs.df[,2]
+  westMPsplit <- stringr::str_split(MPsWest, pattern = "_targ")
+  targWest <- unlist(westMPsplit)[2*(1:length(westMPsplit))]
+
+  gridMPs.df$targE <- as.numeric(targEast)
+  gridMPs.df$targW <- as.numeric(targWest)
+
+  gridMPs.df
+}
+
 # Take gridMPs.df object for the particular CMP
 # and add the performance metrics we've defined
 # to the data.frame. These can then be used to

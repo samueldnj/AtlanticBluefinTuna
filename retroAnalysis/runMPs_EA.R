@@ -22,9 +22,10 @@ source("plots.R")
 #             bet = 0.9,
 #             outFile = "autoBRgrid.R")
 
-makeGridEA( eGamma = seq(from = 0.01, to = 0.09, by = 0.02),
-            wGamma = seq(from = 0.01, to = 0.09, by = 0.02),
-            outFile = "autoEAgrid.R")
+makeGridEA_targ(  eTarg = seq(from = 0.8, to = 1.8, by = 0.2),
+                  wTarg = seq(from = 0.8, to = 1.8, by = 0.2),
+                  eGamma = 1, wGamma = 1,
+                  outFile = "autoEAgrid.R")
 
 source("autoEAgrid.R")
 
@@ -50,7 +51,7 @@ perfMetricList <- calcPerfMetrics(  projFolder = projFolder,
 
 saveRDS(perfMetricList, file = file.path("MSEs",projFolder,"PMlist.rds"))
 
-gridMPs.df <- makeMP.df_EA( projFolder =  projFolder)
+gridMPs.df <- makeMP.df_EA_targ( projFolder =  projFolder)
 
 gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
                                       projFolder = projFolder)

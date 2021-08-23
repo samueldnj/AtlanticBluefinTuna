@@ -12,75 +12,67 @@
 # Load the ABTMSE package
 source("initTest.R")
 source("runCMPs.R")
-source("makeGridMPs_constU.R")
+source("makeGridMPs_BR.R")
 source("pewPMs.R")
 source("plots.R")
 source("tools.R")
 
-OMdvec <- 1:48  
 
 
-projFolder <- "testConU_5to10_allOMs"
+
+OMdvec <- 1:48
+
+projFolder <- "EA_tuneBr30_targ1"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
-#                                     OMs = OMdvec )
+                                    # OMs = OMdvec )
 
 
-# # projFolder <- "conU_minpYrH_RefineGrid2"
 
-# gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
+gridMPs.df <- makeMP.df_EA( projFolder =  projFolder)
 
-# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-#                                       OMs = OMdvec,
-#                                       projFolder = projFolder)
+gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
+                                      OMs = OMdvec,
+                                      projFolder = projFolder)
 
-# projFolder <- "conU_pH30_RefineGrid1"
-
-
-# gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
-
-# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-#                                       OMs = OMdvec,
-#                                       projFolder = projFolder)
+# Save
+write.csv(gridPerfMetrics.df, file = file.path("MSEs",projFolder,"perfMetrics.csv"))
 
 
-# projFolder <- "conU_pYrH_RefineGrid2"
+targPars <- array(NA, dim = c(1,2))
+rownames(targPars) <- c("wtdMedBr30")
+colnames(targPars) <- c("East","West")
 
-# gridMPs.df <- makeMP.df_conU( projFolder =  projFolder)
-
-# gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
-#                                       OMs = OMdvec,
-#                                       projFolder = projFolder)
-
-pH30Grid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
-pH30surfaces <- makeRespSurfaces( grid.df = pH30Grid.df,  
-                                  tuningPars = c("multEast","multWest"),
-                                  resp = "pH30",
-                                  target = 0.6,
+Br30Grid.df <- read.csv("MSEs/BR_tuneBr30/perfMetrics.csv")
+Br30surfaces <- makeRespSurfaces( grid.df = Br30Grid.df,  
+                                  tuningPars = c("gamE","gamW"),
+                                  resp = "wtdMedBr30",
+                                  target = 1.25,
                                   tol = 0.01 )
 
-pYrHGrid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
-pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
-                                  tuningPars = c("multEast","multWest"),
-                                  resp = "pYrHealthy",
-                                  target = 0.6,
-                                  tol = .1 )
-minpYrHGrid.df <- read.csv("MSEs/testConU_5to10_allOMs/perfMetrics.csv")
-minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
-                                      tuningPars = c("multEast","multWest"),
-                                      resp = "minProbYrHealth",
-                                      target = 0.6,
-                                      tol = 0.01 )
 
-surfList <- list( pH30 = pH30surfaces,
-                  pYrH = pYrHsurfaces,
-                  minpYrH = minpYrHsurfaces )
+# # pYrHGrid.df <- read.csv("MSEs/BR_initGrid_hiCaps3/perfMetrics.csv")
+# # pYrHsurfaces <- makeRespSurfaces( grid.df = pYrHGrid.df,  
+# #                                   tuningPars = c("alpha","beta"),
+# #                                   resp = "pYrHealthy",
+# #                                   target = 0.6,
+# #                                   tol = 0.1 )
+
+# # minpYrHGrid.df <- read.csv("MSEs/BR_refineGrid2_YearEach30/perfMetrics.csv")
+# # minpYrHsurfaces <- makeRespSurfaces(  grid.df = minpYrHGrid.df,  
+# #                                       tuningPars = c("alpha","beta"),
+# #                                       resp = "minProbYrHealth",
+# #                                       target = 0.6,
+# #                                       tol = 0.1 )
+
+
+
+surfList <- list( Br30 = Br30surfaces )
 
 
 targPars <- plotRespSurfaces( surfList = surfList,
-                              tuningPars = c("m (East area)","m (West area)"))
+                              tuningPars = c("alpha (East area)","beta (West area)"),
+                              rtext = c("wtdBr30") )
 
 targPars
-
-
 
