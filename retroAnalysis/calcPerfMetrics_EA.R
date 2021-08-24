@@ -43,9 +43,9 @@ targPars <- array(NA, dim = c(1,2))
 rownames(targPars) <- c("wtdMedBr30")
 colnames(targPars) <- c("East","West")
 
-Br30Grid.df <- read.csv("MSEs/BR_tuneBr30/perfMetrics.csv")
+Br30Grid.df <- read.csv("MSEs/EA_tuneBr30_targ/perfMetrics.csv")
 Br30surfaces <- makeRespSurfaces( grid.df = Br30Grid.df,  
-                                  tuningPars = c("gamE","gamW"),
+                                  tuningPars = c("targE","targW"),
                                   resp = "wtdMedBr30",
                                   target = 1.25,
                                   tol = 0.01 )

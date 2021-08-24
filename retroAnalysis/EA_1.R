@@ -114,7 +114,7 @@ EA_1_W = function(  x,
                     Gamma = 0.15,
                     phaseTime = 0,
                     initPhz = 56,
-                    cap = Inf,
+                    cap = 2.5e6,
                     yrs4mean=3, na.rm=T){
 #normalizing indices: years 2014 to 2016 are years 50 to 52 since model starts in 1965
   if(is.null(lastyr))
