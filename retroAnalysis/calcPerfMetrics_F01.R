@@ -21,7 +21,7 @@ source("tools.R")
 
 OMdvec <- 1:48
 
-projFolder <- "testF01_qGrid_allOMs"
+projFolder <- "F01_tuneBr30_grid2"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )
