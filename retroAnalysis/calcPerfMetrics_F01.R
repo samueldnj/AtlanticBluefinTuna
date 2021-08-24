@@ -21,14 +21,14 @@ source("tools.R")
 
 OMdvec <- 1:48
 
-projFolder <- "F01_tuneBr30_grid2"
+projFolder <- "AH_phaseIn"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )
 
 
 
-gridMPs.df <- makeMP.df_F01( projFolder =  projFolder)
+gridMPs.df <- makeMP.df_F01( projFolder =  projFolder, filename = "mpList.rds")
 
 
 gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,

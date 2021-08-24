@@ -1,6 +1,30 @@
 # plots.R
 
 
+# Perf metric plots
+# 
+plotDetStochBr30Dists <- function(  dMSE,
+                                    sMSE = NULL,
+                                    mpIdx = 1 )
+{
+  Br30_det    <- lapply( X = dMSE, FUN = Br30 )
+  Br30_stoch  <- lapply( X = sMSE, FUN = Br30 )
+
+  # abind
+
+  # Drop the zeroC CMP
+
+  # Calc quantiles
+
+
+  # Now plot
+  par(mfrow = c(2,1), mar = c(1,1,1,1), oma = c(3,3,1,1) )
+
+  plot(x = c(1,48), y = c(0,2), axes = FALSE )
+    axis(side = 2, las = 1)
+
+}
+
 plotRetros <- function( dsetE = dsetE,
                         dsetW = dsetW,
                         retroTACs_may = retroTACs_may,
