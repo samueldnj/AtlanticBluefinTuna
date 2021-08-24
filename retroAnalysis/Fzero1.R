@@ -88,9 +88,13 @@ Fzero1W <- function(  x,
   {
     sqTAC <- dset$Cobs[x,initPhz]
 
+    browser()
+
     tNow <- ny - initPhz 
     # phase-in TAC
     TAC <- tNow/phaseTime * TAC + (phaseTime - tNow)/phaseTime * sqTAC
+
+
   }
  
   TAC

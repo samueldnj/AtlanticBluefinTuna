@@ -21,6 +21,8 @@ source("constU.R")
 source("EA_1.R")
 source("Fzero1.R")
 
+library("corrplot")
+
 # Load data sets
 dsetE <- readRDS("dsetE.rds")
 dsetW <- readRDS("dsetW.rds")
@@ -59,7 +61,7 @@ for(yIdx in 1:length(retroYrs))
                                         target_yr=55,
                                         deltaE_up=0.5,
                                         deltaE_down=0.5,
-                                        multiplierE=6.4)
+                                        multiplierE=6.13)
 
   retroTACs_may[2,2,yIdx] <- ConstU_W(  x=1,
                                         dset=dsetW,
@@ -70,7 +72,7 @@ for(yIdx in 1:length(retroYrs))
                                         target_yr=55,
                                         deltaW_down=0.5,
                                         deltaW_up=0.5,
-                                        multiplierW=1.5)
+                                        multiplierW=1.46)
 
   # EA_1
   retroTACs_may[3,1,yIdx] <- EA_1_E(  x = 1,
@@ -117,52 +119,44 @@ for(yIdx in 1:length(retroYrs))
                                       IndexID_m = 12, 
                                       IndexID_o = 14, 
                                       nyears=55,
-                                      q = 0.306, # from 2015 VPA continuity run
+                                      q = 0.306, 
                                       IndexID_bio = 14)
 }
 
+# Plot
+graphics.off()
+pdf(file = "figs/retroTACs.pdf",
+        height = 11, width = 8.5)        
+plotRetros(dsetE,dsetW,retroTACs_may)
+dev.off()
 
+nCMPs <- dim(retroTACs_may)[1]
+eastCatMat <- matrix(0, nrow = dim(retroTACs_may)[3], ncol = nCMPs + 1 )
+westCatMat <- matrix(0, nrow = dim(retroTACs_may)[3], ncol = nCMPs + 1 )
 
+eastCatMat[,1] <- dsetE$Cobs[1,retroYrs]
+eastCatMat[,1 + 1:nCMPs] <- t(retroTACs_may[,1,])
 
-par(mfrow = c(2,1), mar = c(1,.1,1,.1), oma = c(4,4,2,2) )
+westCatMat[,1] <- dsetW$Cobs[1,retroYrs]
+westCatMat[,1 + 1:nCMPs] <- t(retroTACs_may[,2,])
 
-mCols <- RColorBrewer::brewer.pal(n = 4, "Dark2")
+eastCatMat <- eastCatMat / 1e6
+westCatMat <- westCatMat / 1e6
 
-plot( x = range(yrs[retroYrs]), 
-      y = c(0,max(dsetE$Cobs[1,retroYrs],retroTACs_may[,1,], na.rm = T))/1e3,
-      type = "n", axes = FALSE )
-  axis(side = 2, las = 1)
-  grid()
-  box()
-  lines(  x = yrs[1:57],
-          y = dsetE$Cobs[1,1:57]/1e3,
-          lty = 1, lwd = 3 )
-  for( m in 1:4 )
-    points( x = yrs[retroYrs],
-            y = retroTACs_may[m,1,]/1e3,
-            pch = 16, col = mCols[m], cex = 1.2 )
+colnames( eastCatMat) <- c("Catch", "BR","LW","EA","AH")
+colnames( westCatMat) <- c("Catch", "BR","LW","EA","AH")
 
-  legend(x = "topleft", col = mCols, pch = 16, cex = 1.2,
-          legend = c("BR","LW","EA","AH"), bty = "n")
-  mtext( side = 3, text = "East Area")
+corEast <- cor(eastCatMat, use = "pairwise.complete.obs")
+corWest <- cor(westCatMat, use = "pairwise.complete.obs")
 
-plot( x = range(yrs[retroYrs]), 
-      y = c(0,max(dsetW$Cobs[1,retroYrs],retroTACs_may[,2,]))/1e3,
-      type = "n", axes = FALSE )
-  axis( side = 1 )
-  axis(side = 2, las = 1)
-  grid()
-  box()
-  lines(  x = yrs[1:57],
-          y = dsetW$Cobs[1,1:57]/1e3,
-          lty = 1, lwd = 3 )
-  for( m in 1:4 )
-    points( x = yrs[retroYrs],
-            y = retroTACs_may[m,2,]/1e3,
-            pch = 16, col = mCols[m], cex = 1.2 )
+graphics.off()
+pdf(file = "figs/eastCorPlot.pdf", width = 8, height = 9)
+corrplot.mixed(corEast, lower = 'square', upper = "number")
+mtext(side = 3, text=  "East Catch and CMP TACs")
+dev.off()
 
-  mtext(side =3, text = "West Area")
-
-  mtext(side = 2, outer = TRUE, text = "Catch (t)", line = 3 )
-  mtext(side = 1, outer = TRUE, text = "Year", line = 3 )
-
+graphics.off()
+pdf(file = "figs/westCorPlot.pdf", width = 8, height = 9)
+corrplot.mixed(corWest, lower = 'square', upper = "number")
+mtext(side = 3, text=  "West Catch and CMP TACs")
+dev.off()

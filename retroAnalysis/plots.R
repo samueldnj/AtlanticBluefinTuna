@@ -1,5 +1,57 @@
 # plots.R
 
+
+plotRetros <- function( dsetE = dsetE,
+                        dsetW = dsetW,
+                        retroTACs_may = retroTACs_may,
+                        cmpNames = c("BR","LW","EA","AH") )
+{
+  nCMPs <- dim(retroTACs_may)[1]
+
+  par(mfrow = c(2,1), mar = c(1,.1,1,.1), oma = c(4,4,2,2) )
+
+  mCols <- RColorBrewer::brewer.pal(n = 4, "Dark2")
+
+  plot( x = range(yrs[retroYrs]), 
+        y = c(0,max(dsetE$Cobs[1,retroYrs],retroTACs_may[,1,], na.rm = T))/1e6,
+        type = "n", axes = FALSE )
+    axis(side = 2, las = 1)
+    grid()
+    box()
+    lines(  x = yrs[1:57],
+            y = dsetE$Cobs[1,1:57]/1e6,
+            lty = 1, lwd = 3 )
+    for( m in 1:nCMPs )
+      points( x = yrs[retroYrs],
+              y = retroTACs_may[m,1,]/1e6,
+              pch = 16, col = mCols[m], cex = 1.2 )
+
+    legend(x = "topleft", col = mCols, pch = 16, cex = 1.2,
+            legend = cmpNames, bty = "n")
+    mtext( side = 3, text = "East Area")
+
+  plot( x = range(yrs[retroYrs]), 
+        y = c(0,max(dsetW$Cobs[1,retroYrs],retroTACs_may[,2,]))/1e6,
+        type = "n", axes = FALSE )
+    axis( side = 1 )
+    axis(side = 2, las = 1)
+    grid()
+    box()
+    lines(  x = yrs[1:57],
+            y = dsetW$Cobs[1,1:57]/1e6,
+            lty = 1, lwd = 3 )
+    for( m in 1:nCMPs )
+      points( x = yrs[retroYrs],
+              y = retroTACs_may[m,2,]/1e6,
+              pch = 16, col = mCols[m], cex = 1.2 )
+
+    mtext(side =3, text = "West Area")
+
+    mtext(side = 2, outer = TRUE, text = "Catch (kt)", line = 3 )
+    mtext(side = 1, outer = TRUE, text = "Year", line = 3 )
+}
+
+
 plotRespSurfaces <- function( surfList,
                               tuningPars = c("multEast","multWest"),
                               rtext = c("Year30",

@@ -158,23 +158,23 @@ class(Fzero1_W) <- "MP"
 # 5 yr
 Fzero1_E_Phz5 <- Fzero1E
 formals(Fzero1_E_Phz5)$phaseTime <- 5
-formals(Fzero1_E_Phz5)$multiplierE <- mE
+formals(Fzero1_E_Phz5)$qE <- qE
 class(Fzero1_E_Phz5) <- "MP"
 
 Fzero1_W_Phz5 <- Fzero1W
 formals(Fzero1_W_Phz5)$phaseTime <- 5
-formals(Fzero1_W_Phz5)$multiplierW <- mW
+formals(Fzero1_W_Phz5)$qW <- qW
 class(Fzero1_W_Phz5) <- "MP"
 
 # 10-year
 Fzero1_E_Phz10 <- Fzero1E
 formals(Fzero1_E_Phz10)$phaseTime <- 10
-formals(Fzero1_E_Phz10)$multiplierE <- mE
+formals(Fzero1_E_Phz10)$qE <- qE
 class(Fzero1_E_Phz10) <- "MP"
 
 Fzero1_W_Phz10 <- Fzero1W
 formals(Fzero1_W_Phz10)$phaseTime <- 10
-formals(Fzero1_W_Phz10)$multiplierW <- mW
+formals(Fzero1_W_Phz10)$qW <- qW
 class(Fzero1_W_Phz10) <- "MP"
 
 
