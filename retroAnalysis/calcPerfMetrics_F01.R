@@ -21,7 +21,7 @@ source("tools.R")
 
 OMdvec <- 1:48
 
-projFolder <- "AH_phaseIn"
+projFolder <- "AH_phaseIn_stoch"
 
 # perfMetricList <- calcPerfMetrics(  projFolder = projFolder, 
 #                                     OMs = OMdvec )
@@ -35,6 +35,7 @@ gridPerfMetrics.df <- addPerfMetrics( gridMPs.df = gridMPs.df,
                                       OMs = OMdvec,
                                       projFolder = projFolder)
 
+write.csv(gridPerfMetrics.df, file = file.path("MSEs",projFolder,"perfMetrics.scv"))
 
 # projFolder <- "F01_refineGrid2_pYrH"
 

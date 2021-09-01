@@ -31,7 +31,7 @@ dsetW <- readRDS("dsetW.rds")
 yrs <- seq(from = 1965, by = 1, length.out = 109 )
 retroYrs <- 46:56
 # Array for retrospective TACs, a is area, y is yr
-retroTACs_may <- array(0, dim = c(4,2,length(retroYrs)))
+retroTACs_may <- array(0, dim = c(3,2,length(retroYrs)))
 
 for(yIdx in 1:length(retroYrs))
 {
@@ -74,28 +74,28 @@ for(yIdx in 1:length(retroYrs))
                                         deltaW_up=0.5,
                                         multiplierW=1.46)
 
-  # EA_1
-  retroTACs_may[3,1,yIdx] <- EA_1_E(  x = 1,
-                                      dset = dsetE,
-                                      lastyr = yr,
-                                      Targ=1.32,
-                                      Deltaup=0.15,
-                                      Gamma = 1,
-                                      Deltadown=0.15,
-                                      yrs4mean=3)
+  # # EA_1
+  # retroTACs_may[3,1,yIdx] <- EA_1_E(  x = 1,
+  #                                     dset = dsetE,
+  #                                     lastyr = yr,
+  #                                     Targ=1.32,
+  #                                     Deltaup=0.15,
+  #                                     Gamma = 1,
+  #                                     Deltadown=0.15,
+  #                                     yrs4mean=3)
 
-  # EA_1
-  retroTACs_may[3,2,yIdx] <- EA_1_W(  x = 1,
-                                      dset = dsetW,
-                                      lastyr = yr,
-                                      Targ=1.5,
-                                      Deltaup=0.15,
-                                      Gamma = 1,
-                                      Deltadown=0.15,
-                                      yrs4mean=3)
+  # # EA_1
+  # retroTACs_may[3,2,yIdx] <- EA_1_W(  x = 1,
+  #                                     dset = dsetW,
+  #                                     lastyr = yr,
+  #                                     Targ=1.5,
+  #                                     Deltaup=0.15,
+  #                                     Gamma = 1,
+  #                                     Deltadown=0.15,
+  #                                     yrs4mean=3)
 
   # AH_E
-  retroTACs_may[4,1,yIdx] <- Fzero1E( x=1, 
+  retroTACs_may[3,1,yIdx] <- Fzero1E( x=1, 
                                       dset = dsetE, 
                                       yrsmth = 3, 
                                       lim = c(.1,.4,1), 
@@ -109,7 +109,7 @@ for(yIdx in 1:length(retroYrs))
                                       IndexID_bio = 2)
 
   # AH_W
-  retroTACs_may[4,2,yIdx] <- Fzero1W( x = 1, 
+  retroTACs_may[3,2,yIdx] <- Fzero1W( x = 1, 
                                       dset = dsetW, 
                                       yrsmth = 3, 
                                       lim = c(.1,.4,1), 
@@ -143,8 +143,8 @@ westCatMat[,1 + 1:nCMPs] <- t(retroTACs_may[,2,])
 eastCatMat <- eastCatMat / 1e6
 westCatMat <- westCatMat / 1e6
 
-colnames( eastCatMat) <- c("Catch", "BR","LW","EA","AH")
-colnames( westCatMat) <- c("Catch", "BR","LW","EA","AH")
+colnames( eastCatMat) <- c("Catch", "BR","LW","AH")
+colnames( westCatMat) <- c("Catch", "BR","LW","AH")
 
 corEast <- cor(eastCatMat, use = "pairwise.complete.obs")
 corWest <- cor(westCatMat, use = "pairwise.complete.obs")

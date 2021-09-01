@@ -1,11 +1,11 @@
 # --------------------------------------------------------------------------
-# runExampleMSE.R
+# runMPs_F01.R
 # 
-# Loads the ABTMSE package (local modified version) and 
-# runs the TMB DD model based procedure
+# Sources function scripts, makes a grid of CMPs and
+# applies to the full grid of operating models
 #
 # Author: Samuel D N Johnson
-# Date: May 30, 2019
+# Date: June 15, 2021
 #
 # --------------------------------------------------------------------------
 

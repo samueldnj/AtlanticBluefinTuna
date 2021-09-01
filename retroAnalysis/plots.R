@@ -3,18 +3,24 @@
 
 # Perf metric plots
 # 
-plotDetStochBr30Dists <- function(  dMSE,
-                                    sMSE = NULL,
-                                    mpIdx = 1 )
+plotBr30Dists <- function(  dMSE,
+                            sMSE,
+                            mpIdx = 1 )
 {
-  Br30_det    <- lapply( X = dMSE, FUN = Br30 )
-  Br30_stoch  <- lapply( X = sMSE, FUN = Br30 )
+  Br30det_E     <- lapply( X = dMSE, FUN = Br30, pp = 1 )
+  Br30det_W     <- lapply( X = dMSE, FUN = Br30, pp = 2 )
+  Br30sto_E     <- lapply( X = sMSE, FUN = Br30, pp = 1 )
+  Br30sto_W     <- lapply( X = sMSE, FUN = Br30, pp = 2 )
 
-  # abind
+  # abind and drop zeroC
+  Br30det_E <- abind(Br30det_E, along = 0.5)[,-1,]
+  Br30det_W <- abind(Br30det_W, along = 0.5)[,-1,]
 
-  # Drop the zeroC CMP
+  Br30sto_E <- abind(Br30sto_E, along = 0.5)[,-1,]
+  Br30sto_W <- abind(Br30sto_W, along = 0.5)[,-1,]
 
-  # Calc quantiles
+  # Calc quantiles 
+  # browser()
 
 
   # Now plot
@@ -28,7 +34,7 @@ plotDetStochBr30Dists <- function(  dMSE,
 plotRetros <- function( dsetE = dsetE,
                         dsetW = dsetW,
                         retroTACs_may = retroTACs_may,
-                        cmpNames = c("BR","LW","EA","AH") )
+                        cmpNames = c("BR","LW","AH") )
 {
   nCMPs <- dim(retroTACs_may)[1]
 
