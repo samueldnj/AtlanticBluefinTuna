@@ -63,11 +63,25 @@ shinyUI(
                dropdownButton(
                  column(12,
                         h5(tags$b("Global CMP filtering",style="color:#347ab6")),
+
                         column(12,
 
-                               checkboxGroupInput("CMPs",label=NULL,choices=MPnames, selected=MPnames,inline=T)
+                               checkboxGroupInput("CMPs",label="By CMP",choices=MPnames, selected=MPnames,inline=T)
                         ),
+                        column(12,
+
+                               checkboxGroupInput("MPtypes",label="By Type",choices=MPtypes, selected=MPtypes,inline=T)
+                        ),
+                        column(12,
+
+                               checkboxGroupInput("Tunings",label="By Tuning",choices=tunes, selected=tunes,inline=T)
+                        ),
+                        column(4),
+                        column(8,actionButton("DeselAllCMPs","Deselect all"),actionButton("SelAllCMPs","Select all"),style="padding:9px"),
+                        column(12),
+
                         h5(tags$b("Display stochastic or deterministic results",style="color:#347ab6")),
+
                         column(12,
                                tipify(radioButtons("StochDet",label=NULL,choices=c("Stochastic","Deterministic"),selected="Deterministic"),title="A full set of MSE runs with 48 simulations
                                       per OM including observation error and recruitment deviations or a 1 simulation run with almost perfect observation error and deterministic recruitment")
@@ -81,7 +95,7 @@ shinyUI(
                  status = "primary",
                  right=TRUE,
                  circle = FALSE,
-                 width="400px"
+                 width="500px"
 
                )
            ), # end of options menu dropdown
@@ -99,13 +113,19 @@ shinyUI(
                                tipify(fileInput("Load",label=NULL),title="Load an object produced by the function Results_compiler() in the ABTMSE package (v6.6.16 or later)"))
 
                              ),
+                 column(12,
+                        h5(tags$b("Download compiled MSE results from app",style="color:#347ab6")),
+                        column(12, downloadButton("SaveDet","Download Deterministic MSE results"),style="padding:9px"),
+                        column(12, downloadButton("SaveStoch","Download Stochastic MSE results (very large - takes a minute)"),style="padding:9px")
+                 ),
+
                  inputId = "DD_file",
                  label = "File",
                  icon = icon("file"),
                  status = "primary",
                  circle = FALSE,
                  right=TRUE,
-                 width="400px"
+                 width="500px"
                )
 
            ) # end of file menu dropdown
@@ -152,28 +172,30 @@ shinyUI(
                       actionButton("oRes1",h5("Reset",style = "color:grey")),
                       hr(),
 
-                      selectInput("OM1","Select a single reference OM",choices=OMnames,selected=OMnames[1]),
+                      column(5,checkboxInput("Wt1",label=h5("Use OM Weights"),value=1)),
+                      column(7,selectInput("OM1","Select an OM",choices=OMnames,selected=OMnames[1])),
+
                       checkboxGroupInput("Rec1", label = h5("Stock-recruitment",style = "font-weight:bold"),
                                   choices = list("(1): West: h=0.6 to h=0.9 1975+, East:  h=0.98 to h=0.98 1988+" = "1",
                                                  "(2): West: B-H h=0.6 all years, East: B-H h=0.7 all years" = "2",
-                                                 "(3): West: post 75+ to pre '75, East: 88+ to '50-87 after 10 years" = "3"), selected = "1"),
+                                                 "(3): West: post 75+ to pre '75, East: 88+ to '50-87 after 10 years" = "3"), selected = c("1","2","3")),
                       checkboxGroupInput("SM1", label = h5("Age of spawning / natural mortality",style = "font-weight:bold"),
-                                  choices = list("(A) Younger spawning, High M" = "A","(B) Older spawning, Low M" = "B"), selected = "A"),
+                                  choices = list("(A) Younger spawning, High M" = "A","(B) Older spawning, Low M" = "B"), selected = c("A","B","C")),
                       checkboxGroupInput("Scale1", label = h5("Scale",style = "font-weight:bold"),
                                          choices = list("(--) mean SSB 15kt West, 200kt East" = "--",
                                                         "(-+) mean SSB 15kt West, 400kt East" = "-+",
                                                         "(+-) mean SSB 50kt West, 200kt East" = "+-",
-                                                        "(++) mean SSB 50kt West, 400kt East" = "++"),selected = "--"),
+                                                        "(++) mean SSB 50kt West, 400kt East" = "++"),selected = c("--","-+","+-","++")),
                       checkboxGroupInput("Comp1", label = h5("Length composition weight",style = "font-weight:bold"),
                                          choices = list("(L) Low length composition weight of 1/20" = "L",
-                                                        "(H) High length composition weight of 1" = "H"),selected = "L"),
+                                                        "(H) High length composition weight of 1" = "H"),selected = c("L","H")),
 
                       checkboxGroupInput("Rob1", label = h5("Robustness",style = "font-weight:bold"),
                                   choiceNames = ROMcode, choiceValues=ROMnames, selected = ""),
 
 
                       hr(),
-                      h5("Operating models included",style = "font-weight:bold"),
+                      h5("Operating models selected",style = "font-weight:bold"),
                       textOutput("test1"),
                       hr(),
                       h5("OM codes",style = "font-weight:bold"),
@@ -232,8 +254,9 @@ shinyUI(
                         tabPanel(h5("Zeh",style = "color:black"),
                                  column(12,HTML("<br>")),
                                  column(2,  selectInput("Zeh_PM","Performance metric",choices=pnames,selected="AvC30")),
-                                 column(9),
-                                 column(1,checkboxInput('zeh_violin',"Violin plot",FALSE)),
+                                 column(6),
+                                 column(2,checkboxInput('zeh_norm',"Normalize by simulation",FALSE)),
+                                 column(2,checkboxInput('zeh_violin',"Violin plot",FALSE)),
                                  column(12,HTML("<br>")),
 
 
@@ -316,15 +339,35 @@ shinyUI(
                                  column(2,plotOutput("Tleg2")),
                                  column(5,plotOutput("Tplot22")),
                                  column(1,h5("Figure 4.",style="color:black")),
-                                 column(11, h5("A trade-off plot showing mean performance over all selected OMs and simulations.",style="color:darkgrey")),
+                                 column(11, h5("A trade-off plot showing median performance over all selected OMs and simulations.",style="color:darkgrey")),
 
 
                                  value=6),
 
+                        tabPanel(h5("T-O E/W",style = "color:black"),
+
+                                 column(12,HTML("<br>")),
+                                 fluidRow(column(3,  selectInput("T_PMw","Performance Metric West (x axis)",choices=pnames,selected="Br30")),
+                                          column(3,  selectInput("T_PMe","Performance Metric East (y axis)",choices=pnames,selected="Br30")),
+                                          column(2,  checkboxInput("barsEW","Add 90th bars",value=FALSE)),
+                                          column(2,  checkboxInput("labsEW","Labels on plots",value=FALSE))
+                                 ),
+
+                                 column(5),
+                                 column(7,h4("Area / Stock Trade-offs",stype="font-weight:bold")),
+                                 column(5,plotOutput("TplotEW1")),
+                                 column(2,plotOutput("Tleg3")),
+                                 column(5,plotOutput("TplotEW2")),
+
+                                 column(1,h5("Figure 5.",style="color:black")),
+                                 column(11, h5("A trade-off plot showing inter stock / area median performance over all selected OMs and simulations.",style="color:darkgrey")),
+
+                                 value=7),
+
                         tabPanel(h5("Proj.",style = "color:black"),
                                  column(12,HTML("<br>")),
 
-                                 column(12,column(6, sliderInput("YB_quant","Quantile",min=5,max=95,value=50,step=5))),
+                                 column(12,column(6, sliderInput("YB_quant","Quantile",min=5,max=95,value=50,step=5)),column(2),column(4,h5("! does not account for OM weights !",style="color:red"))),
 
                                  column(5),column(7,h4("Eastern Stock",stype="font-weight:bold")),
                                  column(6,plotOutput("YBP1E",width="auto")),
@@ -333,16 +376,16 @@ shinyUI(
                                  column(5),column(7,h4("Western Stock",stype="font-weight:bold")),
                                  column(6,plotOutput("YBP1W",width="auto")),
                                  column(6,plotOutput("YBP2W",width="auto")),
-                                 column(1,h5("Figure 5.",style="color:black")),
+                                 column(1,h5("Figure 6.",style="color:black")),
                                  column(11, h5("Mean Catch (by area) and SSB (by stock) projections averaged over all selected OMs and simulations.",style="color:darkgrey")),
 
 
-                                 value=7),
+                                 value=8),
 
                         tabPanel(h5("Stoch. Proj.",style = "color:black"),
                                  column(12,HTML("<br>")),
 
-                                 column(12,column(6, sliderInput("StochIQR","Inter-quantile range",min=50,max=99,value=90,step=1))),
+                                 column(12,column(6, sliderInput("StochIQR","Inter-quantile range",min=50,max=99,value=90,step=1)),column(2),column(4,h5("! does not account for OM weights !",style="color:red"))),
 
                                  column(3,  selectInput("S_MP1","CMP 1",choices=MPnames,selected=MPnames[1])),
                                  column(3,  selectInput("S_MP2","CMP 2",choices=MPnames,selected=MPnames[2])),
@@ -357,10 +400,10 @@ shinyUI(
                                  column(5),column(7,h4("Western Stock",stype="font-weight:bold")),
                                  column(6,plotOutput("S1W",width="auto")),
                                  column(6,plotOutput("S2W",width="auto")),
-                                 column(1,h5("Figure 6.",style="color:black")),
-                                 column(11, h5("As figure 5 but showing uncertainty in Catch (by area) and SSB (by stock) outcomes for up to three MPs. The projected values of catch (by area) and SSB (by stock) are the mean values across all simulations and selected OMs.",style="color:darkgrey")),
+                                 column(1,h5("Figure 7.",style="color:black")),
+                                 column(11, h5("As figure 6 but showing uncertainty in Catch (by area) and SSB (by stock) outcomes for up to three MPs. The projected values of catch (by area) and SSB (by stock) are the mean values across all simulations and selected OMs.",style="color:darkgrey")),
 
-                                 value=8),
+                                 value=9),
 
                         tabPanel(h5("By Sim Proj.",style = "color:black"),
                                  column(12,HTML("<br>")),
@@ -381,10 +424,10 @@ shinyUI(
                                  column(5),column(7,h4("Western Stock",stype="font-weight:bold")),
                                  column(6,plotOutput("Sm1W",width="auto")),
                                  column(6,plotOutput("Sm2W",width="auto")),
-                                 column(1,h5("Figure 7.",style="color:black")),
-                                 column(11, h5("As figure 6 but showing by-simulation results for a single OM for up to two MPs. The projected values of catch (by area) and SSB (by stock) are the mean values across all simulations and selected OMs.",style="color:darkgrey")),
+                                 column(1,h5("Figure 8.",style="color:black")),
+                                 column(11, h5("As figure 7 but showing by-simulation results for a single OM for up to two MPs. The projected values of catch (by area) and SSB (by stock) are the mean values across all simulations and selected OMs.",style="color:darkgrey")),
 
-                                 value=9),
+                                 value=10),
 
                         tabPanel(h5("Radar",style = "color:black"),
                                  column(12,HTML("<br>")),
@@ -404,14 +447,14 @@ shinyUI(
                                  column(6,plotOutput("R1W",width="auto")),
                                  column(6,plotOutput("R2W",width="auto")),
 
-                                 column(1,h5("Figure 8.",style="color:black")),
+                                 column(1,h5("Figure 9.",style="color:black")),
                                  column(11, h5("Radar plots show the mean of the performance metrics (over all simulations and selected OMs).
                                                Radar plots are intended to distinguish good and bad performing CMPs according to the shaded area. It follows
                                                that some metrics are either inverted (denoted with an i) or are a reciprocal (r) such that larger plotted
                                                areas reflect better performance.",style="color:darkgrey")),
 
                                  #plotOutput("Wormplot",height="650px"),
-                                 value=10),
+                                 value=11),
 
                         tabPanel(h5("Radar E/W",style = "color:black"),
                                  column(12,HTML("<br>")),
@@ -424,18 +467,17 @@ shinyUI(
 
                                  column(12,HTML("<br>")),
 
-                                 column(5),column(7,h4("Eastern Stock",stype="font-weight:bold")),
                                  column(6,plotOutput("REW1",width="auto")),
                                  column(6,plotOutput("REW2",width="auto")),
 
-                                 column(1,h5("Figure 9.",style="color:black")),
-                                 column(11, h5("As Figure 8 but allowing for cross-stock performance evaluation.  Plots show the mean of the performance metrics (over all simulations and selected OMs).
+                                 column(1,h5("Figure 10.",style="color:black")),
+                                 column(11, h5("As Figure 9 but allowing for cross-stock performance evaluation.  Plots show the mean of the performance metrics (over all simulations and selected OMs).
                                                Radar plots are intended to distinguish good and bad performing CMPs according to the shaded area. It follows
                                                that some metrics are either inverted (denoted with an i) or are a reciprocal (r) such that larger plotted
                                                areas reflect better performance.",style="color:darkgrey")),
 
                                  #plotOutput("Wormplot",height="650px"),
-                                 value=10),
+                                 value=12),
 
 
                         id = "tabs1"
@@ -454,8 +496,8 @@ shinyUI(
                       actionButton("oRob2",h5("Robust..",style = "color:grey")),
                       actionButton("oRes2",h5("Reset",style = "color:grey")),
                       hr(),
-
-                      selectInput("OM2","Select a single reference OM",choices=OMnames,selected=OMnames[1]),
+                      column(5,checkboxInput("Wt2",label=h5("Use OM Weights"),value=1)),
+                      column(7,selectInput("OM2","Select an OM",choices=OMnames,selected=OMnames[1])),
                       checkboxGroupInput("Rec2", label = h5("Stock-recruitment",style = "font-weight:bold"),
                                          choices = list("(1): West: h=0.6 to h=0.9 1975+, East:  h=0.98 to h=0.98 1988+" = "1",
                                                         "(2): West: B-H h=0.6 all years, East: B-H h=0.7 all years" = "2",
@@ -478,7 +520,7 @@ shinyUI(
 
 
                    hr(),
-                   h5("Operating models included",style = "font-weight:bold"),
+                   h5("Operating models selected",style = "font-weight:bold"),
                    textOutput("test2"),
                    hr(),
                    h5("OM codes",style = "font-weight:bold"),
@@ -496,7 +538,7 @@ shinyUI(
       ), # column
       column(8,style="height:40px"),
       column(2,style="height:40px; padding:9px",textOutput("SessionID")),
-      column(2,style="height:40px", h6("copyright (c) ICCAT 2020"))
+      column(2,style="height:40px", h6("copyright (c) ICCAT 2021"))
     ) # fluid row
   )# Fluidpage
 )

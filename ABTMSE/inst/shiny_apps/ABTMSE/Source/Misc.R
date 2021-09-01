@@ -14,3 +14,26 @@ getMPind<-function(){
   MPind
 }
 
+updateCMPwidgets<-function(MPnames){
+  updateSelectInput(session,"Zeh_MP1",selected=MPnames[2],choices=MPnames)
+  updateSelectInput(session,"Zeh_MP2",selected="None",choices=c("None",MPnames))
+
+  updateSelectInput(session,"ZehPM_MP1",selected=MPnames[1],choices=MPnames)
+  updateSelectInput(session,"ZehPM_MP2",selected=MPnames[2],choices=MPnames)
+  updateSelectInput(session,"ZehPM_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
+
+  updateSelectInput(session,"S_MP1",selected=MPnames[1],choices=MPnames)
+  updateSelectInput(session,"S_MP2",selected=MPnames[2],choices=MPnames)
+  updateSelectInput(session,"S_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
+
+  updateSelectInput(session,"Sm_MP1",selected=MPnames[1],choices=MPnames)
+  updateSelectInput(session,"Sm_MP2",selected=MPnames[2],choices=MPnames)
+
+  updateSelectInput(session,"R_MP1",selected=MPnames[1],choices=MPnames)
+  updateSelectInput(session,"R_MP2",selected=MPnames[2],choices=MPnames)
+  updateSelectInput(session,"R_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
+
+  updateSelectInput(session,"REW_MP1",selected=MPnames[1],choices=MPnames)
+  updateSelectInput(session,"REW_MP2",selected=MPnames[2],choices=MPnames)
+  updateSelectInput(session,"REW_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
+}

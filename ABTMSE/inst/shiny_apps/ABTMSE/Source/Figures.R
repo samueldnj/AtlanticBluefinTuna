@@ -52,40 +52,6 @@ custombar<-function(dat,MPnams,tickwd1=0.085,tickwd2=0.045,lwd1=3,lwd2=1,xlab=T,
   if(!add)mtext(ynam,2,line=2)
 
 }
-#renderPlot(ZehP(MET,MPnames,1,1),height=Zeh_sz*0.8)
-# ind<-1:96; pp<-1; Ino=1; PMind<-1; MPind<-1:29
-ZehP<-function(MET,Pnam,pp,Ino){
-
- # temp<-changed()
-
-  PMind<<-match(input$Zeh_PM,pnames)
-  if(Ino==1)ind<<-getind1()
-  if(Ino==2)ind<<-getind2()
-  MPind<-getMPind()
-  #if(input$zeh_violin)MPind<-MPind[MPind!=1]
-  MET_s<-MET[,,,MPind,]
-  res<-MET_s[,ind,pp,,PMind]
-  #ylim=range(c(MET_s[,ind,pp,,PMind],MET_s[,ind,pp,,PMind]))
-  ndim<-length(dim(res))
-
-  if(input$zeh_violin==0){
-    ylim=range(c(MET_s[,getind1(),pp,,PMind],MET_s[,getind2(),pp,,PMind]))
-    if(ndim==2)store<-apply(res,2,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
-    if(ndim==3)store<-apply(res,3,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
-    custombar(dat=t(store),MPnams=MPnames[MPind],ylim=ylim,ynam=input$Zeh_PM)
-  }else{
-
-    if(ndim==3)res0<-array(res,c(dim(res)[1]*dim(res)[2],dim(res)[3]))
-    if(ndim==2)res0<-res
-    df<-data.frame(y=as.vector(res0),x=rep(MPnames[MPind],each=dim(res0)[1]))
-    df<-subset(df,df$x!="ZeroC")
-    p<-ggplot(df, aes(x=x, y=y, fill=x)) +  geom_violin(width=1.4)+ scale_fill_viridis(discrete = TRUE) +geom_boxplot(width=0.1, color="black", alpha=0.2)+  theme(legend.position="none",plot.title = element_text(size=11))+xlab("")+ylab("")
-    print(p)
-
-  }
-  # mtext("Candidate Management Procedure",1,line=6.8,font=2,outer=T)
-
-}
 
 
 ZehOM<-function(MET,Pnam,pp){
@@ -148,16 +114,86 @@ ZehOM<-function(MET,Pnam,pp){
 
 }
 
+#renderPlot(ZehP(MET,MPnames,1,1),height=Zeh_sz*0.8)
+# ind<-1:96; pp<-1; Ino=1; PMind<-1; MPind<-1:29
+ZehP<-function(MET,Pnam,pp,Ino){
+
+  # temp<-changed()
+
+  PMind<<-match(input$Zeh_PM,pnames)
+  if(Ino==1)ind<<-getind1()
+  if(Ino==2)ind<<-getind2()
+
+  if(Ino==1)doWt = input$Wt1
+  if(Ino==2)doWt = input$Wt2
+
+  MPind<-getMPind()
+  #if(input$zeh_violin)MPind<-MPind[MPind!=1]
+  MET_s<-MET[,,,MPind,]
+  ylim=range(c(MET_s[,getind1(),pp,,PMind],MET_s[,getind2(),pp,,PMind]))
+  res<-MET_s[,ind,pp,,PMind]
+  ndim<-length(dim(res))
+  normtext2<-""
+  if(input$zeh_norm){
+    ylim=c(0,2)#MET_s<-MET_s/array(apply(MET_s,1:3,mean),dim(MET_s))
+    if(ndim==3)    res<-res/array(apply(res,1:2,mean),dim(res))
+    if(ndim==2)    res<-res/array(apply(res,1,mean),dim(res))
+    normtext2<-" (relative to mean score among MPs per sim)"
+
+  }
+  #ylim=range(c(MET_s[,ind,pp,,PMind],MET_s[,ind,pp,,PMind]))
+
+
+  if(input$zeh_violin==0){
+
+    if(ndim==2)store<-apply(res,2,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
+    if(ndim==3){
+      if(!doWt){
+        store<-apply(res,3,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
+      }else{
+        store<-wapply3_qs(res,OMw=OMwt[ind],qs=c(0.05,0.25,0.5,0.75,0.95))
+      }
+    }
+    custombar(dat=t(store),MPnams=MPnames[MPind],ylim=ylim,ynam=paste0(input$Zeh_PM,normtext2))
+  }else{
+
+    if(ndim==3)res0<-array(res,c(dim(res)[1]*dim(res)[2],dim(res)[3]))
+    if(ndim==2)res0<-res
+    df<-data.frame(y=as.vector(res0),x=rep(MPnames[MPind],each=dim(res0)[1]))
+    df$x <- factor(df$x, levels = unique(df$x))
+    df<-subset(df,df$x!="ZeroC-ZeroC")
+    df<-subset(df,df$x!="ZeroC")
+    if(!doWt)p<-ggplot(df, aes(x=x, y=y, fill=x)) +  geom_violin(width=1.4)+ scale_fill_viridis(discrete = TRUE) +geom_boxplot(width=0.1, color="black", alpha=0.2)+  theme(legend.position="none",plot.title = element_text(size=11))+xlab("")+ylab(paste0(input$Zeh_PM,normtext2))
+    if(doWt){
+      if(ndim==3)nreps<-dim(res)[3]-1
+      if(ndim==2)nreps<-1
+      weights=rep(rep(OMwt[ind]/sum(OMwt[ind]),each=dim(res)[1]),nreps)
+
+      p<-ggplot(df, aes(x=x, y=y, fill=x)) +  geom_violin(aes(weight = weights),width=1.4)+ geom_boxplot(aes(weight = weights),width=0.1, color="black", alpha=0.2)+ scale_fill_viridis(discrete = TRUE) +  theme(legend.position="none",plot.title = element_text(size=11))+xlab("")+ylab(paste0(input$Zeh_PM,normtext2))
+
+
+    }
+    print(p)
+
+  }
+  # mtext("Candidate Management Procedure",1,line=6.8,font=2,outer=T)
+
+}
+
 
 #    MET<-CompRes$MET; Pnam<-CompRes$pnames; MPnames<-CompRes$MPnames; pp<-1 ; Ino<-1; PMind<-c(1,4,length(Pnam))
 #    MPind<-1:3 ;ind<-rep(T,length(CompRes$OMnames)) ;ylim<-range(MET); ZehPMnams<-Pnam[PMind]
-# input <- list(zehPM_violin=T)
+#    input <- list(zehPM_violin=T); doWt=T; ylim=range(c(MET_s[,ind,pp,,PMind[i]],MET_s[,ind,pp,,PMind[i]]))
 ZehPM<-function(MET,Pnam,pp,Ino){
 
   #temp<-changed()
 
   ZehPMnams<-c(input$ZehPM_PM1,input$ZehPM_PM2,input$ZehPM_PM3)
   PMind<-c(match(ZehPMnams,pnames))
+
+
+  if(Ino==1)doWt = input$Wt1
+  if(Ino==2)doWt = input$Wt2
 
   par(mfrow=c(1,3))
   if(Ino==1)ind<<-getind1()
@@ -170,13 +206,22 @@ ZehPM<-function(MET,Pnam,pp,Ino){
 
     res<-MET_s[,ind,pp,,PMind[i]]
 
-    ylim=range(c(MET_s[,getind1(),pp,,PMind[i]],MET_s[,getind2(),pp,,PMind[i]]))
+    ylim=c(0,quantile(c(MET_s[,getind1(),pp,,PMind[i]],MET_s[,getind2(),pp,,PMind[i]]),0.99)) # range(c(MET_s[,getind1(),pp,,PMind[i]],MET_s[,getind2(),pp,,PMind[i]]))
     ndim<-length(dim(res))
 
     if(input$zehPM_violin==0){
 
+      #if(ndim==2)store<-apply(res,2,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
+      #if(ndim==3)store<-apply(res,3,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
+
       if(ndim==2)store<-apply(res,2,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
-      if(ndim==3)store<-apply(res,3,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
+      if(ndim==3){
+        if(!doWt){
+          store<-apply(res,3,quantile,p=c(0.05,0.25,0.5,0.75,0.95))
+        }else{
+          store<-wapply3_qs(res,OMw=OMwt[ind],qs=c(0.05,0.25,0.5,0.75,0.95))
+        }
+      }
 
       custombar(dat=t(store),MPnams=MPnames[MPind],ylim=ylim,ynam=ZehPMnams[i],cols=MPcols[1:3])
 
@@ -185,9 +230,18 @@ ZehPM<-function(MET,Pnam,pp,Ino){
       if(ndim==3)res0<-array(res,c(dim(res)[1]*dim(res)[2],dim(res)[3]))
       if(ndim==2)res0<-res
       df<-data.frame(y=as.vector(res0),x=rep(MPnames[MPind],each=dim(res0)[1]))
+      df$x <- factor(df$x, levels = unique(df$x))
 
-      df<-subset(df,df$x!="ZeroC")
-      plist[[i]]<-ggplot(df, aes(x=x, y=y, fill=x)) + geom_violin() + scale_fill_viridis(discrete = TRUE) + geom_boxplot(width=0.1, color="black", alpha=0.2)+ theme(legend.position="none",plot.title = element_text(size=11))+xlab("")+ylab(ZehPMnams[i])
+      if(!doWt)plist[[i]]<-ggplot(df, aes(x=x, y=y, fill=x)) + geom_violin() + scale_fill_viridis(discrete = TRUE) + geom_boxplot(width=0.1, color="black", alpha=0.2)+ theme(legend.position="none",plot.title = element_text(size=11))+xlab("")+ylab(ZehPMnams[i])
+
+      if(doWt){
+        if(ndim==3)nreps<-dim(res)[3]
+        if(ndim==2)nreps<-dim(res)[2]
+
+        weights=rep(rep(OMwt[ind]/sum(OMwt[ind]),each=dim(res)[1]),nreps)
+        plist[[i]]<-ggplot(df, aes(x=x, y=y, fill=x)) +  geom_violin(aes(weight = weights),width=1.4)+ geom_boxplot(aes(weight = weights),width=0.1, color="black", alpha=0.2)+ scale_fill_viridis(discrete = TRUE) +  theme(legend.position="none",plot.title = element_text(size=11))+xlab("")+ylab("")
+
+      }
 
     }
 
@@ -200,12 +254,11 @@ ZehPM<-function(MET,Pnam,pp,Ino){
 
 
 # Trade-off plot
-Tplot<-function(x1=1:10,y1=1:10,x2=1:10,y2=1:10,tabno=1,xlab="xlab",ylab="ylab",MPnames=as.character(1:10),bars=F,MPlabs=F){
+Tplot<-function(x1=1:10,y1=1:10,x2=1:10,y2=1:10,tabno=1,xlab="xlab",ylab="ylab",MPnam,MPcoly,bars=F,MPlabs=F){
 
   temp<-changed()
 
   par(mai=c(0.8,1,0.01,0.03))
-
 
   yinc<-(max(y1,y2)-min(y1,y2))/20
   if(bars)ylim<-range(y1,y2)+c(-yinc,yinc)/3
@@ -226,23 +279,23 @@ Tplot<-function(x1=1:10,y1=1:10,x2=1:10,y2=1:10,tabno=1,xlab="xlab",ylab="ylab",
     abline(v=xls,col="lightgrey")
     abline(h=0,col="darkgrey",lwd=2)
     abline(v=0,col="darkgrey",lwd=2)
-    points(x[2,],y[2,],col=MPcols,cex=1.3,pch=19,)
+    points(x[2,],y[2,],col=MPcoly,cex=1.3,pch=19,)
   }else{
     plot(x[2,],y[2,],col="white",xlab="",ylab="",xlim=xlim,ylim=ylim)
     abline(h=yls,col="lightgrey")
     abline(v=xls,col="lightgrey")
     abline(h=0,col="darkgrey",lwd=2)
     abline(v=0,col="darkgrey",lwd=2)
-    text(x[2,],y[2,],MPnames,col=MPcols,font=2)
+    text(x[2,],y[2,],MPnam,col=MPcoly,font=2)
   }
 
-  mtext(input$T_PMx,1,line=1.9)
-  mtext(input$T_PMy,2,line=1.9)
+  mtext(xlab,1,line=1.9)
+  mtext(ylab,2,line=1.9)
 
   if(bars){
     for(MP in 1:ncol(x)){
-      lines(c(x[1,MP],x[3,MP]),rep(y[2,MP],2),col=MPcols[MP])
-      lines(rep(x[2,MP],2),c(y[1,MP],y[3,MP]),col=MPcols[MP])
+      lines(c(x[1,MP],x[3,MP]),rep(y[2,MP],2),col=MPcoly[MP])
+      lines(rep(x[2,MP],2),c(y[1,MP],y[3,MP]),col=MPcoly[MP])
     }
   }
 }
@@ -252,7 +305,28 @@ Tleg<-function(){
   par(mai=rep(0.01,4))
   plot(1,1,col='white',xlab="",ylab="",axes=F)
   MPind<-getMPind()
-  if(!input$labs)legend('center',legend=MPnames[MPind],text.col= MPcols,bty='n')
+  MPind[1]<-F
+  MPn <- MPnames[MPind]
+  MPc<- MPcols[MPind]
+  nMs<-length(MPn)
+
+  leftlim<-ceiling(nMs/2)
+  if(leftlim<15)leftlim=15
+  if(leftlim>nMs)leftlim=nMs
+
+  if(!input$labs){
+
+    if(nMs>15){ # wrap legend
+      indleft<-1:leftlim
+      indright<-(leftlim+1):nMs
+      legend('left', legend=MPn[indleft], text.col= MPc[indleft], bty='n')
+      legend('right',legend=MPn[indright],text.col= MPc[indright],bty='n')
+    }else{
+       legend('center', legend=MPn, text.col= MPc, bty='n')
+    }
+
+
+  }
 }
 
 Twrap<-function(pp,tabno){
@@ -261,32 +335,107 @@ Twrap<-function(pp,tabno){
   PMy<-match(input$T_PMy,pnames)
   ind1<-getind1()
   ind2<-getind2()
+
+  if(tabno==1)ind<-ind1
+  if(tabno==2)ind<-ind2
+
   MPind<-getMPind()
+  MPind[1]<-F #remove ZeroC
   MET_s<-MET[,,,MPind,]
   datx1<-MET_s[,ind1,pp,,PMx]
   daty1<-MET_s[,ind1,pp,,PMy]
   datx2<-MET_s[,ind2,pp,,PMx]
   daty2<-MET_s[,ind2,pp,,PMy]
 
+  if(tabno==1)doWt = input$Wt1
+  if(tabno==2)doWt = input$Wt2
+
   if(length(dim(datx1))==3){
-    x1<-apply(datx1,3,quantile,p=c(0.05,0.5,0.95))
-    y1<-apply(daty1,3,quantile,p=c(0.05,0.5,0.95))
+    if(!doWt){
+      x1<-apply(datx1,3,quantile,p=c(0.05,0.5,0.95))
+      y1<-apply(daty1,3,quantile,p=c(0.05,0.5,0.95))
+    }else{
+      x1<-wapply3_qs(datx1,OMw=OMwt[ind1],qs=c(0.05,0.5,0.95))
+      y1<-wapply3_qs(daty1,OMw=OMwt[ind1],qs=c(0.05,0.5,0.95))
+    }
   }else{
     x1<-apply(datx1,2,quantile,p=c(0.05,0.5,0.95))
     y1<-apply(daty1,2,quantile,p=c(0.05,0.5,0.95))
   }
 
   if(length(dim(datx2))==3){
-    x2<-apply(datx2,3,quantile,p=c(0.05,0.5,0.95))
-    y2<-apply(daty2,3,quantile,p=c(0.05,0.5,0.95))
+
+    if(!doWt){
+      x2<-apply(datx2,3,quantile,p=c(0.05,0.5,0.95))
+      y2<-apply(daty2,3,quantile,p=c(0.05,0.5,0.95))
+    }else{
+      x2<-wapply3_qs(datx2,OMw=OMwt[ind2],qs=c(0.05,0.5,0.95))
+      y2<-wapply3_qs(daty2,OMw=OMwt[ind2],qs=c(0.05,0.5,0.95))
+    }
+
   }else{
     x2<-apply(datx2,2,quantile,p=c(0.05,0.5,0.95))
     y2<-apply(daty2,2,quantile,p=c(0.05,0.5,0.95))
   }
 
-  Tplot(x1,y1,x2,y2,tabno,xlab=input$T_PMx,ylab=input$T_PMy,MPnames=MPnames[MPind],bars=input$bars,MPlabs=input$labs)
+  Tplot(x1,y1,x2,y2,tabno,xlab=input$T_PMx,ylab=input$T_PMy,MPnam=MPnames[MPind],MPcoly=MPcols[MPind],bars=input$bars,MPlabs=input$labs)
   #Tplot(x,y,xlab="",ylab="",MPnames=1:10,bars=F,MPlabs=F)
 }
+
+
+TwrapEW<-function(tabno){
+
+  PMx<-match(input$T_PMw,pnames)
+  PMy<-match(input$T_PMe,pnames)
+  ind1<-getind1()
+  ind2<-getind2()
+
+  if(tabno==1)ind<-ind1
+  if(tabno==2)ind<-ind2
+
+  MPind<-getMPind()
+  MPind[1]<-F #remove ZeroC
+  MET_s<-MET[,,,MPind,]
+  datx1<-MET_s[,ind1,2,,PMx]
+  daty1<-MET_s[,ind1,1,,PMy]
+  datx2<-MET_s[,ind2,2,,PMx]
+  daty2<-MET_s[,ind2,1,,PMy]
+
+  if(tabno==1)doWt = input$Wt1
+  if(tabno==2)doWt = input$Wt2
+
+  if(length(dim(datx1))==3){
+    if(!doWt){
+      x1<-apply(datx1,3,quantile,p=c(0.05,0.5,0.95))
+      y1<-apply(daty1,3,quantile,p=c(0.05,0.5,0.95))
+    }else{
+      x1<-wapply3_qs(datx1,OMw=OMwt[ind1],qs=c(0.05,0.5,0.95))
+      y1<-wapply3_qs(daty1,OMw=OMwt[ind1],qs=c(0.05,0.5,0.95))
+    }
+  }else{
+    x1<-apply(datx1,2,quantile,p=c(0.05,0.5,0.95))
+    y1<-apply(daty1,2,quantile,p=c(0.05,0.5,0.95))
+  }
+
+  if(length(dim(datx2))==3){
+
+    if(!doWt){
+      x2<-apply(datx2,3,quantile,p=c(0.05,0.5,0.95))
+      y2<-apply(daty2,3,quantile,p=c(0.05,0.5,0.95))
+    }else{
+      x2<-wapply3_qs(datx2,OMw=OMwt[ind2],qs=c(0.05,0.5,0.95))
+      y2<-wapply3_qs(daty2,OMw=OMwt[ind2],qs=c(0.05,0.5,0.95))
+    }
+
+  }else{
+    x2<-apply(datx2,2,quantile,p=c(0.05,0.5,0.95))
+    y2<-apply(daty2,2,quantile,p=c(0.05,0.5,0.95))
+  }
+
+  Tplot(x1,y1,x2,y2,tabno,xlab=paste0("West",input$T_PMw),ylab=paste0("East",input$T_PMe),MPnam=MPnames[MPind],MPcoly=MPcols[MPind],bars=input$barsEW,MPlabs=input$labsEW)
+  #Tplot(x,y,xlab="",ylab="",MPnames=1:10,bars=F,MPlabs=F)
+}
+
 
 
 PROplot<-function(dat,MPnams,ylim,ynam){
@@ -329,32 +478,68 @@ YBP<-function(pp,Ino,leg=F){
   #saveRDS(resA,"C:/temp/resA.rda")
   #saveRDS(quants,"C:/temp/quants.rda")
 
-  if(ndim1==3)ymax<-max(apply(res1,2:3,quantile,p=quant/100))
-  if(ndim1==4)ymax<-max(apply(res1,3:4,quantile,p=quant/100))
-  if(ndim2==3)ymax<-max(ymax,max(apply(res2,2:3,quantile,p=quant/100)))
-  if(ndim2==4)ymax<-max(ymax,max(apply(res2,3:4,quantile,p=quant/100)))
-  ylim<-c(0,ymax)
+  #if(Ino==1)doWt = input$Wt1
+  #if(Ino==2)doWt = input$Wt2
+  doWt<-F
+  if(!doWt){
 
-  if(ndim==3)store<-apply(res,2:3,quantile,p=quant/100)
-  if(ndim==4)store<-apply(res,3:4,quantile,p=quant/100)
-  PROplot(store,MPnams=MPnames[MPind],ylim=ylim,ynam="Catch by Area (1000t)")
+    if(ndim1==3)ymax<-max(apply(res1,2:3,quantile,p=quant/100))
+    if(ndim1==4)ymax<-max(apply(res1,3:4,quantile,p=quant/100))
+    if(ndim2==3)ymax<-max(ymax,max(apply(res2,2:3,quantile,p=quant/100)))
+    if(ndim2==4)ymax<-max(ymax,max(apply(res2,3:4,quantile,p=quant/100)))
+    ylim<-c(0,ymax)
 
-  res<-CompRes$B_BMSY[,ind,pp,MPind,]
-  res1<-CompRes$B_BMSY[,ind1,pp,MPind,]
-  res2<-CompRes$B_BMSY[,ind2,pp,MPind,]
-  ndim1<-length(dim(res1))
-  ndim2<-length(dim(res2))
+    if(ndim==3)store<-apply(res,2:3,quantile,p=quant/100)
+    if(ndim==4)store<-apply(res,3:4,quantile,p=quant/100)
+    PROplot(store,MPnams=MPnames[MPind],ylim=ylim,ynam="Catch by Area (1000t)")
 
-  if(ndim1==3)ymax<-max(apply(res1,2:3,quantile,p=quant/100))
-  if(ndim1==4)ymax<-max(apply(res1,3:4,quantile,p=quant/100))
-  if(ndim2==3)ymax<-max(ymax,max(apply(res2,2:3,quantile,p=quant/100)))
-  if(ndim2==4)ymax<-max(ymax,max(apply(res2,3:4,quantile,p=quant/100)))
-  ylim<-c(0,ymax)
+    res<-CompRes$B_BMSY[,ind,pp,MPind,]
+    res1<-CompRes$B_BMSY[,ind1,pp,MPind,]
+    res2<-CompRes$B_BMSY[,ind2,pp,MPind,]
+    ndim1<-length(dim(res1))
+    ndim2<-length(dim(res2))
 
-  if(ndim==3)store<-apply(res,2:3,quantile,p=quant/100)
-  if(ndim==4)store<-apply(res,3:4,quantile,p=quant/100)
-  PROplot(store,MPnams=MPnames[MPind],ylim=ylim,ynam="SSB/SSBMSY dynamic")
-  if(leg)legend('top',MPnames[MPind],text.col=MPcols,bty='n')
+    if(ndim1==3)ymax<-max(apply(res1,2:3,quantile,p=quant/100))
+    if(ndim1==4)ymax<-max(apply(res1,3:4,quantile,p=quant/100))
+    if(ndim2==3)ymax<-max(ymax,max(apply(res2,2:3,quantile,p=quant/100)))
+    if(ndim2==4)ymax<-max(ymax,max(apply(res2,3:4,quantile,p=quant/100)))
+    ylim<-c(0,ymax)
+
+    if(ndim==3)store<-apply(res,2:3,quantile,p=quant/100)
+    if(ndim==4)store<-apply(res,3:4,quantile,p=quant/100)
+    PROplot(store,MPnams=MPnames[MPind],ylim=ylim,ynam="SSB/SSBMSY dynamic")
+    if(leg)legend('top',MPnames[MPind],text.col=MPcols,bty='n')
+
+  } else{
+
+    if(ndim1==3)ymax<-max(wapply23(res1,OMw=OMwt[ind],q=quant/100))
+    if(ndim1==4)ymax<-max(wapply34(res1,OMw=OMwt[ind],q=quant/100))
+    if(ndim2==3)ymax<-max(ymax,max(wapply23(res2,OMw=OMwt[ind],q=quant/100)))
+    if(ndim2==4)ymax<-max(ymax,max(wapply34(res2,OMw=OMwt[ind],q=quant/100)))
+    ylim<-c(0,ymax)
+
+    if(ndim==3)store<-wapply23(res,OMw=OMwt[ind],q=quant/100)
+    if(ndim==4)store<-wapply34(res,OMw=OMwt[ind],q=quant/100)
+    PROplot(store,MPnams=MPnames[MPind],ylim=ylim,ynam="Catch by Area (1000t)")
+
+    res<-CompRes$B_BMSY[,ind,pp,MPind,]
+    res1<-CompRes$B_BMSY[,ind1,pp,MPind,]
+    res2<-CompRes$B_BMSY[,ind2,pp,MPind,]
+    ndim1<-length(dim(res1))
+    ndim2<-length(dim(res2))
+
+    if(ndim1==3)ymax<-max(wapply23(res1,OMw=OMwt[ind],q=quant/100))
+    if(ndim1==4)ymax<-max(wapply34(res1,OMw=OMwt[ind],q=quant/100))
+    if(ndim2==3)ymax<-max(ymax,max(wapply23(res2,OMw=OMwt[ind],q=quant/100)))
+    if(ndim2==4)ymax<-max(ymax,max(wapply34(res2,OMw=OMwt[ind],q=quant/100)))
+    ylim<-c(0,ymax)
+
+    if(ndim==3)store<-wapply23(res,OMw=OMwt[ind],q=quant/100)
+    if(ndim==4)store<-wapply34(res,OMw=OMwt[ind],q=quant/100)
+    PROplot(store,MPnams=MPnames[MPind],ylim=ylim,ynam="SSB/SSBMSY dynamic")
+    if(leg)legend('top',MPnames[MPind],text.col=MPcols,bty='n')
+
+  }
 
   #res<-CompRes$F_FMSY[,ind,pp,MPind,]
   #resA<-CompRes$F_FMSY[,unique(c(ind1,ind2)),pp,MPind,]
@@ -542,22 +727,32 @@ radarP<-function(pp,Ino,leg=F){
   pind<-match(input$R_PMs,pnames)
   plabs<-pnames[pind]
 
+  if(Ino==1)doWt = input$Wt1
+  if(Ino==2)doWt = input$Wt2
+
   # ind1<-1:96; ind2<-1:96; ind<-ind1; MPind<-27:29; pind=c(1,12,13); pp=2; Ino=2; plabs<-pnames[pind]
   perf1<-MET[,,pp,,]
   perf1<-perf1[,ind1,MPind,pind,drop=F]
-  perf1<-apply(perf1,3:4,mean,na.rm=T)
+  if(!doWt){
+    perf1<-apply(perf1,3:4,mean,na.rm=T)
+  }else{
+    perf1<-wapply34_mu(perf1,OMwt[ind1])
+  }
 
   perf2<-MET[,,pp,,]
   perf2<-perf2[,ind2,MPind,pind,drop=F]
-  perf2<-apply(perf2,3:4,mean,na.rm=T)
-
+  if(!doWt){
+    perf2<-apply(perf2,3:4,mean,na.rm=T)
+  }else{
+    perf2<-wapply34_mu(perf2,OMwt[ind2])
+  }
   # metric inversions
   invnams<-c("AAVC")
 
   iind<-plabs%in%invnams
   if(sum(iind)>0) plabs[iind]<-paste(plabs[iind],"(i)")
   inverty<-function(x,maxx)maxx-x
-
+  #inverty<-function(x,maxx)1/(10+x)
   if(sum(iind)>0){
     piind<-(1:length(plabs))[iind]
     for(i in piind){
@@ -622,15 +817,25 @@ radarPEW<-function(Ino,leg=F){
 
   plabs<-c(paste0("W-",pnames[pindW]),paste0("E-",pnames[pindE]))
 
+  if(Ino==1)doWt = input$Wt1
+  if(Ino==2)doWt = input$Wt2
+
   # ind1<-1:4; ind2<-100:105; ind<-ind1; MPind<-1:3; pind=1:4; pp=1; Ino=1
   perf1<-MET[,,1,,]
   perf1<-perf1[,Iind,MPind,pindE,drop=F]
-  perf1<-apply(perf1,3:4,mean,na.rm=T)
+  if(!doWt){
+    perf1<-apply(perf1,3:4,mean,na.rm=T)
+  }else{
+    perf1<-wapply34_mu(perf1,OMwt[Iind])
+  }
 
   perf2<-MET[,,2,,]
   perf2<-perf2[,Iind,MPind,pindW,drop=F]
-  perf2<-apply(perf2,3:4,mean,na.rm=T)
-
+  if(!doWt){
+    perf2<-apply(perf2,3:4,mean,na.rm=T)
+  }else{
+    perf2<-wapply34_mu(perf2,OMwt[Iind])
+  }
   # metric inversions
   invnams<-c("AAVC")
 

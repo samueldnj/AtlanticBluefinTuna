@@ -6,6 +6,8 @@ library(shinyalert)
 library(ggplot2)
 library(viridis)
 library(gridExtra)
+library(reldist)
+library(quantreg)
 
 options(shiny.maxRequestSize=1000*1024^2)
 
@@ -16,6 +18,7 @@ shinyServer(function(input, output, session){
   source("./Source/Figures.R",local=TRUE)
   source("./Source/Tables.R",local=TRUE)
   source("./Source/Misc.R",local=TRUE)
+  source("./Source/Weighted_estimators.R",local=TRUE)
 
   changed<-reactiveVal(0)
   Design<-CompRes$Design
@@ -224,6 +227,10 @@ shinyServer(function(input, output, session){
   output$Tleg2<-renderPlot(Tleg())
 
 
+  output$TplotEW1<-renderPlot(TwrapEW(tabno=1), height=Zeh_sz*0.7)
+  output$TplotEW2<-renderPlot(TwrapEW(tabno=2), height=Zeh_sz*0.7)
+  output$Tleg3<-renderPlot(Tleg())
+
   # Projection plots
 
   output$YBP1E<-renderPlot(YBP(1,1,leg=T),height=Zeh_sz*0.7)
@@ -271,29 +278,16 @@ shinyServer(function(input, output, session){
       ROMcode<<-CompRes$ROMcode
 
       updateCheckboxGroupInput(session,"CMPs",label=NULL,choices=MPnames, selected=MPnames,inline=T)
+      updateCMPwidgets(MPnames)
 
-      updateSelectInput(session,"Zeh_MP1",selected=MPnames[2],choices=MPnames)
-      updateSelectInput(session,"Zeh_MP2",selected="None",choices=c("None",MPnames))
+      MPs<-unique(sapply(MPnames,function(x)substr(x,1,2)))
+      tunes<-unique(sapply(MPnames,function(x)substr(x,3,3)))
+      tunes<-tunes[tunes!="r"]
+      MPtypes<-MPs[MPs!="Ze"]
 
-      updateSelectInput(session,"ZehPM_MP1",selected=MPnames[1],choices=MPnames)
-      updateSelectInput(session,"ZehPM_MP2",selected=MPnames[2],choices=MPnames)
-      updateSelectInput(session,"ZehPM_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
 
-      updateSelectInput(session,"S_MP1",selected=MPnames[1],choices=MPnames)
-      updateSelectInput(session,"S_MP2",selected=MPnames[2],choices=MPnames)
-      updateSelectInput(session,"S_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
-
-      updateSelectInput(session,"Sm_MP1",selected=MPnames[1],choices=MPnames)
-      updateSelectInput(session,"Sm_MP2",selected=MPnames[2],choices=MPnames)
-
-      updateSelectInput(session,"R_MP1",selected=MPnames[1],choices=MPnames)
-      updateSelectInput(session,"R_MP2",selected=MPnames[2],choices=MPnames)
-      updateSelectInput(session,"R_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
-
-      updateSelectInput(session,"REW_MP1",selected=MPnames[1],choices=MPnames)
-      updateSelectInput(session,"REW_MP2",selected=MPnames[2],choices=MPnames)
-      updateSelectInput(session,"REW_MP3",selected=MPnames[min(3,length(MPnames))],choices=MPnames)
-
+      updateCheckboxGroupInput(session,"Tunings",choices=tunes, selected=tunes,inline=T)
+      updateCheckboxGroupInput(session,"MPtypes",choices=MPtypes, selected=MPtypes,inline=T)
 
       changed(changed()+1)
 
@@ -316,32 +310,65 @@ shinyServer(function(input, output, session){
   observeEvent(input$CMPs,{
     MPind<-getMPind()
     MPnames_s<-MPnames[MPind]
-
-
-    updateSelectInput(session,"Zeh_MP1",selected=MPnames_s[2],choices=MPnames_s)
-    updateSelectInput(session,"Zeh_MP2",selected="None",choices=c("None",MPnames_s))
-
-    updateSelectInput(session,"ZehPM_MP1",selected=MPnames_s[1],choices=MPnames_s)
-    updateSelectInput(session,"ZehPM_MP2",selected=MPnames_s[2],choices=MPnames_s)
-    updateSelectInput(session,"ZehPM_MP3",selected=MPnames_s[min(3,length(MPnames_s))],choices=MPnames_s)
-
-    updateSelectInput(session,"S_MP1",selected=MPnames_s[1],choices=MPnames_s)
-    updateSelectInput(session,"S_MP2",selected=MPnames_s[2],choices=MPnames_s)
-    updateSelectInput(session,"S_MP3",selected=MPnames_s[min(3,length(MPnames_s))],choices=MPnames_s)
-
-    updateSelectInput(session,"Sm_MP1",selected=MPnames_s[1],choices=MPnames_s)
-    updateSelectInput(session,"Sm_MP2",selected=MPnames_s[2],choices=MPnames_s)
-
-    updateSelectInput(session,"R_MP1",selected=MPnames_s[1],choices=MPnames_s)
-    updateSelectInput(session,"R_MP2",selected=MPnames_s[2],choices=MPnames_s)
-    updateSelectInput(session,"R_MP3",selected=MPnames_s[min(3,length(MPnames_s))],choices=MPnames_s)
-
-    updateSelectInput(session,"REW_MP1",selected=MPnames_s[1],choices=MPnames_s)
-    updateSelectInput(session,"REW_MP2",selected=MPnames_s[2],choices=MPnames_s)
-    updateSelectInput(session,"REW_MP3",selected=MPnames_s[min(3,length(MPnames_s))],choices=MPnames_s)
-
+    updateCMPwidgets(MPnames_s)
 
   })
+
+  observeEvent(input$SelAllCMPs,{
+    updateCheckboxGroupInput(session,"CMPs",choices=MPnames, selected=MPnames,inline=T)
+    updateCheckboxGroupInput(session,"Tunings",choices=tunes, selected=tunes,inline=T)
+    updateCheckboxGroupInput(session,"MPtypes",choices=MPtypes, selected=MPtypes,inline=T)
+    updateCMPwidgets(MPnames)
+
+  })
+
+  observeEvent(input$DeselAllCMPs,{
+    updateCheckboxGroupInput(session,"CMPs",choices=MPnames, selected="ZeroC",inline=T)
+    updateCheckboxGroupInput(session,"Tunings",choices=tunes, selected=NULL,inline=T)
+    updateCheckboxGroupInput(session,"MPtypes",choices=MPtypes, selected=NULL,inline=T)
+    updateCMPwidgets("")
+
+  })
+
+  observeEvent(input$MPtypes,{
+
+    MPsel<-MPnames[sapply(MPnames,function(x)substr(x,1,2))%in%input$MPtypes]
+    #tunesel<-sapply(MPsel,function(x)substr(x,3,3))
+    updateCheckboxGroupInput(session,"CMPs",choices=MPnames, selected=MPsel,inline=T)
+    #updateCheckboxGroupInput(session,"Tunings",choices=tunes, selected=tunesel,inline=T)
+    updateCMPwidgets(MPsel)
+
+  })
+
+  observeEvent(input$Tunings,{
+
+    MPsel<-MPnames[sapply(MPnames,function(x)substr(x,3,3))%in%input$Tunings]
+    #MPtypesel<-sapply(MPsel,function(x)substr(x,1,2))
+    updateCheckboxGroupInput(session,"CMPs",choices=MPnames, selected=MPsel,inline=T)
+    #updateCheckboxGroupInput(session,"Tunings",choices=tunes, selected=tunesel,inline=T)
+    updateCMPwidgets(MPsel)
+
+  })
+
+  output$SaveDet<- downloadHandler(
+
+    filename = function()paste0("CompResd",".rda"),
+
+    content=function(file){
+      saveRDS(readRDS("./data/CompResd.rda"),file)
+    }
+
+  )
+
+  output$SaveStoch<- downloadHandler(
+
+    filename = function()paste0("CompRes",".rda"),
+
+    content=function(file){
+      saveRDS(readRDS("./data/CompRes.rda"),file)
+    }
+
+  )
 
 
 })
